@@ -1,0 +1,72 @@
+# Family Ready: manually started iPhone build workflows.
+# No push/tag/schedule triggers or notifications are configured.
+# Run ios-compile-check first; it does not need an Apple account.
+# See START_IPHONE_CLOUD.txt before running ios-testflight.
+
+workflows:
+  ios-compile-check:
+    name: iOS compile check - no Apple account
+    instance_type: mac_mini_m2
+    max_build_duration: 60
+    environment:
+      flutter: 3.50.0
+      xcode: latest
+      cocoapods: default
+      vars:
+        # Proposed identifier only; it has not been registered with Apple.
+        FR_BUNDLE_ID: com.dennisrogers.familyready
+    cache:
+      cache_paths:
+        - ~/.pub-cache
+    scripts:
+      - name: Prepare isolated iOS project
+        script: bash scripts/prepare_ios.sh
+      - name: Analyze app and check saved-plan behavior
+        script: bash scripts/check_ios.sh
+      - name: Compile unsigned iPhone app
+        script: bash scripts/build_ios.sh unsigned
+    artifacts:
+      # This unsigned app is for compile verification, not phone installation.
+      - .cloud_build/family_ready/build/ios/iphoneos/*.app
+      - .cloud_build/family_ready/pubspec.lock
+      - /tmp/xcodebuild_logs/*.log
+
+  ios-testflight:
+    name: iOS signed upload - internal TestFlight
+    instance_type: mac_mini_m2
+    max_build_duration: 60
+    # Create this named integration in your own Codemagic account first.
+    # Store the private API key in Codemagic, never in this repository.
+    integrations:
+      app_store_connect: family-ready-app-store
+    environment:
+      flutter: 3.50.0
+      xcode: latest
+      cocoapods: default
+      ios_signing:
+        distribution_type: app_store
+        # Must match FR_BUNDLE_ID and the App Store Connect app record.
+        bundle_identifier: com.dennisrogers.familyready
+      vars:
+        FR_BUNDLE_ID: com.dennisrogers.familyready
+    cache:
+      cache_paths:
+        - ~/.pub-cache
+    scripts:
+      - name: Prepare isolated iOS project
+        script: bash scripts/prepare_ios.sh
+      - name: Analyze app and check saved-plan behavior
+        script: bash scripts/check_ios.sh
+      - name: Build signed internal TestFlight archive
+        script: bash scripts/build_ios.sh testflight
+    artifacts:
+      - .cloud_build/family_ready/build/ios/ipa/*.ipa
+      - .cloud_build/family_ready/build/ios/archive/*.xcarchive/dSYMs/*.dSYM
+      - .cloud_build/family_ready/pubspec.lock
+      - /tmp/xcodebuild_logs/*.log
+    publishing:
+      app_store_connect:
+        auth: integration
+        # Upload only. Add yourself as an internal tester in App Store Connect.
+        submit_to_testflight: false
+        submit_to_app_store: false
