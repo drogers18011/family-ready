@@ -1,8 +1,8 @@
 import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'plan_dialogs.dart';
@@ -26,12 +26,20 @@ class FamilyReadyApp extends StatelessWidget {
       useMaterial3: true,
       colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFF285B48)),
       scaffoldBackgroundColor: const Color(0xFFF5F5EF),
-      inputDecorationTheme: const InputDecorationTheme(
+      inputDecorationTheme: const InputDecorationThemeData(
         border: OutlineInputBorder(),
         filled: true,
         fillColor: Colors.white,
       ),
     ),
+    builder: (context, child) {
+      // Flutter's temporary bridge supplies legacy theme/localization context.
+      // Remove it after dependencies finish migrating to material_ui.
+      // ignore: deprecated_member_use
+      return MaterialUiCompatibilityBridge(
+        child: child ?? const SizedBox.shrink(),
+      );
+    },
     home: const PlanHome(),
   );
 }
@@ -1614,7 +1622,7 @@ class _PlanHomeState extends State<PlanHome> {
             child: Padding(
               padding: EdgeInsets.fromLTRB(16, 0, 16, 12),
               child: Text(
-                'Local prototype v0.2 · Not shared',
+                'Local prototype v0.2.1 · Not shared',
                 style: TextStyle(fontSize: 12),
               ),
             ),
