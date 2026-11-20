@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Copy Family Ready into a newly generated, isolated iOS shell.
+"""Copy Black Box into a newly generated, isolated iOS shell.
 
 The helper does not execute Flutter, contact services, or handle credentials.
 It only edits the staging project made by prepare_ios.sh.
@@ -67,8 +67,8 @@ def configure(source: Path, stage: Path, bundle_id: str) -> None:
     plist_path = stage / "ios" / "Runner" / "Info.plist"
     with plist_path.open("rb") as handle:
         info = plistlib.load(handle)
-    info["CFBundleDisplayName"] = "Family Ready"
-    info["CFBundleName"] = "Family Ready"
+    info["CFBundleDisplayName"] = "Black Box"
+    info["CFBundleName"] = "Black Box"
     # Do not invent privacy or export-compliance declarations. Review any
     # App Store Connect questions against the actual app and SDK behavior.
     with plist_path.open("wb") as handle:
@@ -77,7 +77,7 @@ def configure(source: Path, stage: Path, bundle_id: str) -> None:
     icon_set = stage / "ios" / "Runner" / "Assets.xcassets" / "AppIcon.appiconset"
     if not (icon_set / "Icon-App-1024x1024@1x.png").is_file():
         raise ValueError("The generated iOS app icon is missing. Review the Flutter template before uploading a build.")
-    print(f"Configured Family Ready with bundle identifier {bundle_id}.")
+    print(f"Configured Black Box with bundle identifier {bundle_id}.")
     print("The initial native build keeps Flutter's generated starter icons.")
 
 

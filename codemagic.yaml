@@ -1,4 +1,4 @@
-# Family Ready: manually started iPhone build workflows.
+# Black Box: manually started iPhone build workflows.
 # No push/tag/schedule triggers or notifications are configured.
 # Run ios-compile-check first; it does not need an Apple account.
 # See START_IPHONE_CLOUD.txt before running ios-testflight.

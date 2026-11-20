@@ -260,7 +260,7 @@ class GroupPlan {
 /// A plain-text copy that can be opened or printed without this app.
 String readablePlanText(GroupPlan plan, {required String saveStatus}) {
   final output = StringBuffer()
-    ..writeln('FAMILY READY — PLAN COPY')
+    ..writeln('BLACK BOX — PLAN COPY')
     ..writeln(plan.groupName)
     ..writeln(saveStatus)
     ..writeln('Local prototype. Changes are not sent to other group members.')

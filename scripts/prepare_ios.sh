@@ -34,7 +34,7 @@ flutter create \
   "$FR_IOS_DIR"
 
 # This marker prevents the configuration helper editing an ordinary project.
-printf '%s\n' 'Family Ready generated cloud project' > "$FR_IOS_DIR/.family_ready_cloud_stage"
+printf '%s\n' 'Black Box generated cloud project' > "$FR_IOS_DIR/.family_ready_cloud_stage"
 python3 "$FR_SOURCE_DIR/scripts/configure_ios.py" "$FR_SOURCE_DIR" "$FR_IOS_DIR" "$FR_BUNDLE_ID"
 
 cd "$FR_IOS_DIR"

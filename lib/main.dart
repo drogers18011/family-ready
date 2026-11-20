@@ -20,7 +20,7 @@ class FamilyReadyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => MaterialApp(
-    title: 'Family Ready',
+    title: 'Black Box',
     debugShowCheckedModeBanner: false,
     theme: ThemeData(
       useMaterial3: true,
@@ -269,7 +269,7 @@ class _PlanHomeState extends State<PlanHome> {
       final requested = await savePlanFile(
         contents: contents,
         filename:
-            'family_ready_${readable ? 'plan' : 'backup'}_${_fileStamp()}.${readable ? 'txt' : 'json'}',
+            'black_box_${readable ? 'plan' : 'backup'}_${_fileStamp()}.${readable ? 'txt' : 'json'}',
         mimeType: readable ? 'text/plain' : 'application/json',
       );
       if (requested)
@@ -308,7 +308,7 @@ class _PlanHomeState extends State<PlanHome> {
       final requested = await savePlanFile(
         contents: contents,
         filename:
-            'family_ready_${recovery
+            'black_box_${recovery
                 ? 'recovery'
                 : previous
                 ? 'previous'
@@ -1614,7 +1614,7 @@ class _PlanHomeState extends State<PlanHome> {
         appBar: AppBar(
           backgroundColor: Colors.white,
           title: const Text(
-            'Family Ready',
+            'Black Box',
             style: TextStyle(fontWeight: FontWeight.w700),
           ),
           bottom: const PreferredSize(
@@ -1622,7 +1622,7 @@ class _PlanHomeState extends State<PlanHome> {
             child: Padding(
               padding: EdgeInsets.fromLTRB(16, 0, 16, 12),
               child: Text(
-                'Local prototype v0.2.1 · Not shared',
+                'Local prototype v0.2.2 · Not shared',
                 style: TextStyle(fontSize: 12),
               ),
             ),

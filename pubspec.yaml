@@ -1,7 +1,7 @@
 name: family_ready
-description: A local browser prototype for a shared preparedness plan.
+description: Black Box, a local prototype for a shared preparedness plan.
 publish_to: none
-version: 0.2.1+3
+version: 0.2.2+4
 
 environment:
   sdk: '>=3.13.0 <4.0.0'

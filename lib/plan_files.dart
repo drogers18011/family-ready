@@ -10,7 +10,7 @@ import 'package:flutter/foundation.dart';
 const int maxPlanBackupBytes = 2 * 1024 * 1024;
 
 const _jsonType = XTypeGroup(
-  label: 'Family Ready backup',
+  label: 'Black Box backup',
   extensions: ['json'],
   mimeTypes: ['application/json'],
   uniformTypeIdentifiers: ['public.json'],
@@ -74,7 +74,7 @@ Future<SelectedPlanFile?> pickPlanBackup() async {
     contents = utf8.decode(buffer.takeBytes());
   } on FormatException {
     throw const PlanFileException(
-      'This file is not a UTF-8 text backup. Choose a Family Ready JSON file.',
+      'This file is not a UTF-8 text backup. Choose a Black Box JSON file.',
     );
   }
   // Accept UTF-8 files saved by editors that include a byte-order mark.

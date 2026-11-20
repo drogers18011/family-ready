@@ -1,0 +1,241 @@
+BLACK BOX - IPHONE BUILDS FROM WINDOWS
+====================================
+Prepared for Dennis Rogers, November 20, 2026
+Test phone: iPhone 16 Pro Max. Development computer: Windows.
+
+RECOMMENDED PATH
+----------------
+Keep developing on Windows. Put the project in a private GitHub repository.
+Codemagic checks out the code and builds it on a hosted Mac. Later, Apple's
+TestFlight installs the signed beta on your iPhone.
+
+CURRENT STATUS: You reported a green unsigned iPhone compile check for v0.2.1.
+Your Apple Developer enrollment is now pending. Apple signing and TestFlight
+come next after membership activation.
+
+The app is version 0.2.2 and is now named Black Box. The successful Material UI
+migration is included. Offline map downloads and two-marker offline routing
+are the next functional milestone; monetization is a later product goal.
+
+UPDATING THE EXISTING CODEMAGIC PROJECT
+--------------------------------------
+Extract black_box_starter.zip and upload its contents to the existing
+family-ready repository, preserving lib, scripts, test, and web as folders at
+the repository root. Commit the replacements to the selected build branch.
+The updated scripts/configure_ios.py sets the iPhone display name to Black Box.
+The updated web/index.html and lib files apply the browser and in-app name.
+
+Keep the existing repository, package, workflow, and integration identifiers.
+They retain their original family_ready/family-ready names for continuity.
+The proposed bundle identifier is still com.dennisrogers.familyready; it has
+not been registered or reserved. The visible product name is Black Box.
+
+While enrollment is pending, you can preview the renamed app in the browser
+or run ios-compile-check. Begin the signing steps below after Apple confirms
+active membership. If you have already paid and receive no confirmation within
+24 hours of purchase, Apple advises contacting Developer Support with your
+Enrollment ID. This does not guarantee activation within 24 hours.
+
+WHAT IS INCLUDED
+-----------------
+codemagic.yaml supplies two workflows, both started manually:
+- ios-compile-check: compile an unsigned iOS release; no Apple credentials.
+- ios-testflight: build a signed internal-testing beta and upload it to App
+  Store Connect. You then assign yourself to the build in TestFlight manually.
+
+There are no push/scheduled triggers or tester invitations. The signed workflow
+does not publish to the public App Store or submit an external beta review.
+
+During a build, Flutter generates the native iOS host in a temporary
+.cloud_build folder on the hosted Mac. Scripts copy this app's source into it.
+The source folder and Windows browser launcher are preserved.
+
+STEP 1 - SET UP THE RESET IPHONE
+--------------------------------
+1. Turn it on and complete the normal Apple setup screens.
+2. Connect to Wi-Fi for activation and downloads.
+3. Choose Set Up Without Another Device, then Don't Transfer Anything if you
+   want a clean test phone.
+4. Sign in with your own Apple Account. Using the account that will own your
+   developer membership makes the first internal test simpler.
+5. Install the normal public iOS updates under Settings > General > Software
+   Update. A beta operating system is not needed.
+6. Install Apple's free TestFlight app:
+   https://apps.apple.com/us/app/testflight/id899247664
+
+An empty TestFlight screen is expected until we upload a signed build and add
+you to it. The later offline test uses downloaded data with Wi-Fi and cellular
+data disabled.
+
+STEP 2 - UPLOAD THE CLEAN PROJECT TO A PRIVATE GITHUB REPOSITORY
+---------------------------------------------------------------
+1. Create or sign in to a personal account at https://github.com/.
+   GitHub Free supports private repositories.
+2. Create a repository named family-ready and select PRIVATE visibility.
+3. Fully extract this project ZIP into a new Windows folder.
+4. On the new GitHub repository page, choose upload existing files.
+5. Drag the CONTENTS of the extracted folder into the upload area, including
+   lib, scripts, test, web, and the top-level files. Do not upload the ZIP or
+   an extra enclosing folder.
+6. Commit the upload. Confirm these appear at the repository's top level:
+     pubspec.yaml
+     codemagic.yaml
+
+Upload the clean project folder. Personal plan backups and Apple signing keys
+are not source files. The repository will not automatically contain the plan
+you entered in Chrome; that remains in your local browser.
+
+STEP 3 - CONNECT CODEMAGIC
+--------------------------
+1. Open https://codemagic.io/ and create a PERSONAL account on the free plan.
+2. Keep paid billing disabled for the first check.
+3. Add an application and connect GitHub.
+4. Authorize the Codemagic CI/CD GitHub App for the family-ready repository.
+   Selecting only this repository is sufficient.
+5. Add family-ready and use the codemagic.yaml configuration in its root.
+6. Select the unsigned workflow first. The signed workflow needs Step 5.
+
+Current published pricing, checked November 18, 2026:
+- Personal Codemagic accounts: 500 free macOS M2 build minutes per month.
+- Team accounts do not receive that free allowance.
+- Additional M2 minutes: $0.095/minute after billing is enabled.
+- Apple Developer Program: $99 USD/year for this TestFlight route, with
+  applicable tax/regional pricing. Not required for the unsigned check.
+
+STEP 4 - RUN THE FREE COMPILE CHECK
+-----------------------------------
+1. In Codemagic, select Start new build.
+2. Select your uploaded branch, usually main.
+3. Choose workflow ios-compile-check and start it.
+
+The workflow uses a macOS M2 machine and Flutter 3.50.0. It generates the iOS
+host project, fetches packages, runs the existing data checks, and compiles
+the app without code signing.
+
+SUCCESS means the app compiled on the hosted Mac. Its unsigned output CANNOT
+be installed on the physical iPhone and is not a TestFlight build.
+
+IF IT FAILS, send the first failed step and first useful error. Repeating an
+unchanged failed build uses more minutes. Apple membership is not needed to
+resolve a compilation problem.
+
+STEP 5 - APPLE SIGNING, AFTER THE COMPILE CHECK PASSES
+-----------------------------------------------------
+These are your own account, identity, agreement, and purchase actions. The
+provided files do not perform them automatically.
+
+A. Enroll and register the app
+1. Review https://developer.apple.com/programs/enroll/ and enroll if needed.
+   Choose individual or organization ownership to match how you intend to
+   publish the app. Complete Apple's identity and payment steps yourself.
+2. When membership is active, open Certificates, Identifiers & Profiles at
+   https://developer.apple.com/account/.
+3. Register an explicit App ID. The proposed bundle identifier is:
+     com.dennisrogers.familyready
+   It is not registered or reserved. If unavailable, choose another identifier
+   and change all three identifier values in codemagic.yaml to match:
+   FR_BUNDLE_ID in both workflows and the signed workflow's bundle_identifier.
+4. At https://appstoreconnect.apple.com/, add a new iOS app record:
+     Name: Black Box (subject to availability in App Store Connect)
+     Primary language: English (U.S.)
+     Bundle ID: the exact registered identifier
+     SKU: family-ready-ios-001 (or another unique internal value)
+   Creating the record does not release the app publicly.
+
+B. Connect Apple's API key directly to Codemagic
+1. In App Store Connect, open Users and Access > Integrations > App Store
+   Connect API. Follow prompts if API access must first be requested.
+2. Generate a dedicated key for Codemagic with App Manager access, following
+   the current Codemagic signing guide in the references below.
+3. Keep the Issuer ID, Key ID, and downloaded .p8 private key securely. Apple
+   allows the private key to be downloaded only once.
+4. In Codemagic account settings, open the Developer Portal integration
+   (the UI may call this Integrations or Team integrations).
+5. Add it with this exact integration name:
+     family-ready-app-store
+6. Enter the identifiers and upload the .p8 directly in Codemagic. Do not put
+   your Apple password/private keys in chat, GitHub, or the project ZIP.
+
+C. Add the matching signing certificate and profile
+The API integration alone is not sufficient.
+1. Open Codemagic settings > codemagic.yaml settings > Code signing identities.
+2. In iOS certificates, choose Generate certificate, Apple Distribution, and
+   the family-ready-app-store API integration.
+3. Follow the download/upload prompts so the certificate and private signing
+   key are available in Code signing identities. A suggested reference name
+   is family-ready-distribution. Keep downloaded files/passwords securely.
+4. In Apple's developer portal, create an App Store Connect distribution
+   provisioning profile for the exact App ID and the new certificate.
+   The TestFlight route does not require a device UDID list.
+5. In Codemagic's iOS provisioning profiles tab, fetch or upload that profile.
+   A suggested reference name is family-ready-appstore.
+6. Confirm that Codemagic shows a matching certificate for the profile.
+
+Keep the personal Codemagic account. Apple's use of the word "team" identifies
+your Apple developer identity; it does not require a paid Codemagic Team plan.
+
+STEP 6 - BUILD AND INSTALL THROUGH TESTFLIGHT
+---------------------------------------------
+1. Manually start workflow ios-testflight on the uploaded branch.
+2. It builds with your signing identities and uploads to App Store Connect.
+3. Wait for Apple to process it. Complete any required beta/export-compliance
+   fields based on the actual app; account answers are not supplied for you.
+4. Open the app in App Store Connect > TestFlight.
+5. Create an INTERNAL testing group, add yourself as an eligible App Store
+   Connect user, and add the processed build to that group.
+6. Open TestFlight on the spare using the corresponding Apple Account and
+   install Black Box when the build is available.
+
+The prepared export is for internal TestFlight testing. A later configuration
+and new build will be needed for external family testers or App Store release.
+TestFlight builds expire after 90 days; they are temporary development builds.
+
+FIRST PHONE CHECK
+------------------
+Check the overview, meeting places, supplies, and group screens. Edit sample
+details, close the app completely, reopen it, and check local saving. Try the
+online map while connected and a sample JSON import through the Files picker.
+
+The phone has separate local storage; it does not share Chrome's saved plan.
+JSON/text EXPORT currently supports browser and desktop. Native mobile sharing
+is a later change, so keep the separate backup downloaded from your browser.
+
+This initial native build does not contain offline maps or road routing yet.
+Next we will download map and routing data, select start/destination markers,
+restart with connectivity disabled, and calculate a NEW road route on the
+phone. That is the acceptance test for the feature you requested.
+
+VERIFICATION AND NEXT DEVELOPMENT
+---------------------------------
+The configuration/scripts have source review and local syntax/fixture checks.
+You reported a green ios-compile-check run for v0.2.1. This verifies the earlier
+Material migration through the configured analysis, data checks, and unsigned
+iPhone compilation. The v0.2.2 name update has source-scope, syntax, and format
+checks; its resulting display name needs checking in the next build. No signed
+IPA, phone installation, or TestFlight upload has been completed yet.
+
+Earlier automatic approval review in the preparation environment rejected
+local Flutter startup after an unexpected cloud metadata connection. That
+blocked path has not been retried. The supplied workflows are for the hosted
+Mac build process you separately requested and start from your own account.
+
+Native offline-routing integration will need tracked iOS host configuration;
+we will extend the project for that work after establishing the first build.
+Generated build outputs are diagnostics, not replacements for the app source.
+
+PRIMARY REFERENCES
+------------------
+Flutter iOS: https://docs.flutter.dev/platform-integration/ios/setup
+Material migration: https://docs.flutter.dev/release/breaking-changes/material-ui-and-cupertino-ui
+Material package: https://pub.dev/packages/material_ui/versions/1.11.1
+Codemagic pricing: https://docs.codemagic.io/billing/pricing/
+GitHub Free: https://docs.github.com/en/get-started/learning-about-github/githubs-plans
+Add repository: https://docs.codemagic.io/getting-started/adding-apps/
+Flutter workflows: https://docs.codemagic.io/yaml-quick-start/building-a-flutter-app/
+Signing: https://docs.codemagic.io/yaml-code-signing/signing-ios/
+Upload: https://docs.codemagic.io/yaml-publishing/app-store-connect/
+Apple membership: https://developer.apple.com/help/account/membership/program-enrollment/
+Phone setup: https://support.apple.com/en-us/105132
+Internal testers: https://developer.apple.com/help/app-store-connect/test-a-beta-version/add-internal-testers
+macOS license: https://www.apple.com/legal/sla/docs/macOSTahoe.pdf
+

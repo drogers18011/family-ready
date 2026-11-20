@@ -213,7 +213,7 @@ class _MeetingMapPickerState extends State<MeetingMapPicker> {
                       key: ValueKey(_tileRevision),
                       urlTemplate:
                           'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-                      userAgentPackageName: 'FamilyReadyPrototype',
+                      userAgentPackageName: 'BlackBoxPrototype',
                       maxNativeZoom: 19,
                       panBuffer: 0,
                       errorTileCallback: (_, error, stackTrace) =>
