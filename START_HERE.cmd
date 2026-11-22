@@ -25,7 +25,7 @@ if errorlevel 1 (
   exit /b 1
 )
 
-echo Black Box - version 0.7.0+10
+echo Black Box - version 0.8.0+11
 echo Getting the required Flutter packages. Internet access is needed.
 call flutter pub get
 if errorlevel 1 (
@@ -40,6 +40,7 @@ echo When Flutter says the app is being served, open this address in your normal
 echo http://127.0.0.1:54321
 echo.
 echo Rugged Field Terminal starts in Dark mode. Use the top-right sun/moon button for Light.
+echo Use the question-mark Help button for the quick tour and instructions.
 echo Map shows your local plan locations. Its map imagery needs internet.
 echo Kit - Suggested adds items to My pack. Mark Owned and Packed separately.
 echo Amazon links in this browser preview are ordinary links with no commission yet.

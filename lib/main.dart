@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
@@ -8,6 +9,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'black_box_theme.dart';
 import 'field_surfaces.dart';
 import 'guide_library.dart';
+import 'help_content.dart';
+import 'help_page.dart';
 import 'personal_packlist.dart';
 import 'plan_dialogs.dart';
 import 'plan_files.dart';
@@ -115,6 +118,7 @@ class _PlanHomeState extends State<PlanHome> {
   static const _storageKey = PlanStore.currentKey;
   static const _previousKey = PlanStore.previousKey;
   static const _recoveryKey = PlanStore.recoveryKey;
+  static const _helpPromptKey = 'black_box.help_intro_dismissed.v1';
   final _storage = SharedPreferencesAsync();
   late final _store = PlanStore(
     write: _storage.setString,
@@ -128,6 +132,9 @@ class _PlanHomeState extends State<PlanHome> {
   bool _hasRecovery = false;
   bool _appearanceBusy = false;
   bool _guidesOpen = false;
+  bool _helpOpen = false;
+  bool _showHelpPrompt = false;
+  int _helpPromptRevision = 0;
   int _kitSection = 0;
   String? _migrationSnapshot;
   final _search = TextEditingController();
@@ -170,6 +177,7 @@ class _PlanHomeState extends State<PlanHome> {
   void initState() {
     super.initState();
     _load();
+    _loadHelpPreference();
   }
 
   @override
@@ -292,6 +300,100 @@ class _PlanHomeState extends State<PlanHome> {
     return 'Saved on $_storageLocation · ${_date(_plan.savedAt!)}';
   }
 
+  Future<void> _loadHelpPreference() async {
+    final revision = _helpPromptRevision;
+    var dismissed = false;
+    try {
+      dismissed = await _storage.getBool(_helpPromptKey) ?? false;
+    } catch (_) {
+      // Optional help preferences must never prevent access to a saved plan.
+    }
+    if (!mounted || revision != _helpPromptRevision) return;
+    setState(() => _showHelpPrompt = !dismissed);
+  }
+
+  Future<void> _dismissHelpPrompt() async {
+    _helpPromptRevision++;
+    if (mounted) setState(() => _showHelpPrompt = false);
+    try {
+      await _storage.setBool(_helpPromptKey, true);
+    } catch (_) {
+      if (mounted) {
+        _message(
+          'The tour reminder is hidden for this session. Its preference '
+          'could not be saved, so it may appear next time.',
+        );
+      }
+    }
+  }
+
+  Future<void> _openHelp({bool tour = false, String? topicId}) async {
+    if (!mounted || _helpOpen) return;
+    setState(() => _helpOpen = true);
+    // Remember that the prompt was acknowledged, not that a real plan is
+    // complete. Reading help never edits plan, packing, or guide data.
+    unawaited(_dismissHelpPrompt());
+    HelpDestination? destination;
+    try {
+      destination = await Navigator.of(context).push<HelpDestination>(
+        MaterialPageRoute<HelpDestination>(
+          builder: (_) => tour
+              ? const QuickTourPage()
+              : HelpCenterPage(initialTopicId: topicId),
+        ),
+      );
+    } catch (_) {
+      if (mounted) _message('Help could not open. Please try again.');
+    } finally {
+      if (mounted) setState(() => _helpOpen = false);
+    }
+    if (!mounted || destination == null) return;
+    await _openHelpDestination(destination);
+  }
+
+  Future<void> _openHelpDestination(HelpDestination destination) async {
+    if (!mounted) return;
+    if (destination == HelpDestination.appearance) {
+      if (!_appearanceBusy) await _showAppearance();
+      return;
+    }
+    if (destination == HelpDestination.guides) {
+      await _openGuides();
+      return;
+    }
+    if (_loading || _busy || _loadError != null) {
+      _message(
+        'The plan is not available yet. Finish loading or saving, '
+        'or resolve its load warning before opening this section.',
+      );
+      return;
+    }
+    setState(() {
+      switch (destination) {
+        case HelpDestination.home:
+          _tab = _homeTab;
+        case HelpDestination.plan:
+          _tab = _planTab;
+        case HelpDestination.map:
+          _tab = _mapTab;
+        case HelpDestination.sharedKit:
+          _tab = _kitTab;
+          _kitSection = 0;
+        case HelpDestination.personalPack:
+          _tab = _kitTab;
+          _kitSection = 1;
+        case HelpDestination.suggested:
+          _tab = _kitTab;
+          _kitSection = 2;
+        case HelpDestination.group:
+          _tab = _groupTab;
+        case HelpDestination.guides:
+        case HelpDestination.appearance:
+          break;
+      }
+    });
+  }
+
   Future<void> _showAppearance() async {
     final selected = await showModalBottomSheet<BlackBoxStyle>(
       context: context,
@@ -343,7 +445,7 @@ class _PlanHomeState extends State<PlanHome> {
                     showAboutDialog(
                       context: context,
                       applicationName: 'Black Box',
-                      applicationVersion: 'Prototype 0.7.0',
+                      applicationVersion: 'Prototype 0.8.0',
                       children: const [
                         Text(
                           'A local preparedness plan for your people, meeting '
@@ -902,6 +1004,37 @@ class _PlanHomeState extends State<PlanHome> {
     ),
   );
 
+  Widget _helpIntroduction() => FieldPanel(
+    margin: const EdgeInsets.only(bottom: 20),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text('Get started with Black Box', style: _type.titleLarge),
+        const SizedBox(height: 8),
+        const Text(
+          'Take a short tour of your plan, kit, and saved guides. '
+          'You can skip it and reopen it from the question-mark button.',
+        ),
+        const SizedBox(height: 14),
+        Wrap(
+          spacing: 10,
+          runSpacing: 8,
+          children: [
+            FilledButton.icon(
+              onPressed: _helpOpen ? null : () => _openHelp(tour: true),
+              icon: const Icon(Icons.help_outline),
+              label: const Text('Start quick tour'),
+            ),
+            TextButton(
+              onPressed: _dismissHelpPrompt,
+              child: const Text('Not now'),
+            ),
+          ],
+        ),
+      ],
+    ),
+  );
+
   Widget _overview() {
     final packed = _plan.supplies.where((item) => item.packed).length;
     final unassigned = _plan.supplies
@@ -916,6 +1049,17 @@ class _PlanHomeState extends State<PlanHome> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         _heading('Your field plan', _plan.groupName),
+        if (_showHelpPrompt)
+          _helpIntroduction()
+        else
+          Padding(
+            padding: const EdgeInsets.only(bottom: 16),
+            child: OutlinedButton.icon(
+              onPressed: _helpOpen ? null : () => _openHelp(),
+              icon: const Icon(Icons.help_outline),
+              label: const Text('Help & tutorial'),
+            ),
+          ),
         FieldPanel(
           prominent: true,
           accent: _colors.primary,
@@ -1991,9 +2135,9 @@ class _PlanHomeState extends State<PlanHome> {
               ),
             ),
             IconButton(
-              onPressed: _appearanceBusy ? null : _showAppearance,
-              tooltip: 'Appearance',
-              icon: const Icon(Icons.tune_rounded),
+              onPressed: _helpOpen ? null : () => _openHelp(),
+              tooltip: 'Help & tutorial',
+              icon: const Icon(Icons.help_outline),
             ),
             const SizedBox(width: 8),
           ],

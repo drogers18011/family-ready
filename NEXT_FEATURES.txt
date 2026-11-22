@@ -2,15 +2,26 @@ BLACK BOX - NEXT FEATURE SPECIFICATION
 ======================================
 Prepared for Dennis Rogers, November 20, 2026
 Updated with Dennis's decisions on November 22, 2026
-Current source: v0.7.0+10 local Flutter prototype
-Latest user-reported green and working baseline: v0.6.0+9
+Current source: v0.8.0+11 local Flutter prototype
+Latest user-reported baseline: v0.7.0+10 rendered well; ios-compile-check green
 
 STATUS
 ------
 This file records the requested product direction and proposed implementation
 rules. It is not a claim that the online service is running.
 
-IMPLEMENTED IN THE v0.7.0 SOURCE:
+IMPLEMENTED IN THE v0.8.0 SOURCE:
+- Optional Home introduction with Start quick tour and Not now. Six short
+  tour chapters have Back, Next, Skip, Done, and a final Open Plan action.
+  Reading progress does not change plan data or mark real setup tasks ready.
+- Help & tutorial opens from the question-mark header button. Ten searchable,
+  expandable topics give numbered instructions and direct Open buttons.
+  Quick tour can be replayed from Help. Appearance moves into Help; the
+  guide-book and sun/moon shortcuts remain in the three-action main header.
+- Bundled instructions can be read without a network or media download once
+  the app is open. The independent optional preference
+  black_box.help_intro_dismissed.v1 remembers introduction dismissal, and a
+  preference failure does not block app use. Existing offline limits remain.
 - Rugged Field Terminal with remembered Light/Dark modes. Static code-drawn
   ripstop/grain backdrops, matte chamfered panels, double edges, and fasteners
   give the interface a field-equipment treatment. Controls retain solid fills.
@@ -44,22 +55,30 @@ IMPLEMENTED IN THE v0.7.0 SOURCE:
   rename their display titles, open them, or remove the app's saved copies.
   The original imported files are not deleted by removing an app copy.
 
-The new rugged native and browser interfaces have not been runtime-tested here.
 For v0.6.0+9, all 52 standalone personal-list model/store checks and all 182
 catalog/link-policy checks passed. Source review and standalone Dart formatting
-also completed. Those are historical results, not reruns for the visual update.
+also completed. Those are historical results, not reruns for later updates.
 Dennis subsequently reported a green ios-compile-check for v0.6.0+9 and that
 everything is working. This is user-reported confirmation, not workspace-run
 browser or native-device QA.
 
-For v0.7.0+10, verification is limited to standalone formatting, source review,
-and numerical contrast review. No new automated tests were added for this
-visual-only change. Flutter startup remains blocked by the previous automatic
+For v0.7.0+10, preparation checks were limited to standalone formatting, source
+review, and numerical contrast review. No new automated tests were added.
+Dennis then reported that v0.7.0+10 rendered great and passed ios-compile-check.
+That is the latest user-reported baseline; it is not runtime QA in this workspace.
+
+For v0.8.0+11, verification is limited to standalone Dart formatting, source
+review, and help content/navigation review. Existing model/storage/test files,
+build scripts, dependencies, fonts, and shopping configuration are unchanged.
+The earlier 52/182-check results have not been rerun, and no new automated
+tests were added. Flutter startup remains blocked by the previous automatic
 approval restriction; no Flutter compilation, browser QA, or native-device QA
-has been performed here for this release. A fresh compile and screen checks
-in both modes are required. Real-device offline reopening/playback checks
-remain required before the relevant offline features can be relied on.
-An installable iPhone/TestFlight build still depends on Apple signing setup.
+has been performed here for this tutorial release. A fresh compile and Help,
+tour, navigation, and larger-text screen checks in both modes are required.
+Real-device offline reopening/playback checks remain required before the
+relevant offline features can be relied on. Apple Developer enrollment was
+last reported pending; a signed iPhone/TestFlight build still needs activation
+and signing setup.
 
 NOT IMPLEMENTED YET:
 Accounts, real membership invitations, multiple stored plans/groups, cloud
@@ -105,6 +124,9 @@ are part of the local plan. Named pins are not downloaded map imagery.
 18. Make the interface more rugged and textured while retaining easy operation
     and both Light and Dark appearances. This is a visual direction, not a
     claim of physical ruggedness or certified data protection.
+19. Add in-app instructions or a tutorial so people can understand the app.
+    The current implementation offers a skippable quick tour and searchable
+    task instructions, with accurate limits for the local prototype.
 
 
 2. PROPOSED BUSINESS RULES - NOT ALL CONFIRMED
@@ -443,10 +465,11 @@ Live member tracking has not been requested and is not part of this scope.
 FUTURE NAVIGATION PROPOSAL
 Plans / Map / Groups / Community / Inbox.
 The Plans screen becomes the home/library. Kits and assignments live within
-each plan. Current v0.7.0 navigation remains Home / Plan / Map / Kit / Group;
+each plan. Current v0.8.0 navigation remains Home / Plan / Map / Kit / Group;
 Kit contains Shared kit, My pack, and Suggested, and Offline guides opens
-from Home or the top bar. Future navigation must keep personal guides easy
-to reach as the online and multi-plan screens are implemented.
+from Home or the top bar. The question-mark header button opens Help, with
+Appearance inside Help. Future navigation must keep personal guides and
+instructions easy to reach as the online and multi-plan screens are implemented.
 
 
 7. TECHNICAL FOUNDATION AND BILLING
@@ -513,10 +536,13 @@ Completed source increments: named-location Map tab in v0.4.0, then a free
 personal packing list and local PDF/video guide library in v0.5.0+8. Version
 0.6.0+9 added suggested supplies, separate ownership/packing, catalog reuse,
 and disabled-by-default affiliate configuration. Dennis reported that release's
-compile check green and the app working. Version 0.7.0+10 adds the rugged
+compile check green and the app working. Version 0.7.0+10 added the rugged
 visual treatment with the existing storage and feature behavior retained.
-The new visual release needs compile and screen checks; dedicated native
-offline reopening/playback checks remain required for the go-bag goal.
+Dennis reported that it rendered great and passed ios-compile-check.
+Version 0.8.0+11 adds the optional tour and searchable bundled instructions.
+This tutorial release still needs its own compile and screen checks;
+dedicated native offline reopening/playback checks remain required for the
+go-bag goal. Reading the tutorial does not establish plan readiness.
 
 Next foundation:
 1. Durable local plan library with migration and multiple plan IDs.
@@ -538,6 +564,18 @@ receive and retain a complete shared plan.
 
 10. RELEASE ACCEPTANCE CHECKS
 -------------------------------
+- The optional introduction can be started or dismissed without blocking the
+  existing app; a failed help preference read/write does not alter plan data.
+- Quick-tour Back, Next, Skip, Done, replay, and final Open Plan work in both
+  appearances, with long text and larger text settings. Completion is not
+  displayed as proof that the user's actual plan is ready.
+- Help search finds relevant numbered instructions, topic expansion works,
+  and direct Open buttons reach the intended screen without editing data.
+- The guide-book, sun/moon, and question-mark shortcuts remain reachable;
+  Appearance and About remain available through Help.
+- Bundled Help can be read after opening the installed app without a network
+  connection. Map imagery, saved-plan access, and guide playback keep their
+  own separate offline requirements and checks.
 - Existing local plans and backups survive migration with all fields intact.
 - A new free invitee reads/downloads every authorized part without purchasing.
 - A Premium Viewer cannot edit via the UI or by directly calling the API.

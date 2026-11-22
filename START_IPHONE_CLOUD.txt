@@ -9,12 +9,26 @@ Keep developing on Windows. Put the project in a private GitHub repository.
 Codemagic checks out the code and builds it on a hosted Mac. Later, Apple's
 TestFlight installs the signed beta on your iPhone.
 
-CURRENT STATUS: You reported a green ios-compile-check for v0.6.0+9 and said
-everything is working. This is the user-reported baseline, not runtime QA
+CURRENT STATUS: You reported a green ios-compile-check for v0.7.0+10 and said
+it rendered great. This is the user-reported baseline, not runtime QA
 performed in this preparation workspace. Your Apple Developer enrollment was
 last reported pending. Apple signing and TestFlight follow activation.
 
-This package is version 0.7.0+10 and gives Field Terminal a rugged treatment.
+This package is version 0.8.0+11 and adds an optional quick tour and searchable
+in-app instructions. Home offers Get started with Black Box, with Start quick
+tour and Not now. The six chapters have Back, Next, Skip, Done, and a final
+Open Plan action. Reading or finishing the tour does not change the plan or
+mark it ready. The introduction preference is saved separately; a failure
+does not block access to the app.
+
+The question-mark header button opens Help & tutorial. Search ten topics,
+expand numbered instructions, and use their Open buttons to reach the related
+screen. Choose Quick tour to replay it. The main header keeps three shortcuts:
+guides, sun/moon, and Help. Appearance is now in Help, with About Black Box &
+licenses inside Appearance. Help is bundled text and needs no network or
+media download to read once the app is open. Actual offline limits are unchanged.
+
+The rugged Field Terminal treatment from v0.7.0+10 is retained.
 Static ripstop/grain backdrops surround matte, chamfered panels with double
 edges and fastener details. Buttons and navigation have stronger borders and
 depth. Barlow Condensed headings sit above IBM Plex Mono body text and labels.
@@ -24,8 +38,8 @@ Texture is drawn by app code; there are no new image assets or dependencies.
 The header simplifies at narrow widths and enlarged text settings.
 
 Switch directly with the top-right sun/moon button, or select Light or Dark
-in Appearance. The choice is remembered
-on the same browser or device when its preference save succeeds. An older
+in Help > Appearance. The choice is remembered on the same browser or device
+when its preference save succeeds. An older
 Flight Deck preference opens Field Terminal in Dark mode after this update.
 The five tabs are Home, Plan, Map, Kit, and Group. Map shows the
 current local plan's primary and backup places by their saved names, with
@@ -63,9 +77,11 @@ cloud storage. Guide files and personal pack items are not in group JSON
 backups; keep original files and use Copy list text for the personal list.
 
 The successful Material UI migration and Black Box rename remain included.
-This rugged visual update has not been Flutter-compiled or tested in a
+This tutorial update has not been Flutter-compiled or tested in a
 browser or on a phone here. Upload this version and run a new ios-compile-check;
-the latest user-reported green result covers v0.6.0+9. Offline map downloads
+the latest user-reported green result covers v0.7.0+10. Preparation checks for
+v0.8.0+11 are limited to standalone formatting, source review, and review of
+the help content/navigation. Offline map downloads
 and two-marker offline routing remain future work. NEXT_FEATURES.txt records
 the planned account groups,
 multiple plans, sharing, forum, asynchronous inbox, and subscriptions. None of
@@ -78,8 +94,9 @@ family-ready repository, preserving assets, lib, scripts, test, and web as
 folders at the repository root beside pubspec.yaml and codemagic.yaml. Include
 ALL files in lib and test, the updated pubspec.yaml/scripts, and every file in
 assets/fonts, preserving their folder hierarchy. Include the new
-lib/field_surfaces.dart with the updated theme and screen files. Keep all guide
-platform files, the suggested/catalog/affiliate-config/personal-repository files,
+lib/help_content.dart and lib/help_page.dart with the updated main.dart.
+Keep lib/field_surfaces.dart with the existing theme and screen files. Keep
+all guide platform files, the suggested/catalog/affiliate-config/personal-repository files,
 and test/suggested_catalog_check.dart alongside the existing checks. Keep
 NEXT_FEATURES.txt and AMAZON_AFFILIATE_SETUP.txt with the top-level documents.
 Do not upload only main.dart, the ZIP, or an extra
@@ -92,11 +109,13 @@ They retain their original family_ready/family-ready names for continuity.
 The proposed bundle identifier is still com.dennisrogers.familyready; it has
 not been registered or reserved. The visible product name is Black Box. The
 shared-plan schema, existing storage keys, and browser origin are unchanged.
+The help prompt uses a separate optional preference,
+black_box.help_intro_dismissed.v1; it does not change plan data or readiness.
 The separate personal-list store reads schema 1 or 2 and now writes schema 2.
 Older packed items migrate to Owned and Packed; older unchecked items remain
 unconfirmed as owned. Group JSON backups still exclude personal items and guides.
 
-While enrollment is pending, you can preview the redesigned app in the browser
+While enrollment is pending, you can preview the updated app in the browser
 or run ios-compile-check. Begin the signing steps below after Apple confirms
 active membership. If you have already paid and receive no confirmation within
 24 hours of purchase, Apple advises contacting Developer Support with your
@@ -146,7 +165,7 @@ STEP 2 - UPLOAD THE CLEAN PROJECT TO A PRIVATE GITHUB REPOSITORY
 4. On the new GitHub repository page, choose upload existing files.
 5. Drag the CONTENTS of the extracted folder into the upload area, including
    assets, lib, scripts, test, web, and the top-level files. Keep assets/fonts
-   and all lib files, including black_box_theme.dart and plan_map.dart, in
+   and ALL lib files, including help_content.dart and help_page.dart, in
    their existing folders. Do not upload the ZIP or an extra enclosing folder.
 6. Commit the upload. Confirm these appear at the repository's top level:
      pubspec.yaml
@@ -154,6 +173,9 @@ STEP 2 - UPLOAD THE CLEAN PROJECT TO A PRIVATE GITHUB REPOSITORY
      NEXT_FEATURES.txt
      AMAZON_AFFILIATE_SETUP.txt
    Also confirm these paths are present, with the same folder hierarchy:
+     lib/main.dart
+     lib/help_content.dart
+     lib/help_page.dart
      lib/black_box_theme.dart
      lib/field_surfaces.dart
      lib/plan_map.dart
@@ -287,7 +309,8 @@ TestFlight builds expire after 90 days; they are temporary development builds.
 FIRST PHONE CHECK
 ------------------
 Check Home, Plan, Map, Kit, and Group. Use the top-right sun/moon button to try
-Field Terminal in Light and Dark, then check the same options in Appearance.
+Field Terminal in Light and Dark, then check the same options in Help >
+Appearance. Open About Black Box & licenses there to confirm Prototype 0.8.0.
 Inspect the textured panels, selected navigation, and button/input contrast.
 Try a narrow screen and larger system text; the header should simplify while
 its controls remain usable. Texture should remain static, and controls should
@@ -298,6 +321,21 @@ Give the primary and backup locations names and pins, then check their labels
 in Map. Select each marker, review its details, and try the existing edit and
 place-pin controls. Map imagery needs internet. Also try a sample JSON import
 through the Files picker. Check text, controls, and navigation on the phone.
+
+HELP AND QUICK TOUR CHECK
+1. On Home, try Start quick tour. Use Back and Next, and confirm Skip returns
+   to the app without changing your plan or packing statuses.
+2. Open the question-mark button > Quick tour to replay. On the final chapter,
+   try Done, then replay again to try Open Plan. Confirm Plan opens normally.
+3. If the Home introduction is still visible, try Not now. Close/reopen the
+   app and check that the card stays dismissed. Help remains available.
+4. Search instructions for "offline", "packed", or "backup". Expand a topic
+   and try its Open button. Check the ten topics and Appearance shortcut.
+5. Check the tour, expanded instructions, and buttons in Light and Dark with
+   larger system text. Keep access to scrolling, Back, and Skip visible.
+6. On the installed phone with Wi-Fi and cellular off, reopen Help and read
+   a topic. This checks bundled instructions; it does not prove saved guide
+   playback, plan persistence, or downloaded maps. Check those separately.
 
 PERSONAL PACK CHECK
 1. Open Kit > My pack. Add an item, quantity, and note; mark it packed.
@@ -373,7 +411,7 @@ VERIFICATION AND NEXT DEVELOPMENT
 The existing configuration/scripts have source review and local syntax/fixture
 checks. Historically, you reported a green ios-compile-check for v0.2.2,
 covering the Material migration and Black Box rename. The latest user-reported
-green build is v0.6.0+9, accompanied by your report that everything is working.
+green build is v0.7.0+10, accompanied by your report that it rendered great.
 This does not replace dedicated signed-phone and offline restart checks.
 
 Version 0.3.0+5 passed standalone Dart formatting and source review during
@@ -415,14 +453,22 @@ disabled configuration and shopping destination/platform validation. Source
 review and standalone Dart formatting also completed. You then reported the
 green compile check and working app for that version.
 
-For v0.7.0+10, verification is limited to standalone formatting, source review,
-and numerical contrast review of selected base palette pairs. The previous
-52 personal-list and 182 catalog/link checks are historical results, not new
-runs for this visual-only update. No additional automated tests were added.
+For v0.7.0+10, preparation checks were limited to standalone formatting, source
+review, and numerical contrast review of selected base palette pairs. The
+previous 52 personal-list and 182 catalog/link checks are historical results, not new
+runs for that visual-only update. No additional automated tests were added.
+Dennis then reported that v0.7.0+10 rendered great and passed ios-compile-check.
+This is user-reported confirmation, not browser or device QA in this workspace.
 
-This rugged visual update has not been Flutter-compiled or tested in a
-browser or on a native device here. Device rendering, interaction, shopping
-handoff, and appearance persistence across real restarts remain unverified.
+For v0.8.0+11, verification is limited to standalone Dart formatting, source
+review, and help content/navigation review. Existing model/storage/test files,
+build scripts, dependencies, fonts, and shopping configuration are unchanged.
+The earlier 52/182-check results have not been rerun. No new automated tests
+were added for the tutorial feature.
+
+This tutorial update has not been Flutter-compiled or tested in a browser or
+on a native device here. Tour navigation, layout with larger text, help search,
+and preference persistence need runtime checks in this new version.
 Run a new ios-compile-check for this version. No signed IPA, phone installation,
 or TestFlight upload has been completed by this workspace.
 
