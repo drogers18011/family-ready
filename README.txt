@@ -1,21 +1,89 @@
-BLACK BOX - VERSION 0.2.2
-========================
-Prepared for Dennis Rogers, November 20, 2026
+BLACK BOX - VERSION 0.5.0+8
+==========================
+Updated for Dennis Rogers, November 22, 2026
 
-RENAMED TO BLACK BOX
---------------------
-The app previously called Family Ready is now Black Box. This update changes
-the app heading, browser title, iPhone display name, Windows launcher, backup
-picker labels, downloaded filenames, and printable plan heading.
+PERSONAL PACKING LIST AND OFFLINE GUIDE FILES
+--------------------------------------------
+Kit now has Shared kit and My pack. My pack is a free, personal checklist with
+items, quantities, notes, and packed check marks. It is separate from the shared
+plan. Failed saves show a warning and offer Retry; use Copy list text to keep
+a readable copy. Group-plan JSON backups do NOT include this personal list.
+
+Open Offline guides from the book button in the top bar or the Home card.
+Import a PDF, MP4, MOV, or M4V from the file picker. Black Box copies the actual
+file before listing it as saved. Rename guides, search/filter them, open the
+saved copy, or remove that copy without deleting the original source file.
+No sample guide files are bundled. Cloud-only sources must download first.
+On iPhone, a video stored only in Photos may first need Share > Save to Files;
+this version imports through Files, with no Photos-library picker.
+
+Native iPhone/device: files are kept in the app's Documents storage, with a
+1 GiB per-file import limit. The app opens the local copy using the device
+viewer. Compatible PDF/video playback must be checked on the actual phone.
+The original file should be kept as a backup; uninstalling/clearing the app
+can remove its copies. Operating-system backups may also include these files.
+
+Windows Chrome preview: actual file copies are kept in browser storage with
+a 100 MiB per-file import limit. Open PDF/video first prepares the copy, then
+Open saved file opens a new browser tab. Some browsers may download it instead
+of previewing it. Browser data can be cleared or evicted, and the launcher
+must be running to reopen the preview. This is not an installed offline PWA.
+
+The file list shows saved bytes and file sizes. Copy size and basic container
+headers are checked; these checks do not prove that a viewer can decode every
+page or frame. Open each file and test it in airplane mode on the phone before
+relying on it. Guides are not part of the group JSON backup. No Black Box
+cloud upload or group sharing of these files is implemented in this release.
+
+Confirmed product rules: free users can post/reply in the future forum, but
+cannot moderate it. Moderator eligibility requires Premium plus an assigned
+administrator-approved role; a purchase alone grants no moderation power.
+Personal packing lists are free. Free inbox sending is still an open choice.
+The forum, subscriptions, accounts, and online permissions remain future work.
+
+NAMED LOCATIONS IN A SEPARATE MAP TAB
+------------------------------------
+The Map tab shows the current local plan's primary and backup meeting
+places using their saved names. Select a marker to review that place's local
+details. The existing edit and place-pin controls remain available.
+
+The five tabs are Home, Plan, Map, Kit, and Group. This version still manages
+one local plan. The Map tab uses online map imagery; it does not download
+offline maps or calculate directions.
+
+FIELD TERMINAL - DARK AND LIGHT
+-------------------------------
+Black Box now uses the Field Terminal design in two modes. Dark is the
+default, with crisp green text and controls on a black background. Light uses
+a pale off-white background with forest-green text and controls.
+
+Use the top-right sun/moon button to switch directly between Light and Dark.
+You can also select either mode in Appearance. The choice is remembered on
+the same browser or device when its preference save succeeds. If an earlier
+version saved the Flight Deck preference, this update opens Field Terminal
+in Dark mode, matching the selected design direction.
+
+Home, Plan, Map, Kit, and Group provide the same functions in either mode.
+The fonts are bundled with the app; showing them does not require a separate
+font download while using the app.
+
+The app previously called Family Ready keeps the Black Box name introduced
+in v0.2.2. The new Map tab uses the existing plan format and saved locations.
 
 Existing saved plans and JSON backups use the same data format and storage
 keys. Continue using your normal Chrome profile at http://127.0.0.1:54321.
 Older Family Ready JSON backups remain supported.
 
 Upload the contents of the extracted black_box_starter.zip into the existing
-family-ready GitHub repository on the same build branch. Keep lib, scripts,
-test, and web as folders beside pubspec.yaml and codemagic.yaml. In particular,
-scripts/configure_ios.py applies the new iPhone display name during a build.
+family-ready GitHub repository on the same build branch. Keep assets, lib,
+scripts, test, and web as folders beside pubspec.yaml and codemagic.yaml.
+Include ALL files in lib and test, the updated pubspec.yaml and scripts, and
+everything in assets/fonts, preserving their folder hierarchy. The new guide
+platform files are required even if you are initially testing in Chrome.
+Keep NEXT_FEATURES.txt with
+the top-level project documents. Upload the extracted contents, not the ZIP or
+an extra enclosing folder. scripts/configure_ios.py still applies the Black Box
+iPhone display name during a build.
 
 The existing package, repository, storage, and build identifiers retain their
 original family_ready/family-ready names. The proposed Apple bundle identifier
@@ -24,12 +92,17 @@ the visible Black Box name and keep the working setup consistent.
 
 CURRENT STATUS
 ---------------
-You reported a green unsigned iPhone compile check for version 0.2.1. Your
-Apple Developer enrollment is pending as of November 20. The next account step
+You reported a green unsigned iPhone compile check for version 0.2.2. Your
+Apple Developer enrollment was last reported pending. The next account step
 is Apple signing and TestFlight after the membership becomes active.
 
-Monetization is a later product milestone. Current priorities are installation
-on the test iPhone, reliable saved plans, and real offline maps and directions.
+This v0.5.0+8 guide/checklist update has not yet been Flutter-compiled here. Run a new
+ios-compile-check after uploading it; the earlier green result covers v0.2.2.
+
+The planned access model lets free readers view complete shared plans and
+download them for offline use, with subscriptions for contributing and editing.
+This local prototype has no accounts, subscriptions, or payment restrictions.
+The full future feature and business requirements are in NEXT_FEATURES.txt.
 
 FLUTTER 3.50 BUILD FIX
 ----------------------
@@ -45,24 +118,25 @@ IPHONE BUILD SETUP ADDED
 ------------------------
 For your iPhone 16 Pro Max and Windows-only development setup, start with
 START_IPHONE_CLOUD.txt. The included Codemagic workflows prepare the current
-v0.2.2 app for an unsigned iOS compile check and, after your Apple account setup,
-an internal TestFlight build. Offline routing is the next functional milestone.
+v0.5.0+8 app for an unsigned iOS compile check and, after your Apple account setup,
+an internal TestFlight build. Offline routing remains a future feature.
 If v0.2 is already working in Chrome, continue with that cloud guide; you do
 not need to repeat the browser installation steps below.
 
 
-This update builds on the first Flutter browser prototype you successfully ran
-on your Windows PC. It keeps the green-and-cream design and adds real online
-meeting-point selection, better supply organization, and backup/restore files.
+This update builds on the Flutter browser prototype you successfully ran on
+your Windows PC. It adds a personal packing list and local guide-file storage
+while retaining the Map tab and existing shared-plan backup/restore format.
 
-UPDATE FROM YOUR FIRST VERSION
-------------------------------
-1. If you entered anything worth keeping in the first version, use Group >
-   Copy plan and paste that text into Notepad as an extra copy.
+UPDATE FROM YOUR EXISTING VERSION
+---------------------------------
+1. Before updating, use Group > Download backup in your working browser app
+   and keep the JSON file. Also use Copy plan text (or Copy plan in an older
+   version) and paste that readable text into Notepad as an extra copy.
 2. Click the running app's terminal window and press q to stop it. Close
    its browser tab too.
 3. Download black_box_starter.zip. Choose Extract All and use a NEW folder,
-   such as Documents\BlackBox_v022. Keep your old source folder.
+   such as Documents\BlackBox_v050. Keep your old source folder.
 4. Open the extracted folder containing START_HERE.cmd and pubspec.yaml.
 5. Double-click START_HERE.cmd and keep its terminal window open. It downloads
    the added Flutter packages and compiles the updated app; internet is needed.
@@ -71,7 +145,8 @@ UPDATE FROM YOUR FIRST VERSION
 
    http://127.0.0.1:54321
 
-7. Confirm the app shows Black Box and v0.2.2. If the old screen is still visible,
+7. Confirm the app shows Black Box. Open Appearance > About Black Box & licenses
+   to check that it says Prototype 0.5.0. If the old screen is still visible,
    press Ctrl+Shift+R to reload it. Do NOT clear site data.
 8. Check that any plan you saved in the first version is still there. Then
    open Group > Download backup and keep the downloaded JSON file.
@@ -86,6 +161,40 @@ coordinate edits between multiple tabs or devices.
 
 WHAT IS NEW
 -----------
+PERSONAL PACK AND GUIDES
+- Kit > My pack: separate free checklist; add/edit quantities and notes,
+  check packed items, filter, and copy readable text.
+- Home > Open guides or the top book button: import actual PDF/video files,
+  see saved-copy status and sizes, search/filter, rename, open, or remove.
+- Shared-kit changes still use the existing plan. Personal pack items and
+  guide files do not enter that plan or its JSON backup.
+- No cloud guide upload, forum, moderator role, or paid access is active yet.
+
+CURRENT PLAN MAP
+- Map is now its own tab between Plan and Kit.
+- It shows the current local plan's primary and backup locations by their
+  saved names. Select either saved marker to review its local details.
+- Existing controls let you edit a place or choose/change its map pin.
+- Map imagery requires internet. Saved names, written details and coordinates
+  are part of the existing local plan; map imagery is not in its JSON backup.
+- Multiple plans, account groups, cloud sharing, a forum, an inbox, and paid
+  subscriptions are planned features, not functions added by this update.
+
+APPEARANCE AND NAVIGATION
+- Field Terminal opens in Dark mode by default. Use the top-right sun/moon
+  button to switch directly to Light mode or back to Dark. Both options are
+  also in Appearance, and the selected mode is stored locally.
+- Light uses a pale off-white background with forest-green text and controls;
+  Dark keeps the green-on-black terminal appearance.
+- Home shows the plan overview; Plan contains meeting places; Map displays
+  those locations; Kit contains supplies; Group contains the local roster,
+  backup/restore, and readable copies.
+- Barlow, Barlow Condensed, and IBM Plex Mono are bundled font assets. Their
+  open font license notices are included with the app.
+- Appearance does not change the saved-plan schema, storage keys, or backups.
+
+EXISTING FUNCTIONS RETAINED
+--------------------------
 MEETING POINTS
 - Primary and backup meeting places still have a name, written address, and
   meeting instructions.
@@ -109,33 +218,55 @@ SUPPLIES
 - Removing a supply asks you to confirm which item will be removed.
 
 BACKUPS AND READABLE COPIES
-- Download backup creates a JSON file containing your whole plan: members,
+- In the browser and on supported desktop targets, Download backup creates
+  a JSON file containing your whole plan: members,
   locations, coordinates, supplies, quantities, assignments, notes, and checks.
 - Restore backup validates the file and shows its group name and counts before
   you decide whether to replace the current plan. It does not merge two plans.
 - A previous local copy is retained during upgrade/restore. A separate recovery
   copy protects the selected backup if a restore is interrupted or a write fails.
-- Group provides preview/download controls when those local copies are present.
-- Download text plan creates a readable .txt file you can open in Notepad and
+- Group provides previews when those local copies are present. Download
+  controls are available on the browser and supported desktop targets.
+- In the browser and on supported desktop targets, Download text plan creates
+  a readable .txt file you can open in Notepad and
   print with Ctrl+P. Copy plan text is also available.
 - Text copies are for reading and printing. Restore backup accepts the JSON
   backup, up to 2 MiB. JSON files are plain and unencrypted; keep them private.
 - A browser download message means the download was requested. Check Chrome's
   Downloads list and confirm the file exists where you expect.
+- Native mobile file export/sharing is not implemented. On the iPhone, the UI
+  provides Copy plan text and Restore backup without unsupported download
+  buttons. A readable text copy cannot be used as a JSON restore backup.
 
 A QUICK WALKTHROUGH
 -------------------
-1. Open Meeting plan. Add a sample name/address, choose a map pin, and save.
-2. Do the same for the backup location.
-3. Open Supplies. Add "Flashlight", quantity "2", category "Light & power",
+1. Use the top-right sun/moon button to try Field Terminal in Light and Dark.
+   Check the same choices in Appearance. Choose your preferred mode, then
+   check it is remembered when you reopen the same browser URL.
+2. Open Plan. Add a sample name/address, choose a map pin, and save.
+3. Do the same for the backup location.
+4. Open Map. Confirm the primary and backup markers use the names you saved.
+   Select each marker and review its details. The map imagery needs internet.
+5. Open Kit > Shared kit. Add "Flashlight", quantity "2", category "Light & power",
    assign someone, and add a note such as "Hall cupboard".
-4. Mark it packed and try the filters. Use Clear filters to show everything.
-5. Wait for the saved status, refresh the page, and check that the fields remain.
-6. Open Group > Download backup. Check the downloaded file is present.
-7. To try restore safely, change one sample item, then select the backup file.
+6. Mark it packed and try the filters. Use Clear filters to show everything.
+7. Wait for the saved status, refresh the page, and check that the fields remain.
+8. In the browser, open Group > Download backup. Check the file is present.
+9. To try restore safely, change one sample item, then select the backup file.
    Review the preview and choose Replace current plan. Confirm the older value
    comes back. Group > Preview previous copy lets you review the replaced plan.
-8. Download a text plan and open it in Notepad to inspect the readable copy.
+10. In the browser, download a text plan and open it in Notepad to inspect the
+   readable copy. On the phone, use Copy plan text for a readable copy instead.
+11. Open Kit > My pack. Add a personal item, set its quantity, mark it packed,
+    switch tabs, and reopen. Refresh/restart and confirm its saved state.
+    Confirm the same action did not alter any Shared kit item.
+12. Open guides and import a small PDF and video you own. Wait for saved-copy
+    status, rename one, and try PDFs/Videos/search. Open both saved files.
+    On Chrome, use the second Open saved file button to open the new tab.
+13. Reopen the app and confirm both saved guides are still listed. On the
+    installed iPhone, close the app, disable Wi-Fi and cellular, reopen it,
+    and open the PDF and video. Check multiple PDF pages and video seeking.
+    The phone test remains necessary; a green compile is not this test.
 
 WHAT WORKS OFFLINE, AND WHAT IS STILL BEING BUILT
 ------------------------------------------------
@@ -143,21 +274,33 @@ The current browser prototype stores written plan details and coordinates in
 this browser. It runs from the development server on your Windows computer.
 This is not yet an installed phone app with verified offline startup.
 
-The interactive map uses online OpenStreetMap tiles. It has no offline map
-package, address search, directions, road closures, or live hazard information.
+The Map tab and pin picker use online OpenStreetMap tiles. They have no offline
+map package, address search, directions, road closures, or live hazard data.
 Its tile service allows ordinary interactive viewing but prohibits bulk/offline
 map downloading. This prototype requests only the area you actively view.
 The JSON backup stores pin coordinates, not map imagery.
+Bundled fonts and a saved appearance do not provide downloaded map data.
 
-There are no shared accounts, invitations, family synchronization, live member
-locations, messages, or built-in survival guides in this version. Adding a name
-only changes the roster in this browser. A save time is not a synchronization
-time or evidence that another person's device has received your plan.
+There are no accounts, account-based groups/invitations, multiple-plan storage,
+cloud sharing, family synchronization, community forum, asynchronous inbox,
+subscriptions, live member locations, or bundled survival-guide content in
+this version. You can import your own local PDF/video guides. Adding a name
+only changes the local roster. A save time
+is not a synchronization time or evidence that another device received a plan.
+NEXT_FEATURES.txt describes the planned features; it is not a list of working
+online services in this release.
 
-The native emergency app still needs durable local storage, a map provider
+The shared plan and checklist still need a more durable primary database and
+device verification before emergency use. Imported guide files use persistent
+Documents storage on native devices. The native emergency app needs a map provider
 that permits offline packages, per-device download/sync status, and actual
 phone restart tests in airplane mode. This prototype is for development and
 feedback, not emergency reliance.
+
+The Black Box name is a flight-recorder metaphor. It does not certify
+physical ruggedness or data security. App-level encrypted local storage is
+not implemented. Those reliability and storage requirements, along with
+offline maps and routing, must be addressed before a go-bag release.
 
 STARTER AND DEVELOPMENT DETAILS
 -------------------------------
@@ -187,24 +330,40 @@ old stored record is retained as the previous copy. Opening an old source
 version after upgrading is not a supported downgrade path: the old code cannot
 read version-2 plans. Keep the updated code with your downloaded backups.
 
-The prototype still uses shared_preferences for local sample data. Its
-maintainers do not recommend it for critical data; native storage will be
-replaced and tested before an emergency-ready release.
+The prototype still uses shared_preferences for plan/checklist data and
+appearance. Its maintainers do not recommend it for critical data; primary
+plan/checklist storage will be replaced and tested before an emergency-ready
+release. PDF/video bytes use native Documents storage or browser IndexedDB,
+not shared_preferences, and are excluded from group-plan JSON backups.
 
 PROJECT FILES
 -------------
 lib/main.dart          Screens, local saving, backup preview, and recovery UI.
+lib/black_box_theme.dart Field Terminal appearance and color definitions.
 lib/plan_models.dart   Data model, version migration, validation, readable export.
 lib/plan_dialogs.dart  Meeting-place and supply editors.
 lib/meeting_map.dart   Interactive online map and coordinate picker.
+lib/plan_map.dart      Map tab for the current local plan's named locations.
 lib/plan_files.dart    File import, browser download, and desktop save helpers.
 lib/plan_store.dart    Restore journal and ordered persistence writes.
-test/                  Pure Dart model/migration and restore-failure checks.
-pubspec.yaml           Version and pinned direct dependencies.
+lib/personal_packlist.dart Personal checklist screen and local preference wiring.
+lib/personal_packlist_models.dart Separate checklist model and queued store.
+lib/guide_library.dart Personal PDF/video library screen.
+lib/guide_files.dart   File picker and conditional platform entry point.
+lib/guide_models.dart  Guide metadata, limits, and basic header validation.
+lib/guide_store.dart   Storage interface and operation queue.
+lib/guide_store_native.dart Transactional native file-copy storage.
+lib/guide_platform_native.dart Device paths and local-file viewer handoff.
+lib/guide_platform_web.dart Browser IndexedDB storage and local Blob opening.
+lib/guide_platform_stub.dart Unsupported-platform fallback.
+test/                  Pure Dart model, restore, checklist, and guide IO checks.
+assets/fonts/          Bundled font files and their open font license notices.
+pubspec.yaml           Version, pinned dependencies, font and asset declarations.
 web/index.html         Browser entry point.
 START_HERE.cmd         Windows launcher.
 README.txt             Browser prototype guide.
 START_IPHONE_CLOUD.txt  Windows-to-iPhone build and TestFlight instructions.
+NEXT_FEATURES.txt       Planned product features, access model, and requirements.
 codemagic.yaml         Manual unsigned and signed iOS build workflows.
 scripts/               Isolated native-project preparation and build helpers.
 
@@ -230,33 +389,74 @@ IF SOMETHING STOPS
 VERIFICATION
 ------------
 You confirmed that version 0.2 looks good and works on your Windows computer.
-During preparation, all Dart sources were parsed/formatted, the pure data models
-passed static analysis and 62 migration/model/roundtrip checks, and map/file APIs were
-checked against their official packages. Restore writes also have injected
-failure checks: all six tested scenarios retained the required current/recovery data.
+Earlier prototype preparation included Dart parsing/formatting, pure-model
+static analysis, migration/model/roundtrip checks, and checking map/file APIs
+against their official packages.
 
-A full Flutter build/browser test has not run in the preparation environment. Automatic approval review previously rejected Flutter startup
+A full Flutter build/browser test has not run in the preparation environment.
+Automatic approval review previously rejected Flutter startup
 because it attempted to contact a cloud instance metadata endpoint. That
 blocked path was not retried or bypassed. Your earlier Windows run provides
 the v0.2 browser check. You subsequently reported a green ios-compile-check
-run for v0.2.1, covering its configured analysis, data checks, and unsigned
-iPhone compilation. This v0.2.2 branding update has source-scope, syntax, and
-format checks. Its display changes will be verified in your next ordinary
-browser/cloud build. Installation and behavior on the physical iPhone still
-need testing after Apple signing is configured.
+run for v0.2.2, covering its configured analysis, data checks, and unsigned
+iPhone compilation, including the Black Box rename.
+
+Version 0.3.0+5 passed standalone Dart formatting and source review during
+preparation. Its existing 62 model/migration/backup/validation checks and all
+six restore-failure scenarios passed with standalone Dart. You have not
+reported a v0.3.0 Flutter build result.
+
+For v0.3.1+6, standalone Dart formatting of lib/main.dart and
+lib/black_box_theme.dart passed with no changes. A focused source review
+checked the default mode, older-preference handling, shared appearance
+callback, direct toggle, and retention of the plan and selected tab. The
+Light palette received source review and numerical contrast checks for
+selected text/control combinations.
+
+For v0.4.0+7, standalone Dart formatting passed for main.dart and plan_map.dart.
+A focused source review checked Map navigation, location selection, and reuse
+of the existing edit/save callbacks. Runtime layout, native builds, and device
+interaction remain unverified.
+
+The existing group model and storage files are unchanged, so the earlier 62-check and
+six-scenario results are carried forward; those checks have not been rerun
+for this update. No widget or native UI tests were run.
+
+For v0.5.0+8, 27 new standalone checklist model/store checks and 38 native guide
+file-storage checks passed. Guide tests used real temporary files with an
+injected directory/opener, covering cold reopen, copy failures, incomplete
+imports, malformed metadata, rename/remove isolation, and queued operations.
+They do not test iOS plugins, browser IndexedDB, PDF/video decoding, or widgets.
+Standalone Dart formatting passed for all 22 Dart source/test files.
+Source review checked navigation, storage boundaries, viewer handoff, browser
+transaction completion, and local-file status wording. The updated build
+check script passed shell syntax validation.
+
+These checks do not replace Flutter compilation or a runtime screen check.
+This guide/checklist update has not been Flutter-compiled here. Device rendering,
+interaction, and appearance persistence across real restarts remain unverified.
+Check it with the Windows browser launcher and a new ios-compile-check build.
+Installation and behavior on the physical iPhone still need testing after
+Apple signing is configured.
 
 Optional developer checks (after Dart is available in your terminal):
   dart test/plan_models_check.dart
   dart test/plan_store_check.dart
+  dart test/personal_packlist_check.dart
+  dart test/guide_store_check.dart
 
 NEXT DEVELOPMENT MILESTONE
 --------------------------
-After checking this update's screens and backup flow, move the plan onto an
-installed phone app with durable local storage. Verify a complete phone-app
-restart in airplane mode before adding family accounts/sync and offline map
-packages. Messaging must clearly distinguish queued and delivered messages.
-Later, consider a paid product or premium features after validating the core
-preparedness experience. No monetization model has been selected yet.
+See NEXT_FEATURES.txt for the agreed direction: account-based groups and
+invitations, multiple plans, user-controlled sharing, an online community
+forum, and an asynchronous inbox. The inbox is not real-time chat or SMS.
+Free readers should be able to view and download complete shared plans for
+offline access; subscribers should be able to contribute and edit. Online
+information about saved areas is a later addition. These are requirements
+for future work, not implemented services or purchase options in this build.
+
+Installation on the test phone, durable storage, proper offline map packages,
+and real restart tests without connectivity remain necessary milestones.
 
 PRIMARY TECHNICAL REFERENCES
 ----------------------------
@@ -274,5 +474,16 @@ https://operations.osmfoundation.org/policies/tiles/
 File APIs:
 https://pub.dev/packages/file_selector/versions/1.1.0
 https://pub.dev/packages/cross_file/versions/0.3.5%2B5
+Local guide storage and viewers:
+https://pub.dev/packages/path_provider
+https://pub.dev/packages/open_filex
+https://pub.dev/packages/web
+https://developer.mozilla.org/en-US/docs/Web/API/Storage_API/Storage_quotas_and_eviction_criteria
 Local preferences limitations:
 https://pub.dev/packages/shared_preferences
+Font sources and licenses:
+https://github.com/google/fonts/tree/main/ofl/barlow
+https://github.com/google/fonts/tree/main/ofl/barlowcondensed
+https://github.com/google/fonts/tree/main/ofl/ibmplexmono
+Apple accessibility design guidance:
+https://developer.apple.com/design/human-interface-guidelines/accessibility

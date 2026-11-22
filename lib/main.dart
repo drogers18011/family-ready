@@ -5,33 +5,83 @@ import 'package:flutter/services.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'black_box_theme.dart';
+import 'guide_library.dart';
+import 'personal_packlist.dart';
 import 'plan_dialogs.dart';
 import 'plan_files.dart';
 import 'plan_models.dart';
+import 'plan_map.dart';
 import 'plan_store.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
+  LicenseRegistry.addLicense(() async* {
+    for (final entry in const {
+      'Barlow': 'assets/fonts/Barlow-OFL.txt',
+      'Barlow Condensed': 'assets/fonts/BarlowCondensed-OFL.txt',
+      'IBM Plex Mono': 'assets/fonts/IBMPlexMono-OFL.txt',
+    }.entries) {
+      yield LicenseEntryWithLineBreaks([
+        entry.key,
+      ], await rootBundle.loadString(entry.value));
+    }
+  });
   runApp(const FamilyReadyApp());
 }
 
-class FamilyReadyApp extends StatelessWidget {
+class FamilyReadyApp extends StatefulWidget {
   const FamilyReadyApp({super.key});
+
+  @override
+  State<FamilyReadyApp> createState() => _FamilyReadyAppState();
+}
+
+class _FamilyReadyAppState extends State<FamilyReadyApp> {
+  static const _appearanceKey = 'black_box.appearance.v1';
+  final _preferences = SharedPreferencesAsync();
+  BlackBoxStyle _style = BlackBoxStyle.terminal;
+  int _appearanceRevision = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadAppearance();
+  }
+
+  Future<void> _loadAppearance() async {
+    final revision = _appearanceRevision;
+    try {
+      final stored = await _preferences.getString(_appearanceKey);
+      if (!mounted || revision != _appearanceRevision) return;
+      setState(() {
+        // Field Terminal is the selected design. Older appearances open dark.
+        _style = stored == BlackBoxStyle.terminalLight.name
+            ? BlackBoxStyle.terminalLight
+            : BlackBoxStyle.terminal;
+      });
+    } catch (_) {
+      // Appearance is optional; a preference failure must not block the plan.
+    }
+  }
+
+  Future<bool> _changeAppearance(BlackBoxStyle style) async {
+    _appearanceRevision++;
+    setState(() => _style = style);
+    try {
+      await _preferences.setString(_appearanceKey, style.name);
+      return true;
+    } catch (_) {
+      return false;
+    }
+  }
 
   @override
   Widget build(BuildContext context) => MaterialApp(
     title: 'Black Box',
     debugShowCheckedModeBanner: false,
-    theme: ThemeData(
-      useMaterial3: true,
-      colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFF285B48)),
-      scaffoldBackgroundColor: const Color(0xFFF5F5EF),
-      inputDecorationTheme: const InputDecorationThemeData(
-        border: OutlineInputBorder(),
-        filled: true,
-        fillColor: Colors.white,
-      ),
-    ),
+    theme: buildBlackBoxTheme(_style),
+    themeAnimationDuration: Duration.zero,
     builder: (context, child) {
       // Flutter's temporary bridge supplies legacy theme/localization context.
       // Remove it after dependencies finish migrating to material_ui.
@@ -40,12 +90,20 @@ class FamilyReadyApp extends StatelessWidget {
         child: child ?? const SizedBox.shrink(),
       );
     },
-    home: const PlanHome(),
+    home: PlanHome(style: _style, onStyleChanged: _changeAppearance),
   );
 }
 
 class PlanHome extends StatefulWidget {
-  const PlanHome({super.key});
+  const PlanHome({
+    super.key,
+    required this.style,
+    required this.onStyleChanged,
+  });
+
+  final BlackBoxStyle style;
+  final Future<bool> Function(BlackBoxStyle) onStyleChanged;
+
   @override
   State<PlanHome> createState() => _PlanHomeState();
 }
@@ -66,6 +124,9 @@ class _PlanHomeState extends State<PlanHome> {
   bool _fileBusy = false;
   bool _hasPrevious = false;
   bool _hasRecovery = false;
+  bool _appearanceBusy = false;
+  bool _guidesOpen = false;
+  bool _showPersonalPack = false;
   String? _migrationSnapshot;
   final _search = TextEditingController();
   String _supplyFilter = 'All';
@@ -76,15 +137,32 @@ class _PlanHomeState extends State<PlanHome> {
   String? _loadError;
   String? _writeError;
   String? _rawSavedData;
-  int _tab = 0;
+  static const _homeTab = 0;
+  static const _planTab = 1;
+  static const _mapTab = 2;
+  static const _kitTab = 3;
+  static const _groupTab = 4;
+  int _tab = _homeTab;
   int _idCounter = 0;
-  static const _labels = ['Overview', 'Meeting plan', 'Supplies', 'Group'];
+  static const _labels = ['Home', 'Plan', 'Map', 'Kit', 'Group'];
   static const _icons = [
     Icons.home_outlined,
     Icons.place_outlined,
+    Icons.map_outlined,
     Icons.checklist_rounded,
     Icons.people_outline,
   ];
+
+  bool get _terminal => widget.style != BlackBoxStyle.aviation;
+  bool get _light => widget.style == BlackBoxStyle.terminalLight;
+  ColorScheme get _colors => Theme.of(context).colorScheme;
+  TextTheme get _type => Theme.of(context).textTheme;
+  String get _storageLocation => kIsWeb ? 'this browser' : 'this device';
+  bool get _canExportFiles =>
+      kIsWeb ||
+      defaultTargetPlatform == TargetPlatform.windows ||
+      defaultTargetPlatform == TargetPlatform.macOS ||
+      defaultTargetPlatform == TargetPlatform.linux;
 
   @override
   void initState() {
@@ -133,7 +211,7 @@ class _PlanHomeState extends State<PlanHome> {
       if (!mounted) return;
       setState(() {
         _loadError =
-            'Your browser could not read the saved plan. '
+            'Black Box could not read the plan saved on $_storageLocation. '
             'Nothing has been overwritten. You can retry, or copy the stored '
             'data if it is available.';
       });
@@ -179,7 +257,7 @@ class _PlanHomeState extends State<PlanHome> {
       setState(() {
         _dirty = true;
         _writeError =
-            'Changes are only in this open page. Saving failed; '
+            'Changes are only in this open app. Saving failed; '
             'retry or copy your plan before closing.';
       });
     } finally {
@@ -206,10 +284,110 @@ class _PlanHomeState extends State<PlanHome> {
 
   String get _saveStatus {
     if (_fileBusy) return 'Working with a file…';
-    if (_saving) return 'Saving on this browser…';
+    if (_saving) return 'Saving on $_storageLocation…';
     if (_dirty) return 'Changes not saved';
     if (_plan.savedAt == null) return 'Sample plan · No changes saved yet';
-    return 'Saved on this browser · ${_date(_plan.savedAt!)}';
+    return 'Saved on $_storageLocation · ${_date(_plan.savedAt!)}';
+  }
+
+  Future<void> _showAppearance() async {
+    final selected = await showModalBottomSheet<BlackBoxStyle>(
+      context: context,
+      isScrollControlled: true,
+      useSafeArea: true,
+      builder: (sheetContext) => SafeArea(
+        top: false,
+        child: SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(20, 24, 20, 16),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('Appearance', style: _type.headlineSmall),
+                const SizedBox(height: 8),
+                Text(
+                  'Field Terminal · Choose light or dark.',
+                  style: _type.bodyMedium,
+                ),
+                const SizedBox(height: 16),
+                for (final style in const [
+                  BlackBoxStyle.terminal,
+                  BlackBoxStyle.terminalLight,
+                ])
+                  ListTile(
+                    contentPadding: const EdgeInsets.symmetric(vertical: 8),
+                    leading: Icon(
+                      style == BlackBoxStyle.terminalLight
+                          ? Icons.light_mode_outlined
+                          : Icons.dark_mode_outlined,
+                      color: _colors.primary,
+                    ),
+                    title: Text(style.label),
+                    subtitle: Text(style.subtitle),
+                    trailing: widget.style == style
+                        ? Icon(
+                            Icons.check_circle_outline,
+                            color: _colors.primary,
+                          )
+                        : null,
+                    selected: widget.style == style,
+                    onTap: () => Navigator.pop(sheetContext, style),
+                  ),
+                const Divider(height: 24),
+                TextButton.icon(
+                  onPressed: () {
+                    Navigator.pop(sheetContext);
+                    showAboutDialog(
+                      context: context,
+                      applicationName: 'Black Box',
+                      applicationVersion: 'Prototype 0.5.0',
+                      children: const [
+                        Text(
+                          'A local preparedness plan for your people, meeting '
+                          'places, kit, and saved PDF/video guides. Family sync, offline maps, and '
+                          'offline directions are still in development.',
+                        ),
+                      ],
+                    );
+                  },
+                  icon: const Icon(Icons.info_outline),
+                  label: const Text('About Black Box & licenses'),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+    if (selected != null) await _applyAppearance(selected);
+  }
+
+  Future<void> _toggleBrightness() => _applyAppearance(
+    _light ? BlackBoxStyle.terminal : BlackBoxStyle.terminalLight,
+  );
+
+  Future<void> _openGuides() async {
+    if (_guidesOpen) return;
+    setState(() => _guidesOpen = true);
+    try {
+      await Navigator.of(context).push<void>(
+        MaterialPageRoute<void>(builder: (_) => const GuideLibraryPage()),
+      );
+    } finally {
+      if (mounted) setState(() => _guidesOpen = false);
+    }
+  }
+
+  Future<void> _applyAppearance(BlackBoxStyle selected) async {
+    if (!mounted || _appearanceBusy) return;
+    setState(() => _appearanceBusy = true);
+    final saved = await widget.onStyleChanged(selected);
+    if (!mounted) return;
+    setState(() => _appearanceBusy = false);
+    if (!saved) {
+      _message('Appearance changed for this session, but could not be saved.');
+    }
   }
 
   Future<void> _copy(String text, String success) async {
@@ -397,20 +575,28 @@ class _PlanHomeState extends State<PlanHome> {
                 const SizedBox(height: 8),
                 Text('File: $filename'),
                 const SizedBox(height: 20),
-                const Text(
-                  'This replaces the plan in this browser. A copy of the current '
+                Text(
+                  'This replaces the plan on $_storageLocation. A copy of the current '
                   'stored plan will be kept here so you can go back.',
                 ),
                 const SizedBox(height: 10),
-                const Text(
-                  'For a separate copy, cancel and download a backup first. '
-                  'Restoring a file does not update anyone else’s device.',
+                Text(
+                  _canExportFiles
+                      ? 'For a separate copy, cancel and download a backup first. '
+                            'Restoring a file does not update anyone else’s device.'
+                      : 'Keep your original backup file. Restoring a file does '
+                            'not update anyone else’s device.',
                 ),
                 if (_hasRecovery && !recovery) ...[
                   const SizedBox(height: 12),
-                  const Text(
-                    'A recovery copy from an earlier restore is also stored here. '
-                    'This restore will replace it. Cancel and download that recovery copy first if you need it.',
+                  Text(
+                    _canExportFiles
+                        ? 'A recovery copy from an earlier restore is also stored here. '
+                              'This restore will replace it. Cancel and download that '
+                              'recovery copy first if you need it.'
+                        : 'A recovery copy from an earlier restore is also stored here. '
+                              'This restore will replace it. Cancel if you need to keep '
+                              'that recovery copy.',
                   ),
                 ],
               ],
@@ -460,13 +646,13 @@ class _PlanHomeState extends State<PlanHome> {
         _dirty = false;
         _loadError = null;
         _writeError = null;
-        _tab = 0;
+        _tab = _homeTab;
         _supplyFilter = 'All';
         _categoryFilter = '';
         _memberFilter = '';
         _search.clear();
       });
-      _message('Plan restored and saved in this browser.');
+      _message('Plan restored and saved on $_storageLocation.');
     } on RestoreFailure catch (error) {
       if (mounted)
         setState(() {
@@ -475,8 +661,10 @@ class _PlanHomeState extends State<PlanHome> {
         });
       _message(
         error.recoveryAvailable
-            ? 'Restore interrupted. The selected backup is preserved as a Recovery copy; preview or download it before retrying.'
-            : 'Restore could not start. Existing stored plans were not replaced. Keep this page open and download your plan.',
+            ? 'Restore interrupted. The selected backup is preserved as a Recovery '
+                  'copy; preview it before retrying.'
+            : 'Restore could not start. Existing stored plans were not replaced. '
+                  'Keep the app open and copy your plan text before retrying.',
       );
     } on PlanFileException catch (error) {
       _message(error.message);
@@ -488,7 +676,8 @@ class _PlanHomeState extends State<PlanHome> {
       _message(
         stage == 'read'
             ? 'The backup could not be opened. Your current plan was not replaced.'
-            : 'The restore could not be saved. Keep this page open and download your current plan before retrying.',
+            : 'The restore could not be saved. Keep the app open and copy your '
+                  'current plan text before retrying.',
       );
     } finally {
       if (mounted) setState(() => _fileBusy = false);
@@ -698,11 +887,11 @@ class _PlanHomeState extends State<PlanHome> {
   Widget _panel(Widget child) => Container(
     width: double.infinity,
     margin: const EdgeInsets.only(bottom: 16),
-    padding: const EdgeInsets.all(22),
+    padding: EdgeInsets.all(_terminal ? 18 : 20),
     decoration: BoxDecoration(
-      color: Colors.white,
-      borderRadius: BorderRadius.circular(20),
-      border: Border.all(color: const Color(0xFFE1E5DC)),
+      color: _colors.surfaceContainerLow,
+      borderRadius: BorderRadius.circular(_terminal ? 8 : 20),
+      border: Border.all(color: _colors.outlineVariant),
     ),
     child: child,
   );
@@ -712,15 +901,12 @@ class _PlanHomeState extends State<PlanHome> {
     child: Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          title,
-          style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-            fontWeight: FontWeight.w700,
-            color: const Color(0xFF203C32),
-          ),
-        ),
+        Text(title, style: _type.headlineLarge),
         const SizedBox(height: 8),
-        Text(subtitle, style: Theme.of(context).textTheme.bodyLarge),
+        Text(
+          subtitle,
+          style: _type.bodyLarge?.copyWith(color: _colors.onSurfaceVariant),
+        ),
       ],
     ),
   );
@@ -731,58 +917,56 @@ class _PlanHomeState extends State<PlanHome> {
         .where((item) => item.assignedTo == null)
         .length;
     final primary = _plan.primary;
+    final total = _plan.supplies.length;
+    final primaryName = primary.isSet
+        ? (primary.name.isEmpty ? 'Your meeting point' : primary.name)
+        : 'Choose a place to meet';
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _heading('A plan to come together.', _plan.groupName),
+        _heading(
+          _terminal ? 'FIELD PLAN' : _plan.groupName,
+          _terminal ? _plan.groupName : 'Your people. Your places. Your kit.',
+        ),
         Container(
           width: double.infinity,
-          margin: const EdgeInsets.only(bottom: 22),
-          padding: const EdgeInsets.all(24),
+          margin: const EdgeInsets.only(bottom: 16),
+          padding: const EdgeInsets.all(20),
           decoration: BoxDecoration(
-            color: const Color(0xFF285B48),
-            borderRadius: BorderRadius.circular(22),
+            color: _colors.surfaceContainerHigh,
+            borderRadius: BorderRadius.circular(_terminal ? 8 : 22),
+            border: Border.all(color: _colors.primary.withValues(alpha: 0.55)),
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Icon(
-                Icons.explore_outlined,
-                color: Color(0xFFDCECC6),
-                size: 32,
+              Row(
+                children: [
+                  Icon(Icons.place_outlined, color: _colors.primary, size: 24),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Text(
+                      'PRIMARY MEETING PLACE',
+                      style: _type.labelMedium?.copyWith(
+                        color: _colors.primary,
+                        letterSpacing: _terminal ? 0 : 1.1,
+                      ),
+                    ),
+                  ),
+                ],
               ),
-              const SizedBox(height: 16),
-              Text(
-                primary.isSet
-                    ? 'YOUR PRIMARY MEETING PLACE'
-                    : 'START WITH A MEETING PLACE',
-                style: const TextStyle(
-                  color: Color(0xFFDCECC6),
-                  fontSize: 12,
-                  letterSpacing: 1.3,
-                ),
-              ),
-              const SizedBox(height: 10),
-              Text(
-                primary.isSet
-                    ? (primary.name.isNotEmpty
-                          ? primary.name
-                          : 'Your main meeting point')
-                    : 'Know where to find each other.',
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontWeight: FontWeight.w700,
-                  fontSize: 26,
-                ),
-              ),
+              const SizedBox(height: 18),
+              Text(primaryName, style: _type.headlineLarge),
               const SizedBox(height: 10),
               Text(
                 primary.address.isNotEmpty
                     ? primary.address
                     : primary.hasCoordinates
                     ? '${primary.latitude!.toStringAsFixed(6)}, ${primary.longitude!.toStringAsFixed(6)}'
-                    : 'Choose your main location, add a backup, and give everyone a clear role.',
-                style: const TextStyle(color: Colors.white, height: 1.5),
+                    : 'Add an address, a backup location, and clear instructions.',
+                style: _type.bodyLarge?.copyWith(
+                  color: _colors.onSurfaceVariant,
+                ),
               ),
               if (primary.notes.isNotEmpty) ...[
                 const SizedBox(height: 12),
@@ -790,28 +974,30 @@ class _PlanHomeState extends State<PlanHome> {
                   primary.notes,
                   maxLines: 3,
                   overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(color: Color(0xFFE7EFE7)),
+                  style: _type.bodyMedium,
+                ),
+              ],
+              if (_terminal) ...[
+                const Divider(height: 32),
+                Text('BACKUP LOCATION', style: _type.labelMedium),
+                const SizedBox(height: 6),
+                Text(
+                  _plan.backup.isSet
+                      ? (_plan.backup.name.isEmpty
+                            ? 'Backup meeting point added'
+                            : _plan.backup.name)
+                      : 'Not added yet',
+                  style: _type.bodyLarge,
                 ),
               ],
               const SizedBox(height: 20),
-              Wrap(
-                spacing: 12,
-                runSpacing: 10,
-                children: [
-                  FilledButton.tonal(
-                    onPressed: () => setState(() => _tab = 1),
-                    child: const Text('Open meeting plan'),
-                  ),
-                  OutlinedButton.icon(
-                    style: OutlinedButton.styleFrom(
-                      foregroundColor: Colors.white,
-                      side: const BorderSide(color: Color(0xFFB6D0BD)),
-                    ),
-                    onPressed: () => _downloadPlan(),
-                    icon: const Icon(Icons.download_outlined),
-                    label: const Text('Back up plan'),
-                  ),
-                ],
+              SizedBox(
+                width: double.infinity,
+                child: FilledButton.icon(
+                  onPressed: () => setState(() => _tab = _planTab),
+                  icon: const Icon(Icons.arrow_forward),
+                  label: const Text('Open meeting plan'),
+                ),
               ),
             ],
           ),
@@ -821,49 +1007,43 @@ class _PlanHomeState extends State<PlanHome> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'Your plan at a glance',
-                style: Theme.of(context).textTheme.titleLarge,
+                _terminal ? 'KIT / PACKING' : 'Your go-bag kit',
+                style: _type.titleLarge,
               ),
               const SizedBox(height: 12),
-              _summaryRow(
-                Icons.people_outline,
-                '${_plan.members.length} group members',
-                'See who is bringing each item.',
-                3,
-              ),
-              _summaryRow(
-                Icons.place_outlined,
-                '${(primary.isSet ? 1 : 0) + (_plan.backup.isSet ? 1 : 0)} of 2 meeting places added',
-                'Keep a written address and an optional map pin.',
-                1,
-              ),
-              _summaryRow(
-                Icons.assignment_ind_outlined,
-                unassigned == 0
-                    ? 'Every listed supply has an owner'
-                    : '$unassigned supplies need an owner',
-                'Assign a person to each item.',
-                2,
-              ),
-              const Divider(height: 24),
               Text(
-                'Packing progress',
-                style: Theme.of(context).textTheme.titleMedium,
+                total == 0
+                    ? 'No items listed yet'
+                    : '$packed of $total items packed',
+                style: _type.headlineSmall,
               ),
               const SizedBox(height: 12),
               ClipRRect(
-                borderRadius: BorderRadius.circular(8),
+                borderRadius: BorderRadius.circular(_terminal ? 2 : 8),
                 child: LinearProgressIndicator(
-                  value: _plan.supplies.isEmpty
-                      ? 0
-                      : packed / _plan.supplies.length,
-                  minHeight: 10,
-                  backgroundColor: const Color(0xFFE7ECE3),
+                  value: total == 0 ? 0 : packed / total,
+                  minHeight: 8,
+                  semanticsLabel: 'Listed items marked packed',
+                  semanticsValue: '$packed of $total',
+                ),
+              ),
+              const SizedBox(height: 12),
+              Text(
+                total == 0
+                    ? 'Add what your group plans to bring.'
+                    : unassigned == 0
+                    ? 'Every listed item has an assigned person.'
+                    : '$unassigned listed items still need an assigned person.',
+                style: _type.bodyMedium?.copyWith(
+                  color: _colors.onSurfaceVariant,
                 ),
               ),
               const SizedBox(height: 10),
-              Text(
-                '$packed of ${_plan.supplies.length} listed items marked packed',
+              _summaryRow(
+                Icons.checklist_rounded,
+                'Open kit and personal pack',
+                'Group supplies and your private packing checklist.',
+                _kitTab,
               ),
             ],
           ),
@@ -872,40 +1052,59 @@ class _PlanHomeState extends State<PlanHome> {
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                'Keep a copy you can take with you.',
-                style: Theme.of(context).textTheme.titleLarge,
+              _summaryRow(
+                Icons.people_outline,
+                '${_plan.members.length} people in this plan',
+                'Review names and assignments.',
+                _groupTab,
               ),
-              const SizedBox(height: 10),
-              const Text(
-                'Download a backup to restore this plan later, or a readable text copy '
-                'to keep and print. Browser data can be cleared.',
-              ),
-              const SizedBox(height: 16),
-              Wrap(
-                spacing: 10,
-                runSpacing: 10,
-                children: [
-                  OutlinedButton.icon(
-                    onPressed: () => _downloadPlan(readable: true),
-                    icon: const Icon(Icons.description_outlined),
-                    label: const Text('Download text plan'),
-                  ),
-                  TextButton(
-                    onPressed: () => setState(() => _tab = 3),
-                    child: const Text('Backup & restore'),
-                  ),
-                ],
+              const Divider(height: 24),
+              _summaryRow(
+                Icons.folder_copy_outlined,
+                'Keep a copy',
+                'Backup, restore, and readable plan text.',
+                _groupTab,
               ),
             ],
           ),
         ),
-        const Padding(
-          padding: EdgeInsets.only(bottom: 12),
-          child: Text(
-            'Local browser preview. Maps require internet; family syncing, messaging, '
-            'and a phone app that reopens offline are still to come.',
-            style: TextStyle(color: Color(0xFF59655D), fontSize: 13),
+        _panel(
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text('OFFLINE GUIDES', style: _type.titleLarge),
+              const SizedBox(height: 10),
+              Text(
+                'Keep PDFs and videos on $_storageLocation for reference.',
+                style: _type.bodyLarge,
+              ),
+              const SizedBox(height: 16),
+              FilledButton.icon(
+                onPressed: _guidesOpen ? null : _openGuides,
+                icon: const Icon(Icons.menu_book_outlined),
+                label: const Text('Open guides'),
+              ),
+            ],
+          ),
+        ),
+        Padding(
+          padding: const EdgeInsets.only(bottom: 12),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Icon(
+                Icons.cloud_outlined,
+                size: 20,
+                color: _colors.onSurfaceVariant,
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Text(
+                  'Map imagery requires internet.',
+                  style: _type.bodySmall,
+                ),
+              ),
+            ],
           ),
         ),
       ],
@@ -945,7 +1144,7 @@ class _PlanHomeState extends State<PlanHome> {
           place.isSet
               ? (place.name.isEmpty ? 'Unnamed location' : place.name)
               : 'Choose a place to meet',
-          style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w600),
+          style: _type.titleLarge,
         ),
         if (place.address.isNotEmpty) ...[
           const SizedBox(height: 8),
@@ -988,18 +1187,64 @@ class _PlanHomeState extends State<PlanHome> {
     crossAxisAlignment: CrossAxisAlignment.start,
     children: [
       _heading(
-        'Know where to go.',
-        'Keep the location and instructions together.',
+        'Meeting plan',
+        'Your primary location, backup, and written instructions.',
+      ),
+      Padding(
+        padding: const EdgeInsets.only(bottom: 16),
+        child: OutlinedButton.icon(
+          onPressed: () => setState(() => _tab = _mapTab),
+          icon: const Icon(Icons.map_outlined),
+          label: const Text('View locations on map'),
+        ),
       ),
       _placeCard('Primary meeting place', _plan.primary, true),
       _placeCard('Backup meeting place', _plan.backup, false),
-      const Padding(
-        padding: EdgeInsets.only(bottom: 12),
+      Padding(
+        padding: const EdgeInsets.only(bottom: 12),
         child: Text(
-          'Written details and coordinates are saved in your browser. The map '
-          'needs internet and does not show routes, closures, or live hazards.',
+          'Written details and coordinates are saved on $_storageLocation after '
+          'a successful save. Map imagery needs internet; routes, closures, and '
+          'live hazards are not shown.',
+          style: _type.bodySmall,
         ),
       ),
+    ],
+  );
+
+  Widget _map() => Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      _heading('Plan locations', _plan.groupName),
+      PlanMapPanel(
+        plan: _plan,
+        onEditPlace: (primary) => _editPlace(primary),
+        onSetPin: (primary) => _setPin(primary),
+      ),
+    ],
+  );
+
+  Widget _kit() => Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      Wrap(
+        spacing: 8,
+        runSpacing: 8,
+        children: [
+          ChoiceChip(
+            label: const Text('Shared kit'),
+            selected: !_showPersonalPack,
+            onSelected: (_) => setState(() => _showPersonalPack = false),
+          ),
+          ChoiceChip(
+            label: const Text('My pack'),
+            selected: _showPersonalPack,
+            onSelected: (_) => setState(() => _showPersonalPack = true),
+          ),
+        ],
+      ),
+      const SizedBox(height: 20),
+      if (_showPersonalPack) const PersonalPacklistPanel() else _supplies(),
     ],
   );
 
@@ -1028,7 +1273,7 @@ class _PlanHomeState extends State<PlanHome> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         _heading(
-          'Everyone has a part.',
+          'Shared kit',
           '$packed of ${_plan.supplies.length} listed items packed. Set quantities, assign people, and check them off.',
         ),
         Padding(
@@ -1195,9 +1440,7 @@ class _PlanHomeState extends State<PlanHome> {
                         children: [
                           Text(
                             item.name,
-                            style: TextStyle(
-                              fontWeight: FontWeight.w600,
-                              fontSize: 17,
+                            style: _type.titleMedium?.copyWith(
                               decoration: item.packed
                                   ? TextDecoration.lineThrough
                                   : null,
@@ -1224,7 +1467,9 @@ class _PlanHomeState extends State<PlanHome> {
                             const SizedBox(height: 10),
                             Text(
                               item.notes,
-                              style: const TextStyle(color: Color(0xFF59655D)),
+                              style: _type.bodyMedium?.copyWith(
+                                color: _colors.onSurfaceVariant,
+                              ),
                             ),
                           ],
                         ],
@@ -1254,14 +1499,15 @@ class _PlanHomeState extends State<PlanHome> {
   Widget _tag(String text, {bool attention = false}) => Container(
     padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
     decoration: BoxDecoration(
-      color: attention ? const Color(0xFFFFEFCE) : const Color(0xFFEDF2E8),
-      borderRadius: BorderRadius.circular(8),
+      color: attention ? _colors.tertiaryContainer : _colors.secondaryContainer,
+      borderRadius: BorderRadius.circular(_terminal ? 4 : 8),
     ),
     child: Text(
       text,
-      style: TextStyle(
-        fontSize: 12,
-        color: attention ? const Color(0xFF785000) : const Color(0xFF31513D),
+      style: _type.labelMedium?.copyWith(
+        color: attention
+            ? _colors.onTertiaryContainer
+            : _colors.onSecondaryContainer,
       ),
     ),
   );
@@ -1269,17 +1515,16 @@ class _PlanHomeState extends State<PlanHome> {
   Widget _group() => Column(
     crossAxisAlignment: CrossAxisAlignment.start,
     children: [
-      _heading(
-        'Your people, your plan.',
-        'See the group’s assignments and keep a backup of your plan.',
-      ),
+      _heading('Your group', 'People and assignments in this local plan.'),
       _panel(
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
+            Text(
               'GROUP NAME',
-              style: TextStyle(fontSize: 12, letterSpacing: 1.2),
+              style: _type.labelMedium?.copyWith(
+                color: _colors.onSurfaceVariant,
+              ),
             ),
             const SizedBox(height: 6),
             Row(
@@ -1298,7 +1543,11 @@ class _PlanHomeState extends State<PlanHome> {
               ],
             ),
             const SizedBox(height: 8),
-            const Text('Adding a name does not invite or notify anyone.'),
+            Text(
+              'This is a local roster. Adding a name does not invite or notify '
+              'anyone; family sync and messaging are still in development.',
+              style: _type.bodySmall,
+            ),
           ],
         ),
       ),
@@ -1359,20 +1608,25 @@ class _PlanHomeState extends State<PlanHome> {
       children: [
         Text('Backup & restore', style: Theme.of(context).textTheme.titleLarge),
         const SizedBox(height: 10),
-        const Text(
-          'A backup file keeps your members, meeting places, map pins, supplies, '
-          'and packed status. Save it somewhere you can find again.',
+        Text(
+          _canExportFiles
+              ? 'A backup file keeps your people, meeting places, map pins, '
+                    'supplies, and packed status. Save it somewhere you can find again.'
+              : 'Restore a JSON backup from Files. Creating or sharing backup '
+                    'files on a phone is still in development; export them from '
+                    'the browser or desktop app for now.',
         ),
         const SizedBox(height: 18),
         Wrap(
           spacing: 10,
           runSpacing: 10,
           children: [
-            FilledButton.icon(
-              onPressed: () => _downloadPlan(),
-              icon: const Icon(Icons.download_outlined),
-              label: const Text('Download backup'),
-            ),
+            if (_canExportFiles)
+              FilledButton.icon(
+                onPressed: () => _downloadPlan(),
+                icon: const Icon(Icons.download_outlined),
+                label: const Text('Download backup'),
+              ),
             OutlinedButton.icon(
               onPressed: () => _restoreBackup(),
               icon: const Icon(Icons.upload_file_outlined),
@@ -1381,28 +1635,33 @@ class _PlanHomeState extends State<PlanHome> {
           ],
         ),
         const SizedBox(height: 12),
-        const Text(
+        Text(
           'Backup files are ordinary, unencrypted JSON files. They contain the '
           'details you entered; keep them private. They do not include map images.',
-          style: TextStyle(fontSize: 12, color: Color(0xFF59655D)),
+          style: _type.bodySmall,
         ),
         const Divider(height: 32),
         Text('A readable copy', style: Theme.of(context).textTheme.titleMedium),
         const SizedBox(height: 8),
-        const Text(
-          'Download a text plan to open in Notepad and print, or copy the text. '
-          'Use the JSON backup above when you want to restore into the app.',
+        Text(
+          _canExportFiles
+              ? 'Download a text plan to keep and print, or copy the text. '
+                    'Use a JSON backup to restore into the app.'
+              : 'Copy the plan text to keep a readable copy elsewhere. '
+                    'Text copies cannot be restored into the app; restore needs '
+                    'a JSON backup.',
         ),
         const SizedBox(height: 12),
         Wrap(
           spacing: 10,
           runSpacing: 10,
           children: [
-            OutlinedButton.icon(
-              onPressed: () => _downloadPlan(readable: true),
-              icon: const Icon(Icons.description_outlined),
-              label: const Text('Download text plan'),
-            ),
+            if (_canExportFiles)
+              OutlinedButton.icon(
+                onPressed: () => _downloadPlan(readable: true),
+                icon: const Icon(Icons.description_outlined),
+                label: const Text('Download text plan'),
+              ),
             TextButton.icon(
               onPressed: _copyPlan,
               icon: const Icon(Icons.copy_outlined),
@@ -1415,8 +1674,8 @@ class _PlanHomeState extends State<PlanHome> {
           Text('Recovery copy', style: Theme.of(context).textTheme.titleMedium),
           const SizedBox(height: 8),
           const Text(
-            'The selected backup was kept during a restore. Download this '
-            'copy to keep it, or preview it before trying the restore again.',
+            'The selected backup was kept during a restore. You can preview '
+            'it before trying the restore again.',
           ),
           const SizedBox(height: 12),
           Wrap(
@@ -1427,10 +1686,11 @@ class _PlanHomeState extends State<PlanHome> {
                 onPressed: () => _restoreBackup(recovery: true),
                 child: const Text('Preview recovery copy'),
               ),
-              TextButton(
-                onPressed: () => _downloadStoredData(recovery: true),
-                child: const Text('Download recovery copy'),
-              ),
+              if (_canExportFiles)
+                TextButton(
+                  onPressed: () => _downloadStoredData(recovery: true),
+                  child: const Text('Download recovery copy'),
+                ),
             ],
           ),
         ],
@@ -1441,9 +1701,9 @@ class _PlanHomeState extends State<PlanHome> {
             style: Theme.of(context).textTheme.titleMedium,
           ),
           const SizedBox(height: 8),
-          const Text(
+          Text(
             'One earlier copy is kept when you upgrade or restore a plan. '
-            'It stays in this browser, so keep a downloaded backup as well.',
+            'It stays on $_storageLocation. Keep a separate backup as well.',
           ),
           const SizedBox(height: 12),
           Wrap(
@@ -1454,10 +1714,11 @@ class _PlanHomeState extends State<PlanHome> {
                 onPressed: () => _restoreBackup(previous: true),
                 child: const Text('Preview previous copy'),
               ),
-              TextButton(
-                onPressed: () => _downloadStoredData(previous: true),
-                child: const Text('Download previous copy'),
-              ),
+              if (_canExportFiles)
+                TextButton(
+                  onPressed: () => _downloadStoredData(previous: true),
+                  child: const Text('Download previous copy'),
+                ),
             ],
           ),
         ],
@@ -1466,7 +1727,7 @@ class _PlanHomeState extends State<PlanHome> {
   );
 
   Widget _content() {
-    final pages = [_overview, _meetings, _supplies, _group];
+    final pages = [_overview, _meetings, _map, _kit, _group];
     return Column(
       children: [
         if (_busy) const LinearProgressIndicator(minHeight: 3),
@@ -1474,13 +1735,18 @@ class _PlanHomeState extends State<PlanHome> {
           Container(
             width: double.infinity,
             padding: const EdgeInsets.all(16),
-            color: const Color(0xFFFFE9BD),
+            color: _colors.errorContainer,
             child: Wrap(
               spacing: 12,
               runSpacing: 8,
               crossAxisAlignment: WrapCrossAlignment.center,
               children: [
-                Text(_writeError!),
+                Text(
+                  _writeError!,
+                  style: _type.bodyMedium?.copyWith(
+                    color: _colors.onErrorContainer,
+                  ),
+                ),
                 TextButton(
                   onPressed: _busy ? null : _save,
                   child: const Text('Retry save'),
@@ -1496,11 +1762,14 @@ class _PlanHomeState extends State<PlanHome> {
           child: AbsorbPointer(
             absorbing: _busy,
             child: SingleChildScrollView(
+              key: ValueKey(_tab),
               child: Center(
                 child: ConstrainedBox(
                   constraints: const BoxConstraints(maxWidth: 850),
                   child: Padding(
-                    padding: const EdgeInsets.all(24),
+                    padding: EdgeInsets.all(
+                      MediaQuery.sizeOf(context).width < 600 ? 16 : 28,
+                    ),
                     child: pages[_tab](),
                   ),
                 ),
@@ -1510,13 +1779,37 @@ class _PlanHomeState extends State<PlanHome> {
         ),
         Container(
           width: double.infinity,
-          padding: const EdgeInsets.fromLTRB(24, 10, 24, 12),
-          color: Colors.white,
-          child: Text(
-            _saveStatus,
-            style: TextStyle(
-              fontSize: 12,
-              color: _dirty ? const Color(0xFF8D4E00) : const Color(0xFF45604F),
+          padding: const EdgeInsets.fromLTRB(16, 10, 16, 10),
+          decoration: BoxDecoration(
+            color: _colors.surfaceContainerLowest,
+            border: Border(top: BorderSide(color: _colors.outlineVariant)),
+          ),
+          child: Semantics(
+            liveRegion: true,
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Icon(
+                  _dirty
+                      ? Icons.warning_amber_rounded
+                      : _plan.savedAt == null
+                      ? Icons.info_outline
+                      : Icons.save_outlined,
+                  size: 18,
+                  color: _dirty ? _colors.tertiary : _colors.onSurfaceVariant,
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    _saveStatus,
+                    style: _type.labelMedium?.copyWith(
+                      color: _dirty
+                          ? _colors.tertiary
+                          : _colors.onSurfaceVariant,
+                    ),
+                  ),
+                ),
+              ],
             ),
           ),
         ),
@@ -1555,10 +1848,11 @@ class _PlanHomeState extends State<PlanHome> {
                         : () => _copy(_rawSavedData!, 'Stored data copied.'),
                     child: const Text('Copy stored data'),
                   ),
-                  TextButton(
-                    onPressed: _busy ? null : () => _downloadStoredData(),
-                    child: const Text('Download stored data'),
-                  ),
+                  if (_canExportFiles)
+                    TextButton(
+                      onPressed: _busy ? null : () => _downloadStoredData(),
+                      child: const Text('Download stored data'),
+                    ),
                   TextButton(
                     onPressed: _busy ? null : () => _restoreBackup(),
                     child: const Text('Restore a backup file'),
@@ -1573,12 +1867,13 @@ class _PlanHomeState extends State<PlanHome> {
                         : () => _restoreBackup(previous: true),
                     child: const Text('Preview previous copy'),
                   ),
-                  TextButton(
-                    onPressed: _busy
-                        ? null
-                        : () => _downloadStoredData(previous: true),
-                    child: const Text('Download previous copy'),
-                  ),
+                  if (_canExportFiles)
+                    TextButton(
+                      onPressed: _busy
+                          ? null
+                          : () => _downloadStoredData(previous: true),
+                      child: const Text('Download previous copy'),
+                    ),
                 ],
                 if (_hasRecovery) ...[
                   const Divider(height: 24),
@@ -1589,12 +1884,13 @@ class _PlanHomeState extends State<PlanHome> {
                         : () => _restoreBackup(recovery: true),
                     child: const Text('Preview recovery copy'),
                   ),
-                  TextButton(
-                    onPressed: _busy
-                        ? null
-                        : () => _downloadStoredData(recovery: true),
-                    child: const Text('Download recovery copy'),
-                  ),
+                  if (_canExportFiles)
+                    TextButton(
+                      onPressed: _busy
+                          ? null
+                          : () => _downloadStoredData(recovery: true),
+                      child: const Text('Download recovery copy'),
+                    ),
                 ],
                 if (_busy) const LinearProgressIndicator(),
               ],
@@ -1612,52 +1908,89 @@ class _PlanHomeState extends State<PlanHome> {
       final available = !_loading && _loadError == null;
       return Scaffold(
         appBar: AppBar(
-          backgroundColor: Colors.white,
-          title: const Text(
-            'Black Box',
-            style: TextStyle(fontWeight: FontWeight.w700),
+          toolbarHeight: 72,
+          titleSpacing: 16,
+          title: Row(
+            children: [
+              Container(
+                width: 38,
+                height: 38,
+                decoration: BoxDecoration(
+                  color: _colors.primary,
+                  borderRadius: BorderRadius.circular(_terminal ? 4 : 9),
+                ),
+                child: Icon(
+                  Icons.inventory_2_outlined,
+                  color: _colors.onPrimary,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  'BLACK BOX',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: _type.titleLarge?.copyWith(
+                    letterSpacing: _terminal ? 0 : 1.4,
+                  ),
+                ),
+              ),
+            ],
           ),
-          bottom: const PreferredSize(
-            preferredSize: Size.fromHeight(30),
-            child: Padding(
-              padding: EdgeInsets.fromLTRB(16, 0, 16, 12),
-              child: Text(
-                'Local prototype v0.2.2 · Not shared',
-                style: TextStyle(fontSize: 12),
+          actions: [
+            IconButton(
+              onPressed: _guidesOpen ? null : _openGuides,
+              tooltip: 'Offline guides',
+              icon: const Icon(Icons.menu_book_outlined),
+            ),
+            IconButton(
+              onPressed: _appearanceBusy ? null : _toggleBrightness,
+              tooltip: _light ? 'Switch to dark mode' : 'Switch to light mode',
+              icon: Icon(
+                _light ? Icons.dark_mode_outlined : Icons.light_mode_outlined,
               ),
             ),
-          ),
+            IconButton(
+              onPressed: _appearanceBusy ? null : _showAppearance,
+              tooltip: 'Appearance',
+              icon: const Icon(Icons.tune_rounded),
+            ),
+            const SizedBox(width: 8),
+          ],
         ),
-        body: _loading
-            ? const Center(child: CircularProgressIndicator())
-            : _loadError != null
-            ? _loadFailure()
-            : Row(
-                children: [
-                  if (wide)
-                    NavigationRail(
-                      extended: true,
-                      backgroundColor: Colors.white,
-                      selectedIndex: _tab,
-                      onDestinationSelected: (index) =>
-                          setState(() => _tab = index),
-                      destinations: List.generate(
-                        4,
-                        (index) => NavigationRailDestination(
-                          icon: Icon(_icons[index]),
-                          label: Text(_labels[index]),
+        body: SafeArea(
+          top: false,
+          bottom: wide || !available,
+          child: _loading
+              ? const Center(child: CircularProgressIndicator())
+              : _loadError != null
+              ? _loadFailure()
+              : Row(
+                  children: [
+                    if (wide)
+                      NavigationRail(
+                        extended: true,
+                        selectedIndex: _tab,
+                        onDestinationSelected: (index) =>
+                            setState(() => _tab = index),
+                        destinations: List.generate(
+                          _labels.length,
+                          (index) => NavigationRailDestination(
+                            icon: Icon(_icons[index]),
+                            label: Text(_labels[index]),
+                          ),
                         ),
                       ),
-                    ),
-                  Expanded(child: _content()),
-                ],
-              ),
+                    Expanded(child: _content()),
+                  ],
+                ),
+        ),
         bottomNavigationBar: !wide && available
             ? NavigationBar(
                 selectedIndex: _tab,
                 onDestinationSelected: (index) => setState(() => _tab = index),
                 destinations: List.generate(
-                  4,
+                  _labels.length,
                   (index) => NavigationDestination(
                     icon: Icon(_icons[index]),
                     label: _labels[index],

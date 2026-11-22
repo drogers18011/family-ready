@@ -148,7 +148,13 @@ class _MeetingMapPickerState extends State<MeetingMapPicker> {
 
   @override
   Widget build(BuildContext context) {
-    final colors = Theme.of(context).colorScheme;
+    final theme = Theme.of(context);
+    final colors = theme.colorScheme;
+    final mapButtonStyle = IconButton.styleFrom(
+      foregroundColor: colors.onSurface,
+      minimumSize: const Size(48, 48),
+      padding: const EdgeInsets.all(12),
+    );
     final selected = _selected;
     return Column(
       mainAxisSize: MainAxisSize.min,
@@ -177,6 +183,10 @@ class _MeetingMapPickerState extends State<MeetingMapPicker> {
                   ),
                 ),
                 TextButton(
+                  style: TextButton.styleFrom(
+                    foregroundColor: colors.onErrorContainer,
+                    minimumSize: const Size(48, 48),
+                  ),
                   onPressed: () => setState(() {
                     _tileError = false;
                     _tileRevision++;
@@ -201,7 +211,7 @@ class _MeetingMapPickerState extends State<MeetingMapPicker> {
                     initialZoom: selected == null ? 3.5 : 15,
                     minZoom: 2,
                     maxZoom: 18,
-                    backgroundColor: const Color(0xFFE6ECE7),
+                    backgroundColor: colors.surfaceContainerHighest,
                     interactionOptions: const InteractionOptions(
                       flags: InteractiveFlag.all & ~InteractiveFlag.rotate,
                     ),
@@ -229,12 +239,15 @@ class _MeetingMapPickerState extends State<MeetingMapPicker> {
                             alignment: Alignment.topCenter,
                             child: Semantics(
                               label: 'Selected meeting point',
-                              child: const Icon(
+                              child: Icon(
                                 Icons.location_pin,
-                                color: Color(0xFF285B48),
+                                color: colors.primary,
                                 size: 48,
                                 shadows: [
-                                  Shadow(color: Colors.white, blurRadius: 6),
+                                  Shadow(
+                                    color: colors.scrim.withValues(alpha: 0.85),
+                                    blurRadius: 4,
+                                  ),
                                 ],
                               ),
                             ),
@@ -247,24 +260,31 @@ class _MeetingMapPickerState extends State<MeetingMapPicker> {
                   top: 10,
                   right: 10,
                   child: Material(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(12),
+                    color: colors.surfaceContainerHigh,
+                    surfaceTintColor: Colors.transparent,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      side: BorderSide(color: colors.outlineVariant),
+                    ),
                     elevation: 2,
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         IconButton(
+                          style: mapButtonStyle,
                           onPressed: () => _zoom(1),
                           tooltip: 'Zoom in',
                           icon: const Icon(Icons.add),
                         ),
                         IconButton(
+                          style: mapButtonStyle,
                           onPressed: () => _zoom(-1),
                           tooltip: 'Zoom out',
                           icon: const Icon(Icons.remove),
                         ),
                         if (selected != null)
                           IconButton(
+                            style: mapButtonStyle,
                             onPressed: () {
                               if (_mapReady) {
                                 _mapController.move(
@@ -282,22 +302,32 @@ class _MeetingMapPickerState extends State<MeetingMapPicker> {
                 ),
                 Positioned(
                   bottom: 0,
+                  left: 0,
                   right: 0,
                   child: Material(
-                    color: Colors.white,
-                    child: InkWell(
-                      onTap: _openAttribution,
-                      child: const Padding(
-                        padding: EdgeInsets.symmetric(
-                          horizontal: 8,
-                          vertical: 7,
-                        ),
-                        child: Text(
-                          '© OpenStreetMap contributors',
-                          style: TextStyle(
-                            fontSize: 11,
-                            color: Color(0xFF1F513D),
-                            decoration: TextDecoration.underline,
+                    color: colors.surfaceContainerHigh,
+                    child: Semantics(
+                      link: true,
+                      child: InkWell(
+                        onTap: _openAttribution,
+                        child: ConstrainedBox(
+                          constraints: const BoxConstraints(minHeight: 48),
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 12,
+                              vertical: 10,
+                            ),
+                            child: Center(
+                              child: Text(
+                                '© OpenStreetMap contributors',
+                                textAlign: TextAlign.center,
+                                style: theme.textTheme.labelSmall!.copyWith(
+                                  color: colors.onSurface,
+                                  decoration: TextDecoration.underline,
+                                  decorationColor: colors.onSurface,
+                                ),
+                              ),
+                            ),
                           ),
                         ),
                       ),
@@ -314,7 +344,7 @@ class _MeetingMapPickerState extends State<MeetingMapPicker> {
               ? 'No pin selected yet.'
               : 'Selected: ${selected.latitude.toStringAsFixed(6)}, '
                     '${selected.longitude.toStringAsFixed(6)}',
-          style: const TextStyle(fontWeight: FontWeight.w600),
+          style: theme.textTheme.labelLarge,
         ),
         if (_outsideMapCoverage) ...[
           const SizedBox(height: 6),
@@ -324,39 +354,51 @@ class _MeetingMapPickerState extends State<MeetingMapPicker> {
           ),
         ],
         const SizedBox(height: 16),
-        Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Expanded(
-              child: TextField(
-                controller: _latitude,
-                keyboardType: const TextInputType.numberWithOptions(
-                  decimal: true,
-                  signed: true,
-                ),
-                decoration: const InputDecoration(
-                  labelText: 'Latitude',
-                  hintText: '39.500000',
-                ),
-                onSubmitted: (_) => _applyCoordinates(),
+        LayoutBuilder(
+          builder: (context, constraints) {
+            final latitudeField = TextField(
+              controller: _latitude,
+              keyboardType: const TextInputType.numberWithOptions(
+                decimal: true,
+                signed: true,
               ),
-            ),
-            const SizedBox(width: 10),
-            Expanded(
-              child: TextField(
-                controller: _longitude,
-                keyboardType: const TextInputType.numberWithOptions(
-                  decimal: true,
-                  signed: true,
-                ),
-                decoration: const InputDecoration(
-                  labelText: 'Longitude',
-                  hintText: '-98.350000',
-                ),
-                onSubmitted: (_) => _applyCoordinates(),
+              decoration: const InputDecoration(
+                labelText: 'Latitude',
+                hintText: '39.500000',
               ),
-            ),
-          ],
+              onSubmitted: (_) => _applyCoordinates(),
+            );
+            final longitudeField = TextField(
+              controller: _longitude,
+              keyboardType: const TextInputType.numberWithOptions(
+                decimal: true,
+                signed: true,
+              ),
+              decoration: const InputDecoration(
+                labelText: 'Longitude',
+                hintText: '-98.350000',
+              ),
+              onSubmitted: (_) => _applyCoordinates(),
+            );
+            if (constraints.maxWidth < 280) {
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  latitudeField,
+                  const SizedBox(height: 12),
+                  longitudeField,
+                ],
+              );
+            }
+            return Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Expanded(child: latitudeField),
+                const SizedBox(width: 10),
+                Expanded(child: longitudeField),
+              ],
+            );
+          },
         ),
         if (_coordinateError != null) ...[
           const SizedBox(height: 8),
@@ -366,17 +408,20 @@ class _MeetingMapPickerState extends State<MeetingMapPicker> {
         Align(
           alignment: Alignment.centerLeft,
           child: OutlinedButton.icon(
+            style: OutlinedButton.styleFrom(minimumSize: const Size(48, 48)),
             onPressed: _applyCoordinates,
             icon: const Icon(Icons.pin_drop_outlined),
             label: const Text('Use coordinates'),
           ),
         ),
         const SizedBox(height: 4),
-        const Text(
+        Text(
           'Typing an address elsewhere does not move this pin. '
           'Confirm the pin and written address describe the same place. '
           'Offline map downloads are not included in this prototype.',
-          style: TextStyle(fontSize: 12, color: Color(0xFF59655D)),
+          style: theme.textTheme.bodySmall!.copyWith(
+            color: colors.onSurfaceVariant,
+          ),
         ),
       ],
     );

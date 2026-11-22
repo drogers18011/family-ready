@@ -1,0 +1,530 @@
+BLACK BOX - NEXT FEATURE SPECIFICATION
+======================================
+Prepared for Dennis Rogers, November 20, 2026
+Updated with Dennis's decisions on November 22, 2026
+Baseline: v0.5.0+8 local Flutter prototype
+
+STATUS
+------
+This file records the requested product direction and proposed implementation
+rules. It is not a claim that the online service is running.
+
+IMPLEMENTED IN THE v0.5.0 SOURCE:
+- Field Terminal with remembered Light/Dark modes.
+- Home / Plan / Map / Kit / Group navigation.
+- A separate Map tab for the CURRENT local plan's primary and backup places.
+  Saved names appear on markers and in a selectable, wrapping location list.
+  Existing editors change place details or coordinates.
+- Existing local plan saving, browser backups, restore recovery, supplies,
+  assignments, and group roster behavior.
+- Kit includes a free personal packing list, separate from group supplies.
+  Personal items, quantities, notes, and packed check marks save locally.
+- Offline guides opens from Home or the top-bar guide button. Import personal
+  PDF, MP4, MOV, or M4V files, retain local byte copies, search/filter them,
+  rename their display titles, open them, or remove the app's saved copies.
+  The original imported files are not deleted by removing an app copy.
+
+The new native and browser interfaces have not been runtime-tested here.
+Compilation and real-device offline reopening/playback checks remain required.
+An installable iPhone/TestFlight build still depends on Apple signing setup.
+
+NOT IMPLEMENTED YET:
+Accounts, real membership invitations, multiple stored plans/groups, cloud
+sharing/sync, community forum or moderator accounts, online inbox,
+subscriptions, verified complete shared-plan offline packages, encrypted plan
+storage, cloud guide uploads/group sharing, downloaded maps, offline routing,
+and local-area information. No sample PDF manuals or videos are included.
+
+The map background still needs internet. Written locations and coordinates
+are part of the local plan. Named pins are not downloaded map imagery.
+
+
+1. REQUIREMENTS PROVIDED BY DENNIS
+----------------------------------
+1. The app is free to download, with a paid Premium subscription supporting
+   cloud storage, other operating costs, and a potential profit.
+2. People can create groups and add/invite other users.
+3. One person can belong to several groups and have several plans.
+4. A person can keep a private plan and also view other groups' shared plans.
+5. Sharing plan information is controlled by the user who has authority over
+   that plan; membership must not expose unrelated private plans.
+6. Authorized members can read the WHOLE plan and download it to their device
+   for offline use without a monthly subscription.
+7. Contributing to and editing shared plans requires a subscription.
+8. Online Community includes a forum.
+9. Online messaging is an inbox, with messages and replies. It does not need
+   an SMS-like or live-chat presentation.
+10. Map is a separate tab, with places identified by their saved names.
+11. Information about the surrounding area while online is a later goal.
+12. The selected visual direction remains Field Terminal, Light and Dark.
+13. Free users can post forum topics and replies.
+14. Free users cannot be moderators.
+15. Users can maintain a free personal packing list on the app, including
+    their own items and check marks, independently of the shared master plan.
+16. The app needs a PDF/video section where users import and store files on
+    their device for use as offline guides during a disaster.
+
+
+2. PROPOSED BUSINESS RULES - NOT ALL CONFIRMED
+---------------------------------------------
+The subscription should belong to one Black Box account and apply across
+that person's authorized plans and groups. A person should not need to buy
+a separate subscription for each group.
+
+Working paid feature: create cloud plans and contribute/edit shared plans.
+Working free feature: join an invitation, view every part of an authorized
+plan, download it, and read its downloaded version offline.
+
+CONFIRMED ON NOVEMBER 22:
+- Registered free users can post forum topics and replies, subject to the
+  same community rules and reasonable usage limits as other members.
+- Free users cannot moderate. A community Moderator requires both an active
+  Premium entitlement and an explicit assignment by an authorized administrator.
+  Buying Premium alone never grants moderation powers. The app operator's
+  administrative/support role is separate from the customer Moderator role.
+- A personal packing list is free. Personal items and local packed check marks
+  do not change a shared plan. Editing shared plan content or its shared packed
+  status still requires Premium and the owner's permission.
+- Users can import PDF/video guides and retain their local copies for offline
+  use. The local library in this prototype has no subscription check.
+
+DECISION STILL OPEN: May free users send inbox messages? Dennis confirmed free
+forum participation, but did not explicitly confirm free inbox sending.
+Recommendation remains ordinary free inbox participation for registered users,
+with reasonable usage limits. Do not treat that recommendation as confirmed.
+
+OTHER PROPOSALS TO DECIDE BEFORE BILLING:
+- Whether a free user may create/edit one private, device-only plan.
+- Monthly and annual prices, storage allowance, group/plan/member limits,
+  version-history retention, and inactive cloud-data retention.
+
+Do not promise unlimited media, maps, or cloud storage before measuring cost.
+Do not apply a paywall to existing prototype data during development.
+
+
+3. GROUPS, PLANS, PEOPLE, AND PERMISSIONS
+-----------------------------------------
+These are separate things:
+- Account: a signed-in Black Box user.
+- Group: an invitation-based collection of accounts.
+- Plan: an independently owned set of instructions, places, people, supplies,
+  assignments, and supported attachments.
+- Person in a plan: someone named in the plan, who may not have an account.
+  A child, relative, or other named participant is not automatically a user
+  with permission to sign in or access the plan.
+- Plan grant: permission for an account or selected group to read a plan,
+  plus explicit Editor permission where the owner allows it.
+- Subscription entitlement: verified permission to use paid capabilities.
+- Community role: a scoped Moderator assignment or the separate operator
+  administration role. Neither Premium nor a group invitation grants it.
+
+Example:
+- Rogers family group: Home evacuation plan and storm shelter plan.
+- Hunting group: Hunting-camp plan.
+- Extended family group: Interstate meeting plan shared with selected members.
+- Dennis alone: a private personal plan, not automatically shared anywhere.
+
+A plan can be shared with more than one group while retaining one plan ID
+and one current published revision. Copying a plan is a separate action:
+the copy gets a new ID and does not silently follow later changes.
+
+RECOMMENDED INITIAL PERMISSION RULES
+- Plans begin private.
+- Inviting a person to a group does not share every private plan owned by
+  other members.
+- Share a named plan with selected people or a selected group explicitly.
+  If sharing with an entire group, explain whether future members are included.
+- Newly invited readers start as Viewers.
+- The plan owner chooses Editors. Group administration and plan ownership
+  are separate; administering a group does not expose someone's private plan.
+- Permission to edit does not automatically include permission to change
+  the sharing list or transfer ownership.
+- Buying Premium never upgrades a Viewer grant into an Editor grant.
+
+Effective shared-plan write rule:
+  signed in + current plan edit permission + active paid entitlement
+  + permission for that specific operation + valid base revision
+
+The server must enforce the rule. Hiding an Edit button is only a UI choice.
+Backups must never grant account membership, sharing permission, or paid status.
+
+FREE VERSUS PREMIUM
+- Free authorized Viewer: read and download the complete plan; receive newer
+  published revisions while still authorized; no shared content edits.
+- Premium Viewer: the same read access, but still cannot edit that plan until
+  its owner grants Editor permission.
+- Premium Editor: change content within the granted plan scope.
+- Owner with expired Premium: keep reading and downloading, and keep access
+  to privacy/security actions such as removing access or deleting the account.
+  Content editing stops unless paid entitlement is active.
+- Another authorized Premium Editor may keep contributing even if the owner's
+  subscription expires. One person's renewal must not disable family reading.
+- All users: create/edit their personal packing list and mark their own items
+  packed without Premium. Those actions do not update group supplies.
+- Free community participant: create topics/replies, report content, and block
+  users; no moderation powers.
+- Premium community participant: the same posting rights; no moderation powers
+  unless an authorized administrator explicitly assigns the Moderator role.
+- Assigned Moderator: moderation operations require both the current assignment
+  and current Premium entitlement. Check both on the server. Losing either
+  stops those operations; operator administration remains a separate role.
+
+INVITATIONS
+Use authenticated acceptance of a private, expiring invite. Do not reveal plan
+contents in an invite URL before acceptance. Recheck the inviter's authority
+when it is accepted. Store invitation secrets safely and make revocation work.
+Do not send invitations merely because someone typed a name in the local roster.
+
+
+4. COMPLETE OFFLINE PLAN DOWNLOADS
+-----------------------------------
+The goal is an explicit Download plan action, not reliance on data that happened
+to appear in an online screen.
+
+A plan package should identify:
+- Plan ID, published revision, download time, and device/account ownership.
+- Every plan instruction, named location, coordinate, and permitted contact.
+- Supply quantities, assignments, and shared status included in that revision.
+- All attachments promised as part of the selected package.
+- A manifest of required files, sizes, and integrity checks.
+
+Download into temporary storage, verify completeness, then replace the current
+offline package atomically. Keep the last complete package if an update stops.
+Do not label a partly downloaded plan as ready.
+
+Reading a downloaded plan should not require a live login, subscription check,
+or cloud response each time the app opens. Native local access can use the
+phone's appropriate local protection. An expired network session should not
+make the emergency copy inaccessible.
+
+Show the saved revision and last successful download time. Offline, the app
+cannot know whether another person has published a newer version.
+
+DISTINGUISH THREE DOWNLOAD STATES
+1. Plan text, locations, supplies, contacts, and supported files.
+2. Offline map imagery/region data.
+3. Offline road/trail routing data and its routing engine.
+
+The first does not provide the second or third. A truthful intermediate label
+is "Plan downloaded; maps not downloaded." A complete offline-map promise
+requires licensed map packages and separate device tests.
+
+SUBSCRIPTION EXPIRY
+Stopping payment must not erase or hide downloaded plans. Renewal cancellation
+and the end of the paid term are different states. Preserve existing drafts;
+do not discard a user's work because a purchase check failed.
+
+REMOVING A MEMBER
+Removing access stops future server reads, downloads, updates, and writes.
+An offline phone cannot receive that revocation until it reconnects, and an
+exported file or screenshot cannot reliably be recalled. Sharing UI must say
+that members can keep previously downloaded copies. Avoid promising remotely
+revocable offline copies.
+
+SHARED EDITING WHILE OFFLINE
+The first shared-service milestone can require internet to publish edits.
+Later, store offline changes as explicit drafts/outbox operations. They must
+be labeled "Not yet shared" and remain distinct from the last published plan.
+The server rechecks membership, edit permission, entitlement, and version
+when the device reconnects. Any offline drafting grace is a policy decision,
+not a substitute for server authorization.
+
+CONFLICTS
+Use stable IDs, server revisions, and unique operation IDs. Two people changing
+the same meeting place must receive a conflict, not a silent overwrite. Treat
+latitude and longitude together as one value. Retrying an operation must not
+duplicate a supply or message. Old drafts must not resurrect deleted content.
+Devices returning after a long absence should fetch a fresh complete snapshot
+before attempting to reconcile their preserved drafts.
+
+
+4A. PERSONAL PDF AND VIDEO GUIDES
+---------------------------------
+CURRENT LOCAL LIBRARY
+- Import PDF documents and MP4, MOV, or M4V video files through the device's
+  file picker. Copy actual file bytes into Black Box's local storage; keeping
+  only a web link, file-picker reference, or cloud placeholder is insufficient.
+- The native app uses a dedicated folder in its Documents directory, with a
+  prototype limit of 1 GiB per file. The browser uses IndexedDB, with a limit
+  of 100 MiB per file. Available device/browser space can impose smaller limits.
+- Keep imported originals. Removing a guide from Black Box removes the app's
+  copy and metadata, not the original source file.
+- A source stored in iCloud Drive or another online provider may first need
+  to download while connected. Only a completed local copy is available later.
+- Import failures and missing/unreadable files must be visible and must not
+  be presented as ready for use. A failed import must not damage existing guides.
+- Open saved copies through the operating system's viewer or the browser.
+  PDF viewing and video playback depend on the available viewer, the file's
+  actual encoding, and the device. An accepted extension alone does not prove
+  that a particular video will play. Test each guide on the intended device.
+- This feature does not upload to a Black Box cloud service or share guides
+  with other groups. Operating-system backup may include the native Documents
+  folder according to the device's backup settings.
+- No PDF manuals, videos, licensed guide collection, or emergency instructions
+  are bundled with this update. Users supply their own files.
+
+OFFLINE VERIFICATION AND BACKUPS
+Browser storage is evictable and can be cleared. The Windows development
+preview still needs its local launcher/server after restart; storing files in
+IndexedDB does not make the whole development app independently launchable
+offline. Native app installation, offline restart, PDF opening, video playback,
+and low-storage behavior require real-device tests; they are not verified here.
+
+Existing group JSON backups exclude guide media and the personal packing list.
+Keep the original guide files separately. Use Copy list text for a readable
+copy of personal packing items. Clearing app/browser storage or deleting the
+app can remove these local items. Native device backup behavior is separate
+from Black Box's existing JSON export.
+
+FUTURE SHARED GUIDES
+An authorized Premium Editor should be able to upload guide files into a
+shared plan. An invited free reader must be able to download the whole plan,
+including its supported guide files, and keep using completed local copies
+without a monthly subscription. Group visibility, per-file authorization,
+storage/bandwidth quotas, file manifests and integrity verification, interrupted
+download recovery, and upload/distribution rights still need implementation.
+The current personal guide library does not implement that shared-cloud flow.
+
+4B. PERSONAL PACKING LIST
+--------------------------
+The current list is private to the local app/browser storage; it is not tied
+to an authenticated account because accounts do not exist in this prototype.
+It supports items, quantities, notes, packed states, counts, and simple filters.
+Its separate save key leaves the existing group plan and backup format intact.
+Saving failures must show the working list as unsaved and allow retry/copy.
+The current app session retains failed drafts across tab changes, but closing
+the app before a successful save can lose that draft. Corrupt stored records
+must remain available for copying and must not be replaced with an empty list.
+
+
+5. COMMUNITY AND INBOX
+-----------------------
+COMMUNITY: an online forum with categories, topics, replies, search, and
+moderation. Suggested first categories are planning, equipment, outdoor skills,
+and local preparation. A private group discussion and a public community post
+are different audiences; the app must make the audience visible before posting.
+Private plans, supply caches, contact details, and coordinates are not published
+to the forum automatically.
+
+Free posting and replying are confirmed. Free moderation is not allowed.
+Moderator operations use an explicit administrator-granted role plus active
+Premium, enforced on the server for every moderation action. A paid account
+cannot appoint itself or gain access to another group's private information.
+Operator administration is separate. None of these server roles is implemented
+in the local prototype.
+
+INBOX: durable messages with sender, recipient, subject, body, time, and reply
+thread. Useful folders are Inbox, Sent, Drafts, and Archive. Live typing indicators
+or presence are unnecessary. Sending/receiving new messages needs internet.
+An optional offline draft/queue must say Draft or Queued until the server
+accepts it; a notification is not proof that the recipient read a message.
+
+Downloaded messages may be readable offline. A plan download should not silently
+download an unlimited forum archive. Attachments, messaging access rules, and
+retention need explicit limits.
+Free inbox sending remains an open business decision, not a confirmed rule.
+
+Apple's user-content guidance calls for filtering, reports with timely response,
+blocking abusive users, and reachable contact information. Build these into
+the forum/inbox release. Reporting, blocking, and account privacy controls
+remain available without Premium. See reference A1.
+
+
+6. MAP AND FUTURE AREA INFORMATION
+----------------------------------
+NOW: current local plan, named primary/backup markers, list, selection, place
+details, and existing editing/pin selection. Map imagery remains online.
+
+TARGET: map only locations from plans the current account is authorized to
+see, plus its intentionally retained offline copies according to the disclosed
+policy. Filter by plan/group and identify the owning plan in the details.
+If two places have the same name, distinguish them with plan/group and role.
+If two places share a coordinate, keep both individually selectable in the list.
+A plan shared with two groups should not produce unexplained duplicate pins.
+
+Area weather, hazards, road information, and local services are a later layer.
+Identify source and update time, and show when information is old or unavailable.
+Do not imply that a saved point proves a route or destination is currently safe.
+Live member tracking has not been requested and is not part of this scope.
+
+FUTURE NAVIGATION PROPOSAL
+Plans / Map / Groups / Community / Inbox.
+The Plans screen becomes the home/library. Kits and assignments live within
+each plan. Current v0.5.0 navigation remains Home / Plan / Map / Kit / Group;
+personal packing items have their own Kit subview, and Offline guides opens
+from Home or the top bar. Future navigation must keep personal guides easy
+to reach as the online and multi-plan screens are implemented.
+
+
+7. TECHNICAL FOUNDATION AND BILLING
+------------------------------------
+Recommended direction, not a deployed service:
+- Keep Flutter for the app.
+- Move primary multi-plan data into a transactional native local database.
+  Keep display preferences separate. Retain the old saved record and backups
+  until migration is verified.
+- Use an account service and a relational cloud database. Supabase Auth,
+  Postgres, Row Level Security, and server mutation functions are a proposed
+  fit for the account/group/plan relationships. See S1.
+- Use explicit versioned downloads and upload operations for offline behavior.
+  Selecting a cloud SDK does not automatically make a complete offline package.
+- Keep privileged service credentials on the server; never embed them in the
+  app or repository. Enforce permissions for database rows and stored files.
+- Use verified purchase/renewal state for entitlement; never trust an editable
+  client flag such as isSubscribed. Start with sandbox purchases before charging.
+- Protect local and server data and implement recovery; the current prototype
+  must not be described as an encrypted or crash-certified information vault.
+
+The recommended first iPhone purchase route is an auto-renewing in-app
+subscription, with clear ongoing value, price, period, and restoration.
+Handle cancellation, expiry, billing grace, refunds, and duplicate/missed
+server events. Alternative storefront payment arrangements are outside this
+initial implementation. See A1 and A3.
+
+Apps with accounts need an in-app account-deletion path. Define how authored
+posts, private plans, and personal information in shared plans are handled;
+ownership transfer alone does not settle personal-data deletion. Deleting an
+account and canceling Apple billing are separate actions. See A2.
+
+There is no connected cloud project, account system, or billing setup in this
+archive. No messages, invites, purchases, or deployments were sent/performed.
+
+
+8. COST AND PROFIT MODEL
+--------------------------
+One paid organizer may support many free readers. Budget for all users' storage
+and downloads, not only the subscriber's own traffic.
+
+Monthly operating contribution =
+  subscription receipts after store fees/refunds/taxes
+  minus cloud, storage, bandwidth, maps, messaging/email, moderation,
+  support, and other operating costs.
+
+This is a model to measure, not a forecast or guaranteed profit.
+Important decisions before choosing prices:
+- Typical plans and group size per paying user.
+- Total and per-file attachment limits.
+- Map download rights, file sizes, and provider charges.
+- Revision retention and inactive-account/plan retention.
+- Free-reader traffic and repeated downloads.
+- Public-community moderation and support workload.
+
+Start communication with text, measure actual use, and set published allowances.
+The paid value should be ongoing planning, collaboration, and cloud service;
+reading an existing emergency copy should not be interrupted by a paywall.
+
+
+9. IMPLEMENTATION ORDER
+--------------------------
+Completed source increments: named-location Map tab in v0.4.0, then a free
+personal packing list and local PDF/video guide library in v0.5.0+8. Compile,
+browser interaction, and native offline reopening/playback checks remain required.
+
+Next foundation:
+1. Durable local plan library with migration and multiple plan IDs.
+2. Accounts, invitation acceptance, private groups, and per-plan permissions.
+3. One complete end-to-end flow: owner shares a plan; a free invited reader
+   downloads it including its supported guides; the reader cold-starts the
+   phone offline and can read the plan and open/play the downloaded files.
+4. Authorized editing and conflict-safe synchronization, using development
+   entitlements while billing is still being integrated.
+5. Verified subscriptions with preserved read access after expiry.
+6. Inbox and forum with moderation, message-state, retention, and audience rules.
+7. Licensed offline maps/routing, then online area information. Plan-data,
+   map, and routing download milestones must be tracked separately.
+
+The public community can follow private group sharing. Its moderation and
+discovery requirements should not delay proving that a free family member can
+receive and retain a complete shared plan.
+
+
+10. RELEASE ACCEPTANCE CHECKS
+-------------------------------
+- Existing local plans and backups survive migration with all fields intact.
+- A new free invitee reads/downloads every authorized part without purchasing.
+- A Premium Viewer cannot edit via the UI or by directly calling the API.
+- A subscriber cannot see a different group's private plan by changing an ID.
+- Joining one group does not reveal unshared plans from another group.
+- A downloaded plan opens after a cold restart with Wi-Fi/cellular off.
+- Expired login tokens and subscription expiry do not hide downloaded content.
+- Interrupted or corrupt updates leave the previous complete package usable.
+- Permission removal stops future server access; UI explains retained copies.
+- Conflicting edits preserve both drafts and require deliberate resolution.
+- Repeated upload requests do not duplicate data or send a message twice.
+- An account switch does not expose the previous account's offline plans.
+- An imported backup cannot forge membership or a paid entitlement.
+- Report, block, and account deletion work for free and expired accounts.
+- Free accounts can post/reply but cannot invoke moderator operations.
+- Premium alone cannot grant moderation; both an explicit assignment and
+  current entitlement are required, with separate operator administration.
+- A free user's personal checklist can be edited without altering the shared
+  plan's items or packed statuses; group backups remain independent.
+- Personal checklist writes remain ordered across tab changes. Failed saves
+  preserve the in-session draft, and corrupt stored data is not overwritten.
+- A completed PDF/video import contains a local byte copy and survives a
+  native app restart without needing the original picker/cloud location.
+- Missing, corrupt, unsupported, or incomplete files do not show a false
+  ready status; interrupted imports leave existing guides intact.
+- Each test phone opens a saved PDF and plays a saved supported video after
+  a cold restart with Wi-Fi/cellular disabled.
+- Removing a local guide leaves its original source file untouched.
+- Browser eviction/storage limits and the development launcher's offline
+  restart limitation are disclosed; native device behavior is tested separately.
+- Shared-plan downloads include permitted guide files for free readers;
+  the manifest, quotas, and rights rules work before that cloud flow ships.
+- Plan, map, and routing readiness are separate and accurately labeled.
+- Current-plan Map shows names in both Light/Dark modes, handles no/one/two
+  pins, duplicate coordinates, long names, and map tile failure.
+
+
+11. COMPETITOR RESEARCH
+-------------------------
+Primary product websites and developer-authored listings were reviewed on
+November 20, 2026 local time. These are published claims, not independent tests.
+
+PrepperApp: shared household emergency planning, invitations, offline data,
+mapped places, and an in-app/web community forum. Its forum allows posting
+with a free account. This is a close overall feature comparison. [C1, C2]
+
+Firefly: shared family preparedness information and offline tools. Its listing
+keeps saved information readable after a trial and charges a one-time unlock
+to continue adding/editing. The free-reader/paid-editor concept is therefore
+already present in this market, with a different architecture/payment model. [C3]
+
+Warrior Gardeners: multiple preparedness locations, inventories, scenarios,
+team planning, and sharing choices for individual plans/resources. [C4]
+
+ReadyPlan: scenario-based preparedness plans, family/team sharing, checklists,
+and saved offline plan access. [C5]
+
+SHTF: Life Prep: private groups, a community library, plans available offline,
+and real-time chat/DM communication. [C6]
+
+Our Plan Is: shared household plans and offline access, with online weather and
+hazard information for saved places. [C7]
+
+Conclusion: similar apps exist, including close combinations. Black Box can
+compete through clear multi-group/multi-plan permissions, complete offline
+copies for free readers, a useful paid-editor service, and straightforward
+forum/inbox coordination. These are positioning goals, not proof of novelty
+or market demand. An unmentioned feature on a marketing page is not proof that
+a competitor lacks it.
+
+PRIMARY REFERENCES
+--------------------
+C1 https://prepperapp.net/faq
+C2 https://prepperapp.net/forum
+C3 https://apps.apple.com/us/app/firefly-family-emergency-plan/id6829938732
+C4 https://www.warriorgardeners.com/
+C5 https://apps.apple.com/us/app/readyplan-crisis-planner/id6741729714
+C6 https://theshtfapp.com/
+C7 https://apps.apple.com/us/app/our-plan-is/id6762509719
+A1 https://developer.apple.com/app-store/review/guidelines/
+A2 https://developer.apple.com/help/app-review/guideline-reference/5-1-1-account-deletion
+A3 https://developer.apple.com/app-store/subscriptions/
+S1 https://supabase.com/docs/guides/database/postgres/row-level-security
+
+Map implementation API references:
+https://pub.dev/documentation/flutter_map/latest/flutter_map/CameraFit/CameraFit.coordinates.html
+https://pub.dev/documentation/flutter_map/latest/flutter_map/MapController/fitCamera.html
+https://pub.dev/documentation/flutter_map/latest/flutter_map/Marker/alignment.html

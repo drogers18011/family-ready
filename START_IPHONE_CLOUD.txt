@@ -1,6 +1,6 @@
 BLACK BOX - IPHONE BUILDS FROM WINDOWS
 ====================================
-Prepared for Dennis Rogers, November 20, 2026
+Updated for Dennis Rogers, November 22, 2026
 Test phone: iPhone 16 Pro Max. Development computer: Windows.
 
 RECOMMENDED PATH
@@ -9,32 +9,66 @@ Keep developing on Windows. Put the project in a private GitHub repository.
 Codemagic checks out the code and builds it on a hosted Mac. Later, Apple's
 TestFlight installs the signed beta on your iPhone.
 
-CURRENT STATUS: You reported a green unsigned iPhone compile check for v0.2.1.
-Your Apple Developer enrollment is now pending. Apple signing and TestFlight
+CURRENT STATUS: You reported a green unsigned iPhone compile check for v0.2.2.
+Your Apple Developer enrollment was last reported pending. Apple signing and TestFlight
 come next after membership activation.
 
-The app is version 0.2.2 and is now named Black Box. The successful Material UI
-migration is included. Offline map downloads and two-marker offline routing
-are the next functional milestone; monetization is a later product goal.
+This package is version 0.5.0+8 and uses Field Terminal. Dark is the default,
+with green text and controls on black. Light uses a pale off-white background
+with forest-green text and controls. Switch directly with the top-right
+sun/moon button, or select Light or Dark in Appearance. The choice is remembered
+on the same browser or device when its preference save succeeds. An older
+Flight Deck preference opens Field Terminal in Dark mode after this update.
+The five tabs are Home, Plan, Map, Kit, and Group. Map shows the
+current local plan's primary and backup places by their saved names, with
+selectable markers, local details, and the existing edit/place-pin controls.
+Its map imagery requires internet. The app still holds one local plan.
+
+NEW: Kit > My pack provides a separate free personal packing checklist.
+The Home card and top-bar book button open Offline guides. Import PDF, MP4,
+MOV, or M4V files, then open their saved copies, search/filter, rename, or
+remove them. Native files are copied into app Documents storage before they
+are listed as saved (1 GiB per file). Browser preview uses IndexedDB with a
+100 MiB per-file limit. No guide content is bundled or uploaded to Black Box
+cloud storage. Guide files and personal pack items are not in group JSON
+backups; keep original files and use Copy list text for the personal list.
+
+The successful Material UI migration and Black Box rename remain included.
+This guide/checklist update has not yet been Flutter-compiled here. Upload this version and
+run a new ios-compile-check; the previous green result covers v0.2.2. Offline
+map downloads and two-marker offline routing remain future work; monetization
+is a later product goal. NEXT_FEATURES.txt records the planned account groups,
+multiple plans, sharing, forum, asynchronous inbox, and subscriptions. None of
+those online/account features is implemented in this local prototype.
 
 UPDATING THE EXISTING CODEMAGIC PROJECT
 --------------------------------------
 Extract black_box_starter.zip and upload its contents to the existing
-family-ready repository, preserving lib, scripts, test, and web as folders at
-the repository root. Commit the replacements to the selected build branch.
-The updated scripts/configure_ios.py sets the iPhone display name to Black Box.
-The updated web/index.html and lib files apply the browser and in-app name.
+family-ready repository, preserving assets, lib, scripts, test, and web as
+folders at the repository root beside pubspec.yaml and codemagic.yaml. Include
+ALL files in lib and test, the updated pubspec.yaml/scripts, and every file in
+assets/fonts, preserving their folder hierarchy. The guide platform files
+and both new test scripts must be included. Keep NEXT_FEATURES.txt with
+the top-level documents. Do not upload only main.dart, the ZIP, or an extra
+enclosing folder. Commit the replacements to the selected build branch.
+scripts/configure_ios.py still sets the iPhone display name to Black Box.
+web/index.html and the lib files keep the browser and in-app name consistent.
 
 Keep the existing repository, package, workflow, and integration identifiers.
 They retain their original family_ready/family-ready names for continuity.
 The proposed bundle identifier is still com.dennisrogers.familyready; it has
-not been registered or reserved. The visible product name is Black Box.
+not been registered or reserved. The visible product name is Black Box. The
+saved-plan schema, existing storage keys, and browser origin are unchanged.
 
-While enrollment is pending, you can preview the renamed app in the browser
+While enrollment is pending, you can preview the redesigned app in the browser
 or run ios-compile-check. Begin the signing steps below after Apple confirms
 active membership. If you have already paid and receive no confirmation within
 24 hours of purchase, Apple advises contacting Developer Support with your
 Enrollment ID. This does not guarantee activation within 24 hours.
+
+If your phone, repository, and Codemagic connection are already set up, keep
+them. Use this update section, then continue with Step 4; do not create another
+repository or app connection just for the design update.
 
 WHAT IS INCLUDED
 -----------------
@@ -75,11 +109,28 @@ STEP 2 - UPLOAD THE CLEAN PROJECT TO A PRIVATE GITHUB REPOSITORY
 3. Fully extract this project ZIP into a new Windows folder.
 4. On the new GitHub repository page, choose upload existing files.
 5. Drag the CONTENTS of the extracted folder into the upload area, including
-   lib, scripts, test, web, and the top-level files. Do not upload the ZIP or
-   an extra enclosing folder.
+   assets, lib, scripts, test, web, and the top-level files. Keep assets/fonts
+   and all lib files, including black_box_theme.dart and plan_map.dart, in
+   their existing folders. Do not upload the ZIP or an extra enclosing folder.
 6. Commit the upload. Confirm these appear at the repository's top level:
      pubspec.yaml
      codemagic.yaml
+     NEXT_FEATURES.txt
+   Also confirm these paths are present, with the same folder hierarchy:
+     lib/black_box_theme.dart
+     lib/plan_map.dart
+     lib/guide_library.dart and all guide_*.dart files
+     lib/personal_packlist.dart and lib/personal_packlist_models.dart
+     test/personal_packlist_check.dart
+     test/guide_store_check.dart
+     assets/fonts/Barlow-Regular.ttf
+     assets/fonts/Barlow-SemiBold.ttf
+     assets/fonts/BarlowCondensed-SemiBold.ttf
+     assets/fonts/IBMPlexMono-Regular.ttf
+     assets/fonts/IBMPlexMono-Medium.ttf
+     assets/fonts/Barlow-OFL.txt
+     assets/fonts/BarlowCondensed-OFL.txt
+     assets/fonts/IBMPlexMono-OFL.txt
 
 Upload the clean project folder. Personal plan backups and Apple signing keys
 are not source files. The repository will not automatically contain the plan
@@ -192,27 +243,111 @@ TestFlight builds expire after 90 days; they are temporary development builds.
 
 FIRST PHONE CHECK
 ------------------
-Check the overview, meeting places, supplies, and group screens. Edit sample
-details, close the app completely, reopen it, and check local saving. Try the
-online map while connected and a sample JSON import through the Files picker.
+Check Home, Plan, Map, Kit, and Group. Use the top-right sun/moon button to try
+Field Terminal in Light and Dark, then check the same options in Appearance.
+Edit sample details, choose a mode, close the app completely, reopen it, and
+check the saved plan and appearance.
+Give the primary and backup locations names and pins, then check their labels
+in Map. Select each marker, review its details, and try the existing edit and
+place-pin controls. Map imagery needs internet. Also try a sample JSON import
+through the Files picker. Check text, controls, and navigation on the phone.
+
+PERSONAL PACK CHECK
+1. Open Kit > My pack. Add an item, quantity, and note; mark it packed.
+2. Switch tabs and reopen it. Close/restart the app and confirm the saved list.
+3. Confirm the Shared kit did not change. Try Copy list text and keep a copy.
+
+GUIDE FILE AND OFFLINE CHECK
+1. Open guides from Home or the top-bar book button.
+2. Import a small PDF and a short video from Files. If a video is only in
+   Photos, first use Share > Save to Files. No Photos-library picker is included.
+3. A cloud-only file needs a connection for the initial download. Wait until
+   Black Box lists its own saved copy; a link is not an offline file.
+4. Open the PDF and video. Check multiple PDF pages and video seeking/audio.
+   A format/container extension does not guarantee that every codec will play.
+5. Close Black Box completely. Disable Wi-Fi and cellular, reopen the app, and
+   repeat those checks from its saved guides. This remains unverified here.
+6. Try rename/search and remove a test copy; confirm the source original remains.
+
+Imported guide bytes use persistent app Documents storage, not temporary
+picker/cache paths. App deletion/storage clearing can remove the copies;
+operating-system backups may include them. Keep originals separately.
+File size/header checks detect some incomplete or unsuitable files but do
+not prove full PDF/video decoding. Browser IndexedDB can be cleared/evicted,
+and the browser preview requires its running launcher to reopen. Its opening
+flow uses an extra Open saved file button to open a browser tab.
 
 The phone has separate local storage; it does not share Chrome's saved plan.
-JSON/text EXPORT currently supports browser and desktop. Native mobile sharing
-is a later change, so keep the separate backup downloaded from your browser.
+JSON/text file EXPORT currently supports browser and desktop. Native mobile
+file export/sharing is not implemented. The iPhone UI provides Copy plan text
+and Restore backup without unsupported download buttons. Text copies are
+readable copies, not JSON restore files, so keep the separate JSON backup
+downloaded from your browser.
 
 This initial native build does not contain offline maps or road routing yet.
-Next we will download map and routing data, select start/destination markers,
-restart with connectivity disabled, and calculate a NEW road route on the
-phone. That is the acceptance test for the feature you requested.
+Future offline routing needs downloaded map and routing data, start/destination
+markers, a restart with connectivity disabled, and calculation of a NEW road
+route on the phone. The new Map tab does not implement that feature.
+
+The future forum allows free posts/replies but no free moderator role.
+Premium plus explicit administrator assignment is required for moderators;
+a subscription alone grants no moderator powers. Operator administration is
+separate. Free inbox sending remains an unconfirmed recommendation.
+
+The Group tab remains a local roster. Accounts, invited users, multiple groups
+and plans, cloud sharing, an online forum, an asynchronous inbox, and paid
+subscriptions are future requirements documented in NEXT_FEATURES.txt. The
+planned inbox is not real-time chat or SMS. There is no active payment feature.
+
+The Black Box name is a flight-recorder metaphor, not a certification of
+physical ruggedness or data security. App-level encrypted storage is not
+implemented. A go-bag release still requires durable plan/checklist storage, suitable offline
+map/routing data, and real restart and storage checks on the phone. Bundled
+fonts do not add offline maps.
 
 VERIFICATION AND NEXT DEVELOPMENT
 ---------------------------------
-The configuration/scripts have source review and local syntax/fixture checks.
-You reported a green ios-compile-check run for v0.2.1. This verifies the earlier
-Material migration through the configured analysis, data checks, and unsigned
-iPhone compilation. The v0.2.2 name update has source-scope, syntax, and format
-checks; its resulting display name needs checking in the next build. No signed
-IPA, phone installation, or TestFlight upload has been completed yet.
+The existing configuration/scripts have source review and local syntax/fixture
+checks. You reported a green ios-compile-check run for v0.2.2. That verifies
+the Material migration and Black Box rename through the configured analysis,
+data checks, and unsigned iPhone compilation.
+
+Version 0.3.0+5 passed standalone Dart formatting and source review during
+preparation. Its existing 62 model/migration/backup/validation checks and all
+six restore-failure scenarios passed with standalone Dart. You have not
+reported a v0.3.0 Flutter build result.
+
+For v0.3.1+6, standalone Dart formatting of lib/main.dart and
+lib/black_box_theme.dart passed with no changes. A focused source review
+checked the default mode, older-preference handling, shared appearance
+callback, direct toggle, and retention of the plan and selected tab. The
+Light palette received source review and numerical contrast checks for
+selected text/control combinations.
+
+For v0.4.0+7, standalone Dart formatting passed for main.dart and plan_map.dart.
+A focused source review checked Map navigation, location selection, and reuse
+of the existing edit/save callbacks. Runtime layout, native builds, and device
+interaction remain unverified.
+
+The existing group model and storage files are unchanged, so the earlier 62-check and
+six-scenario results are carried forward; those checks have not been rerun
+for this update. No widget or native UI tests were run.
+
+For v0.5.0+8, 27 standalone checklist model/store checks and 38 native guide
+file-storage checks passed. Guide tests use real temporary files and injected
+paths/openers. They cover cold reopen, copy failures, truncated input,
+malformed metadata, safe rename/remove, and queued operations. These tests do
+not run the iOS plugins, browser IndexedDB, PDF/video viewers, or widgets.
+scripts/check_ios.sh now runs both new test scripts after existing checks.
+Standalone Dart formatting passed for all 22 Dart source/test files.
+Source review checked navigation, storage boundaries, viewer handoff, browser
+transaction completion, and local-file status wording. The updated build
+check script passed shell syntax validation.
+
+This guide/checklist update has not been Flutter-compiled here. Device rendering,
+interaction, and appearance persistence across real restarts remain unverified.
+Run a new ios-compile-check for this version. No signed IPA, phone installation,
+or TestFlight upload has been completed yet.
 
 Earlier automatic approval review in the preparation environment rejected
 local Flutter startup after an unexpected cloud metadata connection. That
@@ -228,6 +363,9 @@ PRIMARY REFERENCES
 Flutter iOS: https://docs.flutter.dev/platform-integration/ios/setup
 Material migration: https://docs.flutter.dev/release/breaking-changes/material-ui-and-cupertino-ui
 Material package: https://pub.dev/packages/material_ui/versions/1.11.1
+Guide file paths: https://pub.dev/packages/path_provider
+Guide native preview: https://pub.dev/packages/open_filex
+Browser file storage: https://pub.dev/packages/web
 Codemagic pricing: https://docs.codemagic.io/billing/pricing/
 GitHub Free: https://docs.github.com/en/get-started/learning-about-github/githubs-plans
 Add repository: https://docs.codemagic.io/getting-started/adding-apps/

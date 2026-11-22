@@ -25,7 +25,7 @@ if errorlevel 1 (
   exit /b 1
 )
 
-echo Black Box - version 0.2.2
+echo Black Box - version 0.5.0+8
 echo Getting the required Flutter packages. Internet access is needed.
 call flutter pub get
 if errorlevel 1 (
@@ -39,6 +39,10 @@ echo Starting the app. The first compile may take a few minutes.
 echo When Flutter says the app is being served, open this address in your normal Chrome window:
 echo http://127.0.0.1:54321
 echo.
+echo Field Terminal starts in Dark mode. Use the top-right sun/moon button for Light.
+echo Map shows your local plan locations. Its map imagery needs internet.
+echo Kit - My pack is your personal list. Open guides to import PDFs and videos.
+echo Guide files stay in this browser. Keep their originals as a backup.
 echo Keep this window open while you use the app. Press q here to stop it.
 echo Use the same browser profile and this exact address to keep your saved plan between runs.
 echo.
