@@ -13,6 +13,7 @@ import 'plan_files.dart';
 import 'plan_models.dart';
 import 'plan_map.dart';
 import 'plan_store.dart';
+import 'suggested_items.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -126,7 +127,7 @@ class _PlanHomeState extends State<PlanHome> {
   bool _hasRecovery = false;
   bool _appearanceBusy = false;
   bool _guidesOpen = false;
-  bool _showPersonalPack = false;
+  int _kitSection = 0;
   String? _migrationSnapshot;
   final _search = TextEditingController();
   String _supplyFilter = 'All';
@@ -341,7 +342,7 @@ class _PlanHomeState extends State<PlanHome> {
                     showAboutDialog(
                       context: context,
                       applicationName: 'Black Box',
-                      applicationVersion: 'Prototype 0.5.0',
+                      applicationVersion: 'Prototype 0.6.0',
                       children: const [
                         Text(
                           'A local preparedness plan for your people, meeting '
@@ -1045,6 +1046,15 @@ class _PlanHomeState extends State<PlanHome> {
                 'Group supplies and your private packing checklist.',
                 _kitTab,
               ),
+              const SizedBox(height: 8),
+              OutlinedButton.icon(
+                onPressed: () => setState(() {
+                  _tab = _kitTab;
+                  _kitSection = 2;
+                }),
+                icon: const Icon(Icons.inventory_2_outlined),
+                label: const Text('Browse suggested items'),
+              ),
             ],
           ),
         ),
@@ -1233,18 +1243,28 @@ class _PlanHomeState extends State<PlanHome> {
         children: [
           ChoiceChip(
             label: const Text('Shared kit'),
-            selected: !_showPersonalPack,
-            onSelected: (_) => setState(() => _showPersonalPack = false),
+            selected: _kitSection == 0,
+            onSelected: (_) => setState(() => _kitSection = 0),
           ),
           ChoiceChip(
             label: const Text('My pack'),
-            selected: _showPersonalPack,
-            onSelected: (_) => setState(() => _showPersonalPack = true),
+            selected: _kitSection == 1,
+            onSelected: (_) => setState(() => _kitSection = 1),
+          ),
+          ChoiceChip(
+            label: const Text('Suggested'),
+            selected: _kitSection == 2,
+            onSelected: (_) => setState(() => _kitSection = 2),
           ),
         ],
       ),
       const SizedBox(height: 20),
-      if (_showPersonalPack) const PersonalPacklistPanel() else _supplies(),
+      if (_kitSection == 1)
+        const PersonalPacklistPanel()
+      else if (_kitSection == 2)
+        SuggestedItemsPanel(onOpenPack: () => setState(() => _kitSection = 1))
+      else
+        _supplies(),
     ],
   );
 

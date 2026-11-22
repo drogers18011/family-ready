@@ -1,13 +1,40 @@
-BLACK BOX - VERSION 0.5.0+8
+BLACK BOX - VERSION 0.6.0+9
 ==========================
 Updated for Dennis Rogers, November 22, 2026
 
-PERSONAL PACKING LIST AND OFFLINE GUIDE FILES
---------------------------------------------
-Kit now has Shared kit and My pack. My pack is a free, personal checklist with
-items, quantities, notes, and packed check marks. It is separate from the shared
-plan. Failed saves show a warning and offer Retry; use Copy list text to keep
-a readable copy. Group-plan JSON backups do NOT include this personal list.
+SUGGESTED ITEMS AND PERSONAL INVENTORY
+--------------------------------------
+Kit now has Shared kit, My pack, and Suggested. Home also has a Browse
+suggested items shortcut. The six suggestions include original preparation
+notes, four ordinary Amazon product links, and two clearly labeled Amazon
+search links. No affiliate tag or commission income is enabled by default.
+
+My pack is a free, personal checklist with items, quantities, notes, and
+separate Owned and Packed states. Marking an item Packed also marks it Owned;
+clearing Owned clears Packed. You can own something without having packed it.
+Items bought anywhere, gifts, and supplies you already have use the same
+inventory controls. These actions do not change the shared plan.
+
+Add & shop on Amazon first saves a new suggestion to My pack as unowned,
+then offers an explicit Open Amazon or Open Amazon search action. A failed
+save does not proceed to shopping. I have this confirms possession; it does
+not mark the item packed. Opening a link or returning from Amazon never
+confirms a purchase. Adding the same catalog item again reuses its entry and
+preserves your edits instead of making a duplicate.
+
+The Windows Chrome preview uses ordinary, untagged US links. All Amazon
+shopping in installed iPhone/Android builds requires the corresponding
+Amazon mobile-app approval, separate from Apple approval. Installed desktop
+builds do not offer Amazon shopping. Inventory remains available in every
+case. Future affiliate use requires real Amazon-generated links and the
+approved app or exact registered HTTPS web origin. Setup details, the six
+item IDs, sources, and disclosure instructions are in AMAZON_AFFILIATE_SETUP.txt.
+
+Failed saves show a warning and offer Retry; use Copy list text to keep a
+readable copy. Group-plan JSON backups do NOT include this personal list.
+
+PERSONAL PDF AND VIDEO GUIDES
+------------------------------
 
 Open Offline guides from the book button in the top bar or the Home card.
 Import a PDF, MP4, MOV, or M4V from the file picker. Black Box copies the actual
@@ -70,7 +97,7 @@ font download while using the app.
 The app previously called Family Ready keeps the Black Box name introduced
 in v0.2.2. The new Map tab uses the existing plan format and saved locations.
 
-Existing saved plans and JSON backups use the same data format and storage
+Existing shared plans and JSON backups use the same data format and storage
 keys. Continue using your normal Chrome profile at http://127.0.0.1:54321.
 Older Family Ready JSON backups remain supported.
 
@@ -78,10 +105,12 @@ Upload the contents of the extracted black_box_starter.zip into the existing
 family-ready GitHub repository on the same build branch. Keep assets, lib,
 scripts, test, and web as folders beside pubspec.yaml and codemagic.yaml.
 Include ALL files in lib and test, the updated pubspec.yaml and scripts, and
-everything in assets/fonts, preserving their folder hierarchy. The new guide
-platform files are required even if you are initially testing in Chrome.
-Keep NEXT_FEATURES.txt with
-the top-level project documents. Upload the extracted contents, not the ZIP or
+everything in assets/fonts, preserving their folder hierarchy. Include the
+new suggested-items, catalog, affiliate-config, and personal-repository files
+in lib, plus test/suggested_catalog_check.dart. Keep the existing guide
+platform files too, even when testing in Chrome. Keep NEXT_FEATURES.txt and
+AMAZON_AFFILIATE_SETUP.txt with the top-level documents. Upload the extracted
+contents, not the ZIP or
 an extra enclosing folder. scripts/configure_ios.py still applies the Black Box
 iPhone display name during a build.
 
@@ -96,8 +125,9 @@ You reported a green unsigned iPhone compile check for version 0.2.2. Your
 Apple Developer enrollment was last reported pending. The next account step
 is Apple signing and TestFlight after the membership becomes active.
 
-This v0.5.0+8 guide/checklist update has not yet been Flutter-compiled here. Run a new
-ios-compile-check after uploading it; the earlier green result covers v0.2.2.
+This v0.6.0+9 suggested-items update has not been Flutter-compiled or tested
+in a browser or on a phone here. Run a new ios-compile-check after uploading
+it; the earlier green result covers v0.2.2.
 
 The planned access model lets free readers view complete shared plans and
 download them for offline use, with subscriptions for contributing and editing.
@@ -118,25 +148,28 @@ IPHONE BUILD SETUP ADDED
 ------------------------
 For your iPhone 16 Pro Max and Windows-only development setup, start with
 START_IPHONE_CLOUD.txt. The included Codemagic workflows prepare the current
-v0.5.0+8 app for an unsigned iOS compile check and, after your Apple account setup,
+v0.6.0+9 app for an unsigned iOS compile check and, after your Apple account setup,
 an internal TestFlight build. Offline routing remains a future feature.
 If v0.2 is already working in Chrome, continue with that cloud guide; you do
 not need to repeat the browser installation steps below.
 
 
 This update builds on the Flutter browser prototype you successfully ran on
-your Windows PC. It adds a personal packing list and local guide-file storage
-while retaining the Map tab and existing shared-plan backup/restore format.
+your Windows PC. It adds suggested supplies and separate ownership/packing
+states while retaining the personal checklist, local guide-file storage,
+Map tab, and existing shared-plan backup/restore format.
 
 UPDATE FROM YOUR EXISTING VERSION
 ---------------------------------
 1. Before updating, use Group > Download backup in your working browser app
    and keep the JSON file. Also use Copy plan text (or Copy plan in an older
    version) and paste that readable text into Notepad as an extra copy.
+   Use Copy list text for a separate personal-list copy and keep your original
+   guide files; neither is included in the group JSON backup.
 2. Click the running app's terminal window and press q to stop it. Close
    its browser tab too.
 3. Download black_box_starter.zip. Choose Extract All and use a NEW folder,
-   such as Documents\BlackBox_v050. Keep your old source folder.
+   such as Documents\BlackBox_v060. Keep your old source folder.
 4. Open the extracted folder containing START_HERE.cmd and pubspec.yaml.
 5. Double-click START_HERE.cmd and keep its terminal window open. It downloads
    the added Flutter packages and compiles the updated app; internet is needed.
@@ -146,7 +179,7 @@ UPDATE FROM YOUR EXISTING VERSION
    http://127.0.0.1:54321
 
 7. Confirm the app shows Black Box. Open Appearance > About Black Box & licenses
-   to check that it says Prototype 0.5.0. If the old screen is still visible,
+   to check that it says Prototype 0.6.0. If the old screen is still visible,
    press Ctrl+Shift+R to reload it. Do NOT clear site data.
 8. Check that any plan you saved in the first version is still there. Then
    open Group > Download backup and keep the downloaded JSON file.
@@ -161,9 +194,24 @@ coordinate edits between multiple tabs or devices.
 
 WHAT IS NEW
 -----------
+SUGGESTIONS AND OWNERSHIP
+- Kit > Suggested and Home > Browse suggested items open the six-item catalog.
+  Four links lead to product pages; two lead to searches. Shopping needs internet.
+- Add to My pack saves a suggestion without opening a store. I have this
+  explicitly confirms possession without marking the item packed.
+- Add & shop on Amazon saves first, then offers Open Amazon or Open Amazon
+  search. Existing catalog entries keep their edited details and status.
+- My pack tracks Owned separately from Packed. Packed implies Owned;
+  clearing Owned also clears Packed. No Amazon order detection is implemented.
+- Ordinary shopping links work in the Chrome preview. Phone shopping stays
+  disabled until Amazon approves that mobile app; installed desktop shopping
+  is unavailable. Affiliate configuration starts empty and disabled.
+- All inventory functions work for supplies obtained from any retailer.
+  See AMAZON_AFFILIATE_SETUP.txt before configuring approved affiliate links.
+
 PERSONAL PACK AND GUIDES
 - Kit > My pack: separate free checklist; add/edit quantities and notes,
-  check packed items, filter, and copy readable text.
+  mark ownership/packing, filter, and copy readable text.
 - Home > Open guides or the top book button: import actual PDF/video files,
   see saved-copy status and sizes, search/filter, rename, open, or remove.
 - Shared-kit changes still use the existing plan. Personal pack items and
@@ -259,6 +307,8 @@ A QUICK WALKTHROUGH
    readable copy. On the phone, use Copy plan text for a readable copy instead.
 11. Open Kit > My pack. Add a personal item, set its quantity, mark it packed,
     switch tabs, and reopen. Refresh/restart and confirm its saved state.
+    Check that Packed also set Owned. Clear Owned and confirm Packed clears;
+    then mark it Owned without marking it Packed.
     Confirm the same action did not alter any Shared kit item.
 12. Open guides and import a small PDF and video you own. Wait for saved-copy
     status, rename one, and try PDFs/Videos/search. Open both saved files.
@@ -267,6 +317,15 @@ A QUICK WALKTHROUGH
     installed iPhone, close the app, disable Wi-Fi and cellular, reopen it,
     and open the PDF and video. Check multiple PDF pages and video seeking.
     The phone test remains necessary; a green compile is not this test.
+14. Open Suggested from Kit or Home. Add a new item to My pack, edit its name
+    or note, then add that catalog item again. Check that it reuses the entry
+    without replacing your edits. Use I have this to confirm possession.
+15. In the Chrome preview, choose Add & shop on Amazon for another new item.
+    Check that it saves as unowned, then use the explicit Open Amazon action.
+    Return without buying anything. Confirm it remains unowned and unpacked.
+    Search suggestions use Open Amazon search. No test purchase is needed.
+16. On a phone build without Amazon approval, check that suggestions and
+    inventory work while Amazon shopping controls remain unavailable.
 
 WHAT WORKS OFFLINE, AND WHAT IS STILL BEING BUILT
 ------------------------------------------------
@@ -289,6 +348,11 @@ only changes the local roster. A save time
 is not a synchronization time or evidence that another device received a plan.
 NEXT_FEATURES.txt describes the planned features; it is not a list of working
 online services in this release.
+
+The suggested catalog is bundled data, so reading its notes does not require
+Amazon. Shopping requires internet and the platform's shopping permission.
+There is no Amazon order integration, verified purchase detection, or active
+affiliate account in this package.
 
 The shared plan and checklist still need a more durable primary database and
 device verification before emergency use. Imported guide files use persistent
@@ -324,11 +388,17 @@ flutter run -d web-server --web-hostname=127.0.0.1 --web-port=54321
 
 Then open http://127.0.0.1:54321 in your normal Chrome window.
 
-The same original browser storage key is retained. Version 1 plans remain
+The same original group-plan browser storage key is retained. Version 1 plans remain
 readable; new writes use version 2. Before the first version-2 save, the exact
 old stored record is retained as the previous copy. Opening an old source
 version after upgrading is not a supported downgrade path: the old code cannot
 read version-2 plans. Keep the updated code with your downloaded backups.
+
+The separate personal-list key is also retained. This update reads personal
+schema versions 1 and 2 and writes version 2 with ownership and catalog IDs.
+Previously packed personal items become Owned and Packed; unchecked older
+items remain unconfirmed as owned. The shared-plan schema is not changed by
+this personal-list migration. Use the updated app with its updated data.
 
 The prototype still uses shared_preferences for plan/checklist data and
 appearance. Its maintainers do not recommend it for critical data; primary
@@ -346,8 +416,12 @@ lib/meeting_map.dart   Interactive online map and coordinate picker.
 lib/plan_map.dart      Map tab for the current local plan's named locations.
 lib/plan_files.dart    File import, browser download, and desktop save helpers.
 lib/plan_store.dart    Restore journal and ordered persistence writes.
-lib/personal_packlist.dart Personal checklist screen and local preference wiring.
-lib/personal_packlist_models.dart Separate checklist model and queued store.
+lib/personal_packlist.dart Personal checklist screen and saved-state controls.
+lib/personal_packlist_models.dart Ownership/packing model, migration, and queued store.
+lib/personal_packlist_repository.dart Shared personal-list access across Kit views.
+lib/suggested_catalog.dart Six suggestions, destination validation, and platform gates.
+lib/suggested_items.dart Suggested-item screen and explicit shopping handoff.
+lib/amazon_affiliate_config.dart Disabled-by-default approval and full-link settings.
 lib/guide_library.dart Personal PDF/video library screen.
 lib/guide_files.dart   File picker and conditional platform entry point.
 lib/guide_models.dart  Guide metadata, limits, and basic header validation.
@@ -356,7 +430,8 @@ lib/guide_store_native.dart Transactional native file-copy storage.
 lib/guide_platform_native.dart Device paths and local-file viewer handoff.
 lib/guide_platform_web.dart Browser IndexedDB storage and local Blob opening.
 lib/guide_platform_stub.dart Unsupported-platform fallback.
-test/                  Pure Dart model, restore, checklist, and guide IO checks.
+test/                  Pure Dart model, restore, checklist, catalog/link, and guide checks.
+test/suggested_catalog_check.dart Catalog and shopping-link validation checks.
 assets/fonts/          Bundled font files and their open font license notices.
 pubspec.yaml           Version, pinned dependencies, font and asset declarations.
 web/index.html         Browser entry point.
@@ -364,6 +439,7 @@ START_HERE.cmd         Windows launcher.
 README.txt             Browser prototype guide.
 START_IPHONE_CLOUD.txt  Windows-to-iPhone build and TestFlight instructions.
 NEXT_FEATURES.txt       Planned product features, access model, and requirements.
+AMAZON_AFFILIATE_SETUP.txt Shopping behavior, approved-link setup, catalog, and sources.
 codemagic.yaml         Manual unsigned and signed iOS build workflows.
 scripts/               Isolated native-project preparation and build helpers.
 
@@ -385,6 +461,11 @@ IF SOMETHING STOPS
   recovery; the error screen also offers available previous/recovery copies.
 - Browser still shows the first version: close the old app tab, check that the
   new folder's launcher is running, and hard-refresh the exact URL above.
+- Amazon shopping is unavailable on a phone: this is expected before Amazon
+  approves that mobile app. The Apple/TestFlight setup is separate. Inventory
+  still works; see AMAZON_AFFILIATE_SETUP.txt for the activation requirements.
+- A shopping link will not open: confirm internet access and use the explicit
+  Open Amazon button after the item saves. Check My pack before retrying.
 
 VERIFICATION
 ------------
@@ -432,9 +513,17 @@ Source review checked navigation, storage boundaries, viewer handoff, browser
 transaction completion, and local-file status wording. The updated build
 check script passed shell syntax validation.
 
+For v0.6.0+9, all 52 standalone personal-checklist model/store checks passed,
+covering the added ownership behavior and personal-list migration.
+All 182 standalone catalog/link-policy checks passed, including the default
+disabled configuration and shopping destination/platform validation. Source
+review and standalone Dart formatting also completed. Other test results
+above describe earlier releases; they are not new reruns for this version.
+
 These checks do not replace Flutter compilation or a runtime screen check.
-This guide/checklist update has not been Flutter-compiled here. Device rendering,
-interaction, and appearance persistence across real restarts remain unverified.
+This suggested-items update has not been Flutter-compiled or tested in a
+browser or on a native device here. Device rendering, interaction, shopping
+handoff, and appearance persistence across real restarts remain unverified.
 Check it with the Windows browser launcher and a new ios-compile-check build.
 Installation and behavior on the physical iPhone still need testing after
 Apple signing is configured.
@@ -444,6 +533,7 @@ Optional developer checks (after Dart is available in your terminal):
   dart test/plan_store_check.dart
   dart test/personal_packlist_check.dart
   dart test/guide_store_check.dart
+  dart test/suggested_catalog_check.dart
 
 NEXT DEVELOPMENT MILESTONE
 --------------------------

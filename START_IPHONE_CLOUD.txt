@@ -13,7 +13,7 @@ CURRENT STATUS: You reported a green unsigned iPhone compile check for v0.2.2.
 Your Apple Developer enrollment was last reported pending. Apple signing and TestFlight
 come next after membership activation.
 
-This package is version 0.5.0+8 and uses Field Terminal. Dark is the default,
+This package is version 0.6.0+9 and uses Field Terminal. Dark is the default,
 with green text and controls on black. Light uses a pale off-white background
 with forest-green text and controls. Switch directly with the top-right
 sun/moon button, or select Light or Dark in Appearance. The choice is remembered
@@ -24,7 +24,28 @@ current local plan's primary and backup places by their saved names, with
 selectable markers, local details, and the existing edit/place-pin controls.
 Its map imagery requires internet. The app still holds one local plan.
 
-NEW: Kit > My pack provides a separate free personal packing checklist.
+NEW: Kit has Shared kit, My pack, and Suggested. Home has a Browse suggested
+items shortcut. Six bundled suggestions have original preparation notes,
+four ordinary Amazon product links, and two clearly labeled search links.
+My pack tracks Owned separately from Packed: Packed sets Owned, and clearing
+Owned clears Packed. I have this confirms possession without marking packed.
+These inventory controls work for items from any retailer or already at home.
+
+Where shopping is enabled, Add & shop on Amazon saves a new suggestion as
+unowned before offering Open Amazon or Open Amazon search. A failed save
+does not proceed to shopping. Existing catalog entries are reused with edits
+preserved. No link click or return from Amazon detects a purchase.
+
+All Amazon shopping in a native phone build requires Amazon's approval of
+that mobile app, separately from Apple Developer membership or TestFlight.
+The approval flags and affiliate-link map start disabled/empty. Suggestions
+and inventory work while phone shopping is unavailable. The Windows Chrome
+preview uses ordinary untagged links; installed desktop builds do not shop.
+Affiliate use on a website requires its exact approved HTTPS origin and a
+valid configured full Amazon-generated link. Read AMAZON_AFFILIATE_SETUP.txt
+before activation. This package has no affiliate income enabled.
+
+Kit > My pack remains a separate free personal packing checklist.
 The Home card and top-bar book button open Offline guides. Import PDF, MP4,
 MOV, or M4V files, then open their saved copies, search/filter, rename, or
 remove them. Native files are copied into app Documents storage before they
@@ -34,10 +55,10 @@ cloud storage. Guide files and personal pack items are not in group JSON
 backups; keep original files and use Copy list text for the personal list.
 
 The successful Material UI migration and Black Box rename remain included.
-This guide/checklist update has not yet been Flutter-compiled here. Upload this version and
-run a new ios-compile-check; the previous green result covers v0.2.2. Offline
-map downloads and two-marker offline routing remain future work; monetization
-is a later product goal. NEXT_FEATURES.txt records the planned account groups,
+This suggested-items update has not been Flutter-compiled or tested in a
+browser or on a phone here. Upload this version and run a new ios-compile-check;
+the previous green result covers v0.2.2. Offline map downloads and two-marker
+offline routing remain future work. NEXT_FEATURES.txt records the planned account groups,
 multiple plans, sharing, forum, asynchronous inbox, and subscriptions. None of
 those online/account features is implemented in this local prototype.
 
@@ -47,9 +68,11 @@ Extract black_box_starter.zip and upload its contents to the existing
 family-ready repository, preserving assets, lib, scripts, test, and web as
 folders at the repository root beside pubspec.yaml and codemagic.yaml. Include
 ALL files in lib and test, the updated pubspec.yaml/scripts, and every file in
-assets/fonts, preserving their folder hierarchy. The guide platform files
-and both new test scripts must be included. Keep NEXT_FEATURES.txt with
-the top-level documents. Do not upload only main.dart, the ZIP, or an extra
+assets/fonts, preserving their folder hierarchy. Include all guide platform
+files, the new suggested/catalog/affiliate-config/personal-repository files,
+and test/suggested_catalog_check.dart alongside the existing checks. Keep
+NEXT_FEATURES.txt and AMAZON_AFFILIATE_SETUP.txt with the top-level documents.
+Do not upload only main.dart, the ZIP, or an extra
 enclosing folder. Commit the replacements to the selected build branch.
 scripts/configure_ios.py still sets the iPhone display name to Black Box.
 web/index.html and the lib files keep the browser and in-app name consistent.
@@ -58,7 +81,10 @@ Keep the existing repository, package, workflow, and integration identifiers.
 They retain their original family_ready/family-ready names for continuity.
 The proposed bundle identifier is still com.dennisrogers.familyready; it has
 not been registered or reserved. The visible product name is Black Box. The
-saved-plan schema, existing storage keys, and browser origin are unchanged.
+shared-plan schema, existing storage keys, and browser origin are unchanged.
+The separate personal-list store reads schema 1 or 2 and now writes schema 2.
+Older packed items migrate to Owned and Packed; older unchecked items remain
+unconfirmed as owned. Group JSON backups still exclude personal items and guides.
 
 While enrollment is pending, you can preview the redesigned app in the browser
 or run ios-compile-check. Begin the signing steps below after Apple confirms
@@ -68,7 +94,7 @@ Enrollment ID. This does not guarantee activation within 24 hours.
 
 If your phone, repository, and Codemagic connection are already set up, keep
 them. Use this update section, then continue with Step 4; do not create another
-repository or app connection just for the design update.
+repository or app connection just for this update.
 
 WHAT IS INCLUDED
 -----------------
@@ -116,13 +142,19 @@ STEP 2 - UPLOAD THE CLEAN PROJECT TO A PRIVATE GITHUB REPOSITORY
      pubspec.yaml
      codemagic.yaml
      NEXT_FEATURES.txt
+     AMAZON_AFFILIATE_SETUP.txt
    Also confirm these paths are present, with the same folder hierarchy:
      lib/black_box_theme.dart
      lib/plan_map.dart
      lib/guide_library.dart and all guide_*.dart files
      lib/personal_packlist.dart and lib/personal_packlist_models.dart
+     lib/personal_packlist_repository.dart
+     lib/suggested_catalog.dart
+     lib/suggested_items.dart
+     lib/amazon_affiliate_config.dart
      test/personal_packlist_check.dart
      test/guide_store_check.dart
+     test/suggested_catalog_check.dart
      assets/fonts/Barlow-Regular.ttf
      assets/fonts/Barlow-SemiBold.ttf
      assets/fonts/BarlowCondensed-SemiBold.ttf
@@ -254,8 +286,24 @@ through the Files picker. Check text, controls, and navigation on the phone.
 
 PERSONAL PACK CHECK
 1. Open Kit > My pack. Add an item, quantity, and note; mark it packed.
-2. Switch tabs and reopen it. Close/restart the app and confirm the saved list.
-3. Confirm the Shared kit did not change. Try Copy list text and keep a copy.
+2. Confirm that Packed also marked it Owned. Clear Owned and confirm Packed
+   clears too. Mark it Owned by itself and confirm it stays unpacked.
+3. Switch tabs and reopen it. Close/restart the app and confirm the saved list.
+4. Confirm the Shared kit did not change. Try Copy list text and keep a copy.
+
+SUGGESTED ITEMS CHECK
+1. Open Kit > Suggested and also try Home > Browse suggested items.
+2. Add a suggestion to My pack. Edit its quantity or note, then add the same
+   suggestion again. Confirm one entry remains with your changes preserved.
+3. Use I have this for an item you possess. Confirm Owned changes without
+   marking Packed. Supplies obtained anywhere use these same controls.
+4. In this default phone build, Amazon shopping must remain unavailable while
+   browsing suggestions and managing inventory continue to work.
+5. After actual Amazon approval and configuration, test the shopping handoff:
+   Add & shop on Amazon saves a new item as unowned, then offers an explicit
+   Open Amazon or Open Amazon search action. Return without purchasing and
+   confirm the item remains unowned and unpacked. Check the disclosure if
+   affiliate links are active. No test order is required for this UI check.
 
 GUIDE FILE AND OFFLINE CHECK
 1. Open guides from Home or the top-bar book button.
@@ -344,8 +392,16 @@ Source review checked navigation, storage boundaries, viewer handoff, browser
 transaction completion, and local-file status wording. The updated build
 check script passed shell syntax validation.
 
-This guide/checklist update has not been Flutter-compiled here. Device rendering,
-interaction, and appearance persistence across real restarts remain unverified.
+For v0.6.0+9, all 52 standalone personal-checklist model/store checks passed,
+including ownership behavior and personal-list migration.
+All 182 standalone catalog/link-policy checks passed, including the default
+disabled configuration and shopping destination/platform validation. Source
+review and standalone Dart formatting also completed. Other test results
+above remain historical results, not new reruns for this version.
+
+This suggested-items update has not been Flutter-compiled or tested in a
+browser or on a native device here. Device rendering, interaction, shopping
+handoff, and appearance persistence across real restarts remain unverified.
 Run a new ios-compile-check for this version. No signed IPA, phone installation,
 or TestFlight upload has been completed yet.
 

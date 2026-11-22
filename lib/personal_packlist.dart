@@ -1,17 +1,9 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:material_ui/material_ui.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
-import 'personal_packlist_models.dart';
+import 'personal_packlist_repository.dart';
 
-/// The shared store outlives a tab's widget. Pending writes finish before a
-/// returning tab loads; failed drafts survive tab changes within this app.
-final _personalPreferences = SharedPreferencesAsync();
-final _personalStore = PersonalPacklistStore(
-  read: _personalPreferences.getString,
-  write: _personalPreferences.setString,
-);
 int _personalIdCounter = 0;
 
 class PersonalPacklistPanel extends StatefulWidget {
@@ -34,7 +26,18 @@ class _PersonalPacklistPanelState extends State<PersonalPacklistPanel> {
   @override
   void initState() {
     super.initState();
+    personalPacklistStore.addListener(_onStoreChanged);
     _load();
+  }
+
+  void _onStoreChanged(PersonalPacklistSnapshot value) {
+    if (mounted) setState(() => _snapshot = value);
+  }
+
+  @override
+  void dispose() {
+    personalPacklistStore.removeListener(_onStoreChanged);
+    super.dispose();
   }
 
   Future<void> _load({bool retry = false}) async {
@@ -44,7 +47,7 @@ class _PersonalPacklistPanelState extends State<PersonalPacklistPanel> {
       _operationError = null;
     });
     try {
-      final loaded = await _personalStore.load(retry: retry);
+      final loaded = await personalPacklistStore.load(retry: retry);
       if (mounted) setState(() => _snapshot = loaded);
     } catch (_) {
       if (mounted) {
@@ -57,14 +60,16 @@ class _PersonalPacklistPanelState extends State<PersonalPacklistPanel> {
     }
   }
 
-  Future<void> _save(PersonalPacklist next) async {
+  Future<void> _change(
+    PersonalPacklist Function(PersonalPacklist current) change,
+  ) async {
     if (_blocked || _snapshot == null) return;
     setState(() {
       _saving = true;
       _operationError = null;
     });
     try {
-      final saved = await _personalStore.save(next);
+      final saved = await personalPacklistStore.mutate(change);
       if (mounted) setState(() => _snapshot = saved);
     } catch (_) {
       if (mounted) {
@@ -82,7 +87,7 @@ class _PersonalPacklistPanelState extends State<PersonalPacklistPanel> {
     if (_blocked) return;
     setState(() => _saving = true);
     try {
-      final saved = await _personalStore.retrySave();
+      final saved = await personalPacklistStore.retrySave();
       if (mounted) setState(() => _snapshot = saved);
     } catch (_) {
       if (mounted) {
@@ -147,14 +152,24 @@ class _PersonalPacklistPanelState extends State<PersonalPacklistPanel> {
       existing: existing,
     );
     if (!mounted || edited == null || _blocked) return;
-    final current = _snapshot!.document;
-    await _save(
-      current.withItems([
+    await _change((current) {
+      if (existing != null &&
+          !current.items.any((item) => item.id == edited.id)) {
+        throw StateError('The item was removed while its editor was open.');
+      }
+      return current.withItems([
         for (final item in current.items)
-          if (item.id == edited.id) edited else item,
+          if (item.id == edited.id)
+            item.copyWith(
+              name: edited.name,
+              quantity: edited.quantity,
+              notes: edited.notes,
+            )
+          else
+            item,
         if (existing == null) edited,
-      ]),
-    );
+      ]);
+    });
   }
 
   Future<void> _remove(PersonalPackItem item) async {
@@ -178,19 +193,29 @@ class _PersonalPacklistPanelState extends State<PersonalPacklistPanel> {
       ),
     );
     if (!mounted || remove != true || _blocked) return;
-    final current = _snapshot!.document;
-    await _save(
-      current.withItems(current.items.where((entry) => entry.id != item.id)),
+    await _change(
+      (current) => current.withItems(
+        current.items.where((entry) => entry.id != item.id),
+      ),
     );
   }
 
   Future<void> _setPacked(PersonalPackItem item, bool packed) async {
     if (_blocked || _snapshot == null) return;
-    final current = _snapshot!.document;
-    await _save(
-      current.withItems([
+    await _change(
+      (current) => current.withItems([
         for (final entry in current.items)
           if (entry.id == item.id) entry.copyWith(packed: packed) else entry,
+      ]),
+    );
+  }
+
+  Future<void> _setOwned(PersonalPackItem item, bool owned) async {
+    if (_blocked || _snapshot == null) return;
+    await _change(
+      (current) => current.withItems([
+        for (final entry in current.items)
+          if (entry.id == item.id) entry.copyWith(owned: owned) else entry,
       ]),
     );
   }
@@ -232,68 +257,98 @@ class _PersonalPacklistPanelState extends State<PersonalPacklistPanel> {
         border: Border.all(color: colors.outlineVariant),
       ),
       child: Padding(
-        padding: const EdgeInsets.fromLTRB(8, 12, 8, 12),
-        child: Row(
+        padding: const EdgeInsets.all(16),
+        child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            SizedBox(
-              width: 48,
-              height: 48,
-              child: Semantics(
-                label: '${item.name}, packed',
-                child: Checkbox(
-                  value: item.packed,
-                  onChanged: _blocked
-                      ? null
-                      : (value) => _setPacked(item, value ?? false),
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Expanded(
+                  child: Text(item.name, style: theme.textTheme.titleMedium),
                 ),
-              ),
-            ),
-            const SizedBox(width: 4),
-            Expanded(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(vertical: 8),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(item.name, style: theme.textTheme.titleMedium),
-                    if (item.quantity.isNotEmpty) ...[
-                      const SizedBox(height: 5),
-                      Text('Quantity: ${item.quantity}'),
-                    ],
-                    if (item.notes.isNotEmpty) ...[
-                      const SizedBox(height: 8),
-                      Text(item.notes, style: theme.textTheme.bodySmall),
-                    ],
-                    const SizedBox(height: 6),
-                    Text(
-                      item.packed ? 'Packed' : 'To pack',
-                      style: theme.textTheme.labelSmall?.copyWith(
-                        color: item.packed
-                            ? colors.primary
-                            : colors.onSurfaceVariant,
+                SizedBox(
+                  width: 48,
+                  height: 48,
+                  child: PopupMenuButton<String>(
+                    enabled: !_blocked,
+                    tooltip: 'Actions for ${item.name}',
+                    onSelected: (action) {
+                      if (action == 'edit') _edit(item);
+                      if (action == 'remove') _remove(item);
+                    },
+                    itemBuilder: (_) => const [
+                      PopupMenuItem(value: 'edit', child: Text('Edit item')),
+                      PopupMenuItem(
+                        value: 'remove',
+                        child: Text('Remove item'),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
+              ],
+            ),
+            if (item.quantity.isNotEmpty) ...[
+              const SizedBox(height: 4),
+              Text('Quantity: ${item.quantity}'),
+            ],
+            if (item.notes.isNotEmpty) ...[
+              const SizedBox(height: 8),
+              Text(item.notes, style: theme.textTheme.bodySmall),
+            ],
+            const SizedBox(height: 12),
+            Text(
+              item.packed
+                  ? 'Owned · packed'
+                  : item.owned
+                  ? 'Owned · not packed'
+                  : 'Not marked owned',
+              style: theme.textTheme.labelSmall?.copyWith(
+                color: item.owned ? colors.primary : colors.onSurfaceVariant,
               ),
             ),
-            SizedBox(
-              width: 48,
-              height: 48,
-              child: PopupMenuButton<String>(
-                enabled: !_blocked,
-                tooltip: 'Actions for ${item.name}',
-                onSelected: (action) {
-                  if (action == 'edit') _edit(item);
-                  if (action == 'remove') _remove(item);
-                },
-                itemBuilder: (_) => const [
-                  PopupMenuItem(value: 'edit', child: Text('Edit item')),
-                  PopupMenuItem(value: 'remove', child: Text('Remove item')),
-                ],
-              ),
+            const SizedBox(height: 6),
+            Wrap(
+              spacing: 12,
+              runSpacing: 4,
+              children: [
+                SizedBox(
+                  width: 140,
+                  child: Semantics(
+                    label: item.name,
+                    child: CheckboxListTile(
+                      value: item.owned,
+                      onChanged: _blocked
+                          ? null
+                          : (value) => _setOwned(item, value ?? false),
+                      title: const Text('Owned'),
+                      contentPadding: EdgeInsets.zero,
+                      controlAffinity: ListTileControlAffinity.leading,
+                    ),
+                  ),
+                ),
+                SizedBox(
+                  width: 140,
+                  child: Semantics(
+                    label: item.name,
+                    child: CheckboxListTile(
+                      value: item.packed,
+                      onChanged: _blocked
+                          ? null
+                          : (value) => _setPacked(item, value ?? false),
+                      title: const Text('Packed'),
+                      contentPadding: EdgeInsets.zero,
+                      controlAffinity: ListTileControlAffinity.leading,
+                    ),
+                  ),
+                ),
+              ],
             ),
+            if (item.sourceSuggestionId != null)
+              Text(
+                'Added from Suggested items',
+                style: theme.textTheme.bodySmall,
+              ),
           ],
         ),
       ),
@@ -308,7 +363,9 @@ class _PersonalPacklistPanelState extends State<PersonalPacklistPanel> {
     final document = snapshot?.document;
     final items =
         document?.items.where((item) {
-          if (_filter == 'To pack') return !item.packed;
+          if (_filter == 'To buy') return !item.owned;
+          if (_filter == 'Owned') return item.owned;
+          if (_filter == 'To pack') return item.owned && !item.packed;
           if (_filter == 'Packed') return item.packed;
           return true;
         }).toList() ??
@@ -322,6 +379,13 @@ class _PersonalPacklistPanelState extends State<PersonalPacklistPanel> {
           'Your own checklist, free to use. These items and check marks are '
           'kept on $_location, separate from the group plan.',
           style: theme.textTheme.bodyMedium,
+        ),
+        const SizedBox(height: 10),
+        Text(
+          'Mark Owned when you have the item available. Marking Packed '
+          'also marks Owned; clearing Owned clears Packed. Shopping links '
+          'do not confirm ownership. To buy shows items not yet marked owned.',
+          style: theme.textTheme.bodySmall,
         ),
         const SizedBox(height: 20),
         if (_loading || _saving) ...[
@@ -377,10 +441,19 @@ class _PersonalPacklistPanelState extends State<PersonalPacklistPanel> {
         if (document != null &&
             snapshot != null &&
             snapshot.loadError == null) ...[
+          if (document.migratedFromVersion1) ...[
+            Text(
+              'Your previous checklist did not track ownership. Its packed '
+              'items are now marked owned; please review the other items.',
+              style: theme.textTheme.bodyMedium,
+            ),
+            const SizedBox(height: 16),
+          ],
           Semantics(
             liveRegion: true,
             child: Text(
-              '${document.packedCount} of ${document.items.length} items packed',
+              '${document.ownedCount} owned · ${document.packedCount} packed '
+              '· ${document.items.length} items',
               style: theme.textTheme.titleMedium,
             ),
           ),
@@ -436,7 +509,13 @@ class _PersonalPacklistPanelState extends State<PersonalPacklistPanel> {
               spacing: 8,
               runSpacing: 8,
               children: [
-                for (final filter in const ['All', 'To pack', 'Packed'])
+                for (final filter in const [
+                  'All',
+                  'To buy',
+                  'Owned',
+                  'To pack',
+                  'Packed',
+                ])
                   ChoiceChip(
                     label: Text(filter),
                     selected: _filter == filter,
@@ -562,7 +641,9 @@ Future<PersonalPackItem?> _editPersonalItem(
                 name: name.trim(),
                 quantity: quantity.trim(),
                 notes: notes.trim(),
+                owned: existing?.owned ?? false,
                 packed: existing?.packed ?? false,
+                sourceSuggestionId: existing?.sourceSuggestionId,
               ),
             );
           },

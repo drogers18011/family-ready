@@ -1,0 +1,245 @@
+BLACK BOX - AMAZON SUGGESTIONS SETUP
+==================================
+For version 0.6.0+9 | November 22, 2026
+
+START HERE
+----------
+The suggested-item catalog is ready to use without affiliate setup. This
+package has no affiliate account, tracking tag, or commission income enabled.
+Its built-in Amazon destinations are ordinary, untagged US links.
+
+Where shopping is available depends on how Black Box is running:
+
+- Windows Chrome preview: ordinary links can open Amazon. Localhost and
+  127.0.0.1 never use affiliate links, even if links are configured later.
+- Published website: ordinary links work. Affiliate links require a matching
+  approved HTTPS origin AND a valid configured link for that item.
+- Installed iPhone or Android app: Amazon shopping controls stay unavailable
+  until the corresponding mobile-app approval flag is enabled. This applies
+  to ordinary links as well as affiliate links.
+- Installed Windows, macOS, or Linux app: Amazon shopping is unavailable.
+
+The suggested catalog and personal inventory still work when shopping is
+unavailable. Viewing saved suggestions and managing your list do not require
+an Amazon purchase. Opening a shopping destination requires internet access.
+
+SHOPPING, OWNERSHIP, AND PACKING ARE DIFFERENT
+--------------------------------------------
+Add & shop on Amazon saves a new suggested item to your personal list as
+unowned, then offers an explicit Open Amazon or Open Amazon search action.
+A failed save does not proceed to shopping. An existing catalog item is
+reused with your edits and status preserved. Opening or returning from Amazon
+does not confirm an order, delivery, or ownership. If opening the link fails,
+the saved list entry can still be used.
+
+Use I have this when you have the item. This confirms ownership in Black Box;
+it does not mark the item packed. Mark it packed separately when you have
+actually put it in your kit. Check quantities and the item's storage location.
+
+These inventory controls work for items bought anywhere, gifts, and supplies
+you already own. There is no reward, feature unlock, or ownership shortcut for
+using an affiliate link. Black Box does not verify purchases, read Amazon
+orders, or link an Amazon customer/order to a Black Box user.
+
+THE CURRENT CONFIGURATION
+-------------------------
+The file to edit later is:
+
+    lib/amazon_affiliate_config.dart
+
+Its starting values are:
+
+    approvedIosApp = false
+    approvedAndroidApp = false
+    approvedWebOrigins = <String>{}
+    amazonSpecialLinks = <String, String>{}
+
+An empty set or map is intentional. Keep these values until you have the
+actual approvals and links for Black Box. Setting a flag to true records an
+approval you already obtained; it does not apply for or obtain approval.
+
+AMAZON APPROVAL COMES FIRST
+--------------------------
+Amazon restricts Amazon links in installed software to approved mobile apps.
+Its mobile-app rules require an app-store listing, free download and access
+to Amazon links, original content, and no Amazon shopping pages in embedded
+WebViews. A developer account or TestFlight build is not Amazon's mobile-app
+approval. Review the current terms before enabling shopping in a phone build.
+
+Source: Amazon Associates Program Policies, including the Mobile Application
+Policy and the software/device linking requirements:
+https://affiliate-program.amazon.com/help/operating/policies
+
+GET READY FOR AFFILIATE ACTIVATION
+--------------------------------
+1. Open the official US Amazon Associates site in your browser:
+   https://affiliate-program.amazon.com/
+
+   Register or sign in with the account that will operate Black Box. Register
+   the actual Black Box website and/or mobile app you intend to use. Follow
+   Amazon's current application and mobile-app approval process. Keep the
+   record of which app and website were accepted.
+
+2. For iPhone, keep approvedIosApp false until the Black Box iPhone app has
+   the necessary Amazon approval. For Android, treat approvedAndroidApp
+   separately. An Apple Developer membership does not change these settings.
+
+3. If using a published web version, identify its exact registered HTTPS
+   origin: the scheme, host, and port if one is needed. An origin contains no
+   page path, query, or trailing slash. The www and non-www hosts are different.
+   Only add the real origin where the registered Black Box site is hosted.
+   Keep local preview addresses out of approvedWebOrigins.
+
+4. Use Amazon's own linking tools to generate the full Special Link for each
+   destination you want to monetize. Collect the complete generated URLs.
+   Do not make up a tracking tag or construct a tagged URL yourself. This
+   feature does not need an Amazon API key.
+
+5. Match each generated link to the correct item ID in the catalog below.
+   A product link must still point to that item's product. A search link must
+   retain that item's exact configured search query. Unconfigured items keep
+   their ordinary destination wherever shopping is available.
+
+Background on Associates links and account requirements:
+https://affiliate-program.amazon.com/help/operating/agreement
+
+EDIT THE FILE ON YOUR WINDOWS PC
+--------------------------------
+First install all files from the 0.6.0+9 update using the main README. Then:
+
+1. Open Visual Studio Code. Choose File > Open Folder and select the Black Box
+   project folder containing pubspec.yaml, codemagic.yaml, and the lib folder.
+
+2. Press Ctrl+P, type lib/amazon_affiliate_config.dart, and press Enter.
+
+3. Find amazonSpecialLinks. Add only the real full Amazon-generated links,
+   keyed by the stable item IDs listed below. Each Dart map entry consists of
+   the item ID in single quotes, a colon, the full URL in single quotes, and
+   a comma. Keep the surrounding braces and the rest of the file intact.
+   Leave any item without a verified link out of the map.
+
+4. Update approvedIosApp, approvedAndroidApp, and/or approvedWebOrigins only
+   for the approved destination you are activating. Do not turn every flag
+   on as a shortcut. Installed desktop shopping remains unavailable.
+
+5. Save with Ctrl+S. For the Chrome preview, stop the previous running app
+   with q in its terminal, then launch START_HERE.cmd again. Continue using
+   the same browser profile and http://127.0.0.1:54321 so your saved local data
+   stays associated with the same address. The preview remains unmonetized.
+
+6. Commit and push the configuration after saving it. In VS Code, open
+   Terminal > New Terminal from the project folder and run these commands,
+   one line at a time:
+
+   git add lib/amazon_affiliate_config.dart
+   git commit -m "Configure approved Amazon links"
+   git push
+
+7. In Codemagic, build the updated branch with ios-compile-check. For an
+   installable iPhone update, continue with START_IPHONE_CLOUD.txt and the
+   signed workflow after your Apple setup is ready. A successful compile
+   checks the build; it does not establish Amazon approval or attribution.
+
+If you prefer help with the edit, provide the full generated links, their item
+IDs, and which Black Box app/site has approval. Those concrete values are
+needed before activation. Leave the configuration empty while collecting them.
+
+LINK VALIDATION IN THIS BUILD
+-----------------------------
+The validator expects full HTTPS URLs on amazon.com or www.amazon.com, a
+supported product path or the exact configured /s?k= search destination, and
+a nonempty tag. Product paths may use /dp/ASIN, one title segment followed by
+/dp/ASIN, or /gp/product/ASIN. Only allowed query parameters pass validation;
+the complete rules are in lib/suggested_catalog.dart. Use the full
+link from Amazon rather than an amzn.to or other shortened URL. If a generated
+form is rejected, review support for that form before changing configuration;
+do not rebuild the URL by hand merely to make it pass.
+
+Syntax checks cannot prove that Amazon generated a link, that an app/site was
+approved, or that a purchase occurred. The operator must verify the link's
+origin and destination. This implementation uses static catalog links; do not
+add user, group, device, email, or plan identifiers to shopping URLs.
+
+DISCLOSURE WHEN AFFILIATE LINKS ARE ACTIVE
+-----------------------------------------
+Show a clear affiliate disclosure near active affiliate links and include
+Amazon's required identification statement prominently:
+
+    As an Amazon Associate I earn from qualifying purchases.
+
+A nearby label such as "Paid link" helps identify the link. Check the actual
+screen after activation. The ordinary-link preview must not be presented as
+already earning commissions.
+
+Disclosure source:
+https://affiliate-program.amazon.com/help/node/topic/GPXFHVYZMTGPUMPE
+
+SIX STARTER SUGGESTIONS
+-----------------------
+These are examples to consider, not a complete kit or a ranking. The supply
+categories follow Ready.gov's emergency-kit checklist. Ready.gov does not
+endorse these particular brands. Choose supplies for your household, location,
+and ability to carry and use them. No live prices, product photos, ratings,
+availability claims, or income estimates are provided.
+
+Category source:
+https://www.ready.gov/sites/default/files/2024-05/ready_supply-kit-checklist.pdf
+
+1. flashlight - Energizer Vision HD flashlight
+   Keep a working light and matching spare batteries. Check the battery type
+   and test the light before packing.
+   Ordinary product link:
+   https://www.amazon.com/dp/B06X9TV75K
+   Manufacturer:
+   https://energizer.com/product/lighting/flashlights-lighting/vision-hd-6aa-performance-metal-light/
+
+2. weather_radio - Midland ER310 weather radio
+   Add a weather-alert radio. Test reception at your location and learn its
+   power and alert settings.
+   Ordinary product link:
+   https://www.amazon.com/dp/B015QIC1PW
+   Manufacturer:
+   https://midlandusa.com/collections/storm-ready/products/er310-portable-emergency-crank-weather-radio
+
+3. manual_can_opener - OXO Good Grips manual can opener
+   Keep a manual opener with canned food. Check that you can comfortably
+   operate it on the cans you store.
+   Ordinary product link:
+   https://www.amazon.com/dp/B00004OCJW
+   Manufacturer:
+   https://www.oxo.com/soft-handled-can-opener-433.html
+
+4. water_container - Reliance Aqua-Tainer, 7 gallons
+   A home water-storage option, not a go-bag bottle. Check its filled weight
+   and where you will store it. A container does not purify water.
+   Ordinary product link:
+   https://www.amazon.com/dp/B001QC31G6
+   Manufacturer:
+   https://relianceoutdoors.com/collections/water-containers
+
+5. whistle - Pealess signaling whistle
+   Keep a whistle accessible and test it before putting it in the bag.
+   Ordinary Amazon SEARCH link; no particular product is selected:
+   https://www.amazon.com/s?k=pealess+emergency+whistle
+
+6. duct_tape - Duct tape
+   A small repair supply. Choose a roll size and adhesive suited to the
+   materials in your kit.
+   Ordinary Amazon SEARCH link; no particular product is selected:
+   https://www.amazon.com/s?k=duct+tape
+
+CHECK THE RESULT WITHOUT PLACING AN ORDER
+----------------------------------------
+- In the ordinary Chrome preview, open an item and check the destination.
+  Returning from Amazon must not mark it owned or packed.
+- Confirm an added item appears as unowned. Use I have this and confirm that
+  ownership changes while its packed state stays unchecked.
+- Add an item bought elsewhere and confirm the same inventory controls work.
+- In an unapproved phone build, confirm inventory works while Amazon shopping
+  controls remain unavailable.
+- On the actual approved app/site, review the disclosure and destination for
+  each active affiliate link. No test purchase is needed for these UI checks.
+
+To stop affiliate use, clear amazonSpecialLinks and rebuild/redeploy. To
+disable phone shopping as well, restore its approval flag to false. Saved
+inventory remains independent of these configuration settings.

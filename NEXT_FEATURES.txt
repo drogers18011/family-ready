@@ -2,14 +2,14 @@ BLACK BOX - NEXT FEATURE SPECIFICATION
 ======================================
 Prepared for Dennis Rogers, November 20, 2026
 Updated with Dennis's decisions on November 22, 2026
-Baseline: v0.5.0+8 local Flutter prototype
+Baseline: v0.6.0+9 local Flutter prototype
 
 STATUS
 ------
 This file records the requested product direction and proposed implementation
 rules. It is not a claim that the online service is running.
 
-IMPLEMENTED IN THE v0.5.0 SOURCE:
+IMPLEMENTED IN THE v0.6.0 SOURCE:
 - Field Terminal with remembered Light/Dark modes.
 - Home / Plan / Map / Kit / Group navigation.
 - A separate Map tab for the CURRENT local plan's primary and backup places.
@@ -17,15 +17,33 @@ IMPLEMENTED IN THE v0.5.0 SOURCE:
   Existing editors change place details or coordinates.
 - Existing local plan saving, browser backups, restore recovery, supplies,
   assignments, and group roster behavior.
-- Kit includes a free personal packing list, separate from group supplies.
-  Personal items, quantities, notes, and packed check marks save locally.
+- Kit includes Shared kit, My pack, and Suggested. The free personal packing
+  list remains separate from group supplies. Items, quantities, notes, Owned,
+  and Packed states save locally. Packed sets Owned; clearing Owned clears
+  Packed. Supplies obtained anywhere use the same inventory controls.
+- Home > Browse suggested items and Kit > Suggested open six original supply
+  notes with four ordinary Amazon product destinations and two search links.
+  A repeated catalog item reuses its existing entry and preserves edits.
+- Add & shop on Amazon saves a new item as unowned before offering an explicit
+  Open Amazon or Open Amazon search action. Failed saves do not open a shop.
+  I have this confirms possession without marking packed. There is no order
+  detection or purchase verification, and no affiliate income is active.
+- Ordinary Amazon links work in the web preview. Phone shopping requires
+  Amazon approval of the corresponding mobile app; installed desktop shopping
+  is unavailable. Affiliate settings start empty/disabled. See
+  AMAZON_AFFILIATE_SETUP.txt for actual-link and approval requirements.
 - Offline guides opens from Home or the top-bar guide button. Import personal
   PDF, MP4, MOV, or M4V files, retain local byte copies, search/filter them,
   rename their display titles, open them, or remove the app's saved copies.
   The original imported files are not deleted by removing an app copy.
 
 The new native and browser interfaces have not been runtime-tested here.
-Compilation and real-device offline reopening/playback checks remain required.
+For v0.6.0+9, all 52 standalone personal-list model/store checks and all 182
+catalog/link-policy checks passed. Source review and standalone Dart formatting
+also completed. No Flutter compilation, browser QA, or native-device QA has
+been performed for this update. The last user-reported
+green iPhone compile check still covers v0.2.2. Compilation and real-device
+offline reopening/playback checks remain required.
 An installable iPhone/TestFlight build still depends on Apple signing setup.
 
 NOT IMPLEMENTED YET:
@@ -33,7 +51,9 @@ Accounts, real membership invitations, multiple stored plans/groups, cloud
 sharing/sync, community forum or moderator accounts, online inbox,
 subscriptions, verified complete shared-plan offline packages, encrypted plan
 storage, cloud guide uploads/group sharing, downloaded maps, offline routing,
-and local-area information. No sample PDF manuals or videos are included.
+and local-area information. Amazon order verification is not implemented,
+and affiliate configuration remains inactive. No sample PDF manuals or videos
+are included.
 
 The map background still needs internet. Written locations and coordinates
 are part of the local plan. Named pins are not downloaded map imagery.
@@ -63,6 +83,10 @@ are part of the local plan. Named pins are not downloaded map imagery.
     their own items and check marks, independently of the shared master plan.
 16. The app needs a PDF/video section where users import and store files on
     their device for use as offline guides during a disaster.
+17. Add suggested supplies with Amazon links and prepare affiliate support as
+    an additional potential revenue source. The requested purchase-to-owned
+    automation is not claimed: the current implementation adds an unowned
+    list entry and requires the user to confirm possession with I have this.
 
 
 2. PROPOSED BUSINESS RULES - NOT ALL CONFIRMED
@@ -87,6 +111,10 @@ CONFIRMED ON NOVEMBER 22:
   status still requires Premium and the owner's permission.
 - Users can import PDF/video guides and retain their local copies for offline
   use. The local library in this prototype has no subscription check.
+- Suggested items and personal ownership/packing controls remain free. The
+  same inventory functionality applies to items obtained from any retailer.
+  Affiliate setup is optional and starts disabled; following a shopping link
+  does not grant a reward, ownership status, or Premium access.
 
 DECISION STILL OPEN: May free users send inbox messages? Dennis confirmed free
 forum participation, but did not explicitly confirm free inbox sending.
@@ -296,6 +324,53 @@ The current app session retains failed drafts across tab changes, but closing
 the app before a successful save can lose that draft. Corrupt stored records
 must remain available for copying and must not be replaced with an empty list.
 
+Version 0.6.0 adds separate Owned and Packed fields. Marking Packed implies
+Owned; clearing Owned also clears Packed. Owning an item does not by itself
+mark it packed. The existing personal save key is retained, reads accept
+schema 1 and 2, and writes use schema 2. Schema-1 packed items migrate as owned;
+unchecked older items remain unconfirmed as owned. This migration does not
+alter the shared plan, its schema, or its JSON backup. Personal items and
+guide files remain outside that group backup.
+
+4C. SUGGESTED SUPPLIES AND OPTIONAL AFFILIATE LINKS
+--------------------------------------------------
+The initial catalog has six stable item IDs: flashlight, weather_radio,
+manual_can_opener, water_container, whistle, and duct_tape. It contains original
+short notes, four ordinary US Amazon product links, and two clearly labeled
+Amazon search links. The seven-gallon water container is a home-kit option,
+not a go-bag bottle. Category guidance follows Ready.gov; it is not a brand
+endorsement. No live price, rating, product-photo feed, or stock claim is shown.
+Catalog sources and ordinary destinations are in AMAZON_AFFILIATE_SETUP.txt.
+
+The local Suggested view and Home shortcut do not require an Amazon account.
+Add to My pack adds an unowned item. I have this explicitly records possession
+without marking it packed. Add & shop on Amazon saves first, then presents
+the separate Open Amazon/Open Amazon search action. Failed saves must not
+proceed to a shopping destination. Returning from a shop cannot change
+ownership or packing. Catalog IDs prevent duplicate entries while preserving
+the user's edited name, quantity, notes, and existing status.
+
+The default affiliate configuration is deliberately empty and disabled.
+Ordinary links work in the Windows Chrome web preview. No Amazon shopping
+is offered in an installed phone app until its corresponding Amazon approval
+is configured; Apple Developer/TestFlight approval is a separate process.
+Installed desktop builds do not offer Amazon shopping. An approved mobile
+app can use ordinary links when an affiliate link is not configured. Web
+affiliate use requires an exact registered HTTPS origin and a valid full
+Amazon-generated link; local preview origins cannot activate affiliate use.
+
+Only supplied, verified full generated links can be activated. Destination
+validation can reject unsupported hosts, paths, IDs, or query parameters;
+it cannot prove Amazon generated a link or approved a distribution surface.
+The operator verifies that provenance and the approval before configuration.
+The setup guide contains the current activation and disclosure instructions.
+
+There is no buyer/order identification, automatic ownership confirmation,
+reward for using affiliate links, or requirement to buy at Amazon. Manual
+inventory controls remain the same for every retailer and existing supplies.
+This is a separate optional revenue mechanism from future Premium billing;
+no commission amount or revenue outcome is promised.
+
 
 5. COMMUNITY AND INBOX
 -----------------------
@@ -350,8 +425,8 @@ Live member tracking has not been requested and is not part of this scope.
 FUTURE NAVIGATION PROPOSAL
 Plans / Map / Groups / Community / Inbox.
 The Plans screen becomes the home/library. Kits and assignments live within
-each plan. Current v0.5.0 navigation remains Home / Plan / Map / Kit / Group;
-personal packing items have their own Kit subview, and Offline guides opens
+each plan. Current v0.6.0 navigation remains Home / Plan / Map / Kit / Group;
+Kit contains Shared kit, My pack, and Suggested, and Offline guides opens
 from Home or the top bar. Future navigation must keep personal guides easy
 to reach as the online and multi-plan screens are implemented.
 
@@ -417,8 +492,10 @@ reading an existing emergency copy should not be interrupted by a paywall.
 9. IMPLEMENTATION ORDER
 --------------------------
 Completed source increments: named-location Map tab in v0.4.0, then a free
-personal packing list and local PDF/video guide library in v0.5.0+8. Compile,
-browser interaction, and native offline reopening/playback checks remain required.
+personal packing list and local PDF/video guide library in v0.5.0+8. Version
+0.6.0+9 adds suggested supplies, separate ownership/packing, catalog reuse,
+and disabled-by-default affiliate configuration. Compile, browser interaction,
+shopping handoff, and native offline reopening/playback checks remain required.
 
 Next foundation:
 1. Durable local plan library with migration and multiple plan IDs.
@@ -461,6 +538,20 @@ receive and retain a complete shared plan.
   plan's items or packed statuses; group backups remain independent.
 - Personal checklist writes remain ordered across tab changes. Failed saves
   preserve the in-session draft, and corrupt stored data is not overwritten.
+- Old personal schema-1 packed items migrate as owned; unchecked items remain
+  unconfirmed. Schema-2 reads/writes preserve ownership, packing, and catalog IDs.
+- Packed sets Owned, clearing Owned clears Packed, and I have this leaves a
+  new item unpacked. Inventory works equally for items obtained anywhere.
+- Adding a catalog item twice preserves one edited entry, including its
+  quantity, notes, and existing ownership/packing status.
+- Add & shop saves before offering Open Amazon/Open Amazon search; a save
+  failure does not leave the app, and a shop return cannot confirm ownership.
+- The unconfigured web preview uses ordinary links; unapproved phone builds
+  and installed desktop builds expose no Amazon shopping action.
+- Affiliate links require the correct approved app or exact registered HTTPS
+  origin, valid supplied full links, and the visible disclosure. Preview/IP
+  origins, wrong product IDs/search queries, and unsupported link forms fail
+  closed to ordinary links where allowed, or no shopping where prohibited.
 - A completed PDF/video import contains a local byte copy and survives a
   native app restart without needing the original picker/cloud location.
 - Missing, corrupt, unsupported, or incomplete files do not show a false
