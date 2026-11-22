@@ -6,6 +6,7 @@ import 'package:material_ui/material_ui.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'black_box_theme.dart';
+import 'field_surfaces.dart';
 import 'guide_library.dart';
 import 'personal_packlist.dart';
 import 'plan_dialogs.dart';
@@ -308,7 +309,7 @@ class _PlanHomeState extends State<PlanHome> {
                 Text('Appearance', style: _type.headlineSmall),
                 const SizedBox(height: 8),
                 Text(
-                  'Field Terminal · Choose light or dark.',
+                  'Rugged Field Terminal · Choose light or dark.',
                   style: _type.bodyMedium,
                 ),
                 const SizedBox(height: 16),
@@ -342,7 +343,7 @@ class _PlanHomeState extends State<PlanHome> {
                     showAboutDialog(
                       context: context,
                       applicationName: 'Black Box',
-                      applicationVersion: 'Prototype 0.6.0',
+                      applicationVersion: 'Prototype 0.7.0',
                       children: const [
                         Text(
                           'A local preparedness plan for your people, meeting '
@@ -885,30 +886,19 @@ class _PlanHomeState extends State<PlanHome> {
     );
   }
 
-  Widget _panel(Widget child) => Container(
-    width: double.infinity,
+  Widget _panel(Widget child) => FieldPanel(
     margin: const EdgeInsets.only(bottom: 16),
-    padding: EdgeInsets.all(_terminal ? 18 : 20),
-    decoration: BoxDecoration(
-      color: _colors.surfaceContainerLow,
-      borderRadius: BorderRadius.circular(_terminal ? 8 : 20),
-      border: Border.all(color: _colors.outlineVariant),
-    ),
+    padding: const EdgeInsets.all(20),
     child: child,
   );
 
   Widget _heading(String title, String subtitle) => Padding(
     padding: const EdgeInsets.only(bottom: 24),
-    child: Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(title, style: _type.headlineLarge),
-        const SizedBox(height: 8),
-        Text(
-          subtitle,
-          style: _type.bodyLarge?.copyWith(color: _colors.onSurfaceVariant),
-        ),
-      ],
+    child: FieldSectionHeading(
+      eyebrow:
+          '${(_tab + 1).toString().padLeft(2, '0')} / ${_labels[_tab].toUpperCase()}',
+      title: title,
+      subtitle: subtitle,
     ),
   );
 
@@ -925,19 +915,12 @@ class _PlanHomeState extends State<PlanHome> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _heading(
-          _terminal ? 'FIELD PLAN' : _plan.groupName,
-          _terminal ? _plan.groupName : 'Your people. Your places. Your kit.',
-        ),
-        Container(
-          width: double.infinity,
-          margin: const EdgeInsets.only(bottom: 16),
-          padding: const EdgeInsets.all(20),
-          decoration: BoxDecoration(
-            color: _colors.surfaceContainerHigh,
-            borderRadius: BorderRadius.circular(_terminal ? 8 : 22),
-            border: Border.all(color: _colors.primary.withValues(alpha: 0.55)),
-          ),
+        _heading('Your field plan', _plan.groupName),
+        FieldPanel(
+          prominent: true,
+          accent: _colors.primary,
+          margin: const EdgeInsets.only(bottom: 20),
+          padding: const EdgeInsets.all(24),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -1019,8 +1002,13 @@ class _PlanHomeState extends State<PlanHome> {
                 style: _type.headlineSmall,
               ),
               const SizedBox(height: 12),
-              ClipRRect(
-                borderRadius: BorderRadius.circular(_terminal ? 2 : 8),
+              Container(
+                padding: const EdgeInsets.all(3),
+                decoration: BoxDecoration(
+                  color: _colors.surfaceContainerLowest,
+                  border: Border.all(color: _colors.outline),
+                  borderRadius: BorderRadius.circular(3),
+                ),
                 child: LinearProgressIndicator(
                   value: total == 0 ? 0 : packed / total,
                   minHeight: 8,
@@ -1520,7 +1508,8 @@ class _PlanHomeState extends State<PlanHome> {
     padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
     decoration: BoxDecoration(
       color: attention ? _colors.tertiaryContainer : _colors.secondaryContainer,
-      borderRadius: BorderRadius.circular(_terminal ? 4 : 8),
+      borderRadius: BorderRadius.circular(3),
+      border: Border.all(color: _colors.outlineVariant),
     ),
     child: Text(
       text,
@@ -1802,7 +1791,7 @@ class _PlanHomeState extends State<PlanHome> {
           padding: const EdgeInsets.fromLTRB(16, 10, 16, 10),
           decoration: BoxDecoration(
             color: _colors.surfaceContainerLowest,
-            border: Border(top: BorderSide(color: _colors.outlineVariant)),
+            border: Border(top: BorderSide(color: _colors.outline, width: 1.5)),
           ),
           child: Semantics(
             liveRegion: true,
@@ -1926,33 +1915,64 @@ class _PlanHomeState extends State<PlanHome> {
     builder: (context, constraints) {
       final wide = constraints.maxWidth >= 900;
       final available = !_loading && _loadError == null;
+      final compactBrand =
+          constraints.maxWidth < 400 ||
+          MediaQuery.textScalerOf(context).scale(16) > 20;
       return Scaffold(
         appBar: AppBar(
-          toolbarHeight: 72,
+          toolbarHeight: 80,
           titleSpacing: 16,
+          flexibleSpace: const FieldBackdrop(child: SizedBox.expand()),
           title: Row(
             children: [
-              Container(
-                width: 38,
-                height: 38,
-                decoration: BoxDecoration(
-                  color: _colors.primary,
-                  borderRadius: BorderRadius.circular(_terminal ? 4 : 9),
-                ),
-                child: Icon(
-                  Icons.inventory_2_outlined,
-                  color: _colors.onPrimary,
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Text(
-                  'BLACK BOX',
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: _type.titleLarge?.copyWith(
-                    letterSpacing: _terminal ? 0 : 1.4,
+              if (!compactBrand) ...[
+                ExcludeSemantics(
+                  child: Container(
+                    width: 42,
+                    height: 42,
+                    decoration: ShapeDecoration(
+                      color: _colors.primary,
+                      shape: BeveledRectangleBorder(
+                        borderRadius: BorderRadius.circular(5),
+                        side: BorderSide(color: _colors.outline, width: 1.5),
+                      ),
+                    ),
+                    child: Icon(
+                      Icons.inventory_2_outlined,
+                      color: _colors.onPrimary,
+                    ),
                   ),
+                ),
+                const SizedBox(width: 12),
+              ],
+              Expanded(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'BLACK BOX',
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: _type.titleLarge?.copyWith(
+                        fontFamily: 'Barlow Condensed',
+                        fontWeight: FontWeight.w600,
+                        fontSize: compactBrand ? 24 : 28,
+                        letterSpacing: 1.1,
+                      ),
+                    ),
+                    if (!compactBrand) ...[
+                      const SizedBox(height: 2),
+                      Text(
+                        'FIELD TERMINAL',
+                        style: _type.labelSmall?.copyWith(
+                          fontSize: 12,
+                          letterSpacing: 1.0,
+                          color: _colors.onSurfaceVariant,
+                        ),
+                      ),
+                    ],
+                  ],
                 ),
               ),
             ],
@@ -1977,43 +1997,76 @@ class _PlanHomeState extends State<PlanHome> {
             ),
             const SizedBox(width: 8),
           ],
+          bottom: PreferredSize(
+            preferredSize: const Size.fromHeight(4),
+            child: ExcludeSemantics(
+              child: Container(
+                height: 4,
+                color: _colors.outlineVariant,
+                alignment: Alignment.centerLeft,
+                child: Container(width: 64, color: _colors.tertiary),
+              ),
+            ),
+          ),
         ),
-        body: SafeArea(
-          top: false,
-          bottom: wide || !available,
-          child: _loading
-              ? const Center(child: CircularProgressIndicator())
-              : _loadError != null
-              ? _loadFailure()
-              : Row(
-                  children: [
-                    if (wide)
-                      NavigationRail(
-                        extended: true,
-                        selectedIndex: _tab,
-                        onDestinationSelected: (index) =>
-                            setState(() => _tab = index),
-                        destinations: List.generate(
-                          _labels.length,
-                          (index) => NavigationRailDestination(
-                            icon: Icon(_icons[index]),
-                            label: Text(_labels[index]),
+        body: FieldBackdrop(
+          child: SafeArea(
+            top: false,
+            bottom: wide || !available,
+            child: _loading
+                ? const Center(child: CircularProgressIndicator())
+                : _loadError != null
+                ? _loadFailure()
+                : Row(
+                    children: [
+                      if (wide)
+                        DecoratedBox(
+                          position: DecorationPosition.foreground,
+                          decoration: BoxDecoration(
+                            border: Border(
+                              right: BorderSide(
+                                color: _colors.outline,
+                                width: 1.5,
+                              ),
+                            ),
+                          ),
+                          child: NavigationRail(
+                            extended: true,
+                            selectedIndex: _tab,
+                            onDestinationSelected: (index) =>
+                                setState(() => _tab = index),
+                            destinations: List.generate(
+                              _labels.length,
+                              (index) => NavigationRailDestination(
+                                icon: Icon(_icons[index]),
+                                label: Text(_labels[index]),
+                              ),
+                            ),
                           ),
                         ),
-                      ),
-                    Expanded(child: _content()),
-                  ],
-                ),
+                      Expanded(child: _content()),
+                    ],
+                  ),
+          ),
         ),
         bottomNavigationBar: !wide && available
-            ? NavigationBar(
-                selectedIndex: _tab,
-                onDestinationSelected: (index) => setState(() => _tab = index),
-                destinations: List.generate(
-                  _labels.length,
-                  (index) => NavigationDestination(
-                    icon: Icon(_icons[index]),
-                    label: _labels[index],
+            ? DecoratedBox(
+                position: DecorationPosition.foreground,
+                decoration: BoxDecoration(
+                  border: Border(
+                    top: BorderSide(color: _colors.outline, width: 1.5),
+                  ),
+                ),
+                child: NavigationBar(
+                  selectedIndex: _tab,
+                  onDestinationSelected: (index) =>
+                      setState(() => _tab = index),
+                  destinations: List.generate(
+                    _labels.length,
+                    (index) => NavigationDestination(
+                      icon: Icon(_icons[index]),
+                      label: _labels[index],
+                    ),
                   ),
                 ),
               )

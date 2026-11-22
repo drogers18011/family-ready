@@ -1,6 +1,26 @@
-BLACK BOX - VERSION 0.6.0+9
+BLACK BOX - VERSION 0.7.0+10
 ==========================
 Updated for Dennis Rogers, November 22, 2026
+
+RUGGED FIELD TERMINAL
+---------------------
+This release gives the working app a more substantial field-equipment look.
+Static ripstop and grain textures sit behind the content. Matte panels have
+chamfered corners, double edges, and small fastener details. Buttons have
+stronger borders and depth, and the selected navigation item is more visible.
+Large headings use bundled Barlow Condensed; body text and utility labels
+retain IBM Plex Mono.
+
+Dark combines olive-black panels, sage controls, cream text, and amber details.
+Light uses sand/canvas tones with forest-green controls. The texture is drawn
+by the app's code: no texture downloads, new image assets, or dependencies are
+needed. Controls and text-entry surfaces remain clear. The header simplifies
+at narrow widths or enlarged text settings to leave room for its controls.
+
+The existing Light/Dark preference, plan/checklist/guide storage, shopping
+behavior, and features are retained. You reported a green ios-compile-check
+and that everything works for v0.6.0+9. That is the user-reported baseline;
+this new visual release still needs its own compile and screen checks.
 
 SUGGESTED ITEMS AND PERSONAL INVENTORY
 --------------------------------------
@@ -80,9 +100,10 @@ offline maps or calculate directions.
 
 FIELD TERMINAL - DARK AND LIGHT
 -------------------------------
-Black Box now uses the Field Terminal design in two modes. Dark is the
-default, with crisp green text and controls on a black background. Light uses
-a pale off-white background with forest-green text and controls.
+Black Box uses the rugged Field Terminal design in two modes. Dark is the
+default, with olive-black equipment panels, cream text, and sage controls.
+Light uses sand/canvas surfaces with forest-green controls. Both have static
+texture, chamfered panels, and restrained amber details.
 
 Use the top-right sun/moon button to switch directly between Light and Dark.
 You can also select either mode in Appearance. The choice is remembered on
@@ -106,7 +127,8 @@ family-ready GitHub repository on the same build branch. Keep assets, lib,
 scripts, test, and web as folders beside pubspec.yaml and codemagic.yaml.
 Include ALL files in lib and test, the updated pubspec.yaml and scripts, and
 everything in assets/fonts, preserving their folder hierarchy. Include the
-new suggested-items, catalog, affiliate-config, and personal-repository files
+new lib/field_surfaces.dart with the updated theme and screen files. Keep the
+suggested-items, catalog, affiliate-config, and personal-repository files
 in lib, plus test/suggested_catalog_check.dart. Keep the existing guide
 platform files too, even when testing in Chrome. Keep NEXT_FEATURES.txt and
 AMAZON_AFFILIATE_SETUP.txt with the top-level documents. Upload the extracted
@@ -121,13 +143,15 @@ the visible Black Box name and keep the working setup consistent.
 
 CURRENT STATUS
 ---------------
-You reported a green unsigned iPhone compile check for version 0.2.2. Your
-Apple Developer enrollment was last reported pending. The next account step
-is Apple signing and TestFlight after the membership becomes active.
+You reported that v0.6.0+9 passed ios-compile-check with a green result and
+that everything is working. This is user-reported confirmation of the
+previous release, not runtime testing performed in this preparation workspace.
+Your Apple Developer enrollment was last reported pending. Apple signing and
+TestFlight follow after the membership becomes active.
 
-This v0.6.0+9 suggested-items update has not been Flutter-compiled or tested
+This v0.7.0+10 rugged visual update has not been Flutter-compiled or tested
 in a browser or on a phone here. Run a new ios-compile-check after uploading
-it; the earlier green result covers v0.2.2.
+it, and inspect the new surfaces and controls in both modes.
 
 The planned access model lets free readers view complete shared plans and
 download them for offline use, with subscriptions for contributing and editing.
@@ -148,16 +172,16 @@ IPHONE BUILD SETUP ADDED
 ------------------------
 For your iPhone 16 Pro Max and Windows-only development setup, start with
 START_IPHONE_CLOUD.txt. The included Codemagic workflows prepare the current
-v0.6.0+9 app for an unsigned iOS compile check and, after your Apple account setup,
+v0.7.0+10 app for an unsigned iOS compile check and, after your Apple account setup,
 an internal TestFlight build. Offline routing remains a future feature.
 If v0.2 is already working in Chrome, continue with that cloud guide; you do
 not need to repeat the browser installation steps below.
 
 
-This update builds on the Flutter browser prototype you successfully ran on
-your Windows PC. It adds suggested supplies and separate ownership/packing
-states while retaining the personal checklist, local guide-file storage,
-Map tab, and existing shared-plan backup/restore format.
+This update builds on the v0.6.0+9 app you reported as working. It changes
+the visual treatment while retaining suggested supplies, ownership/packing,
+the personal checklist, local guide-file storage, Map tab, and existing
+shared-plan backup/restore format.
 
 UPDATE FROM YOUR EXISTING VERSION
 ---------------------------------
@@ -169,17 +193,17 @@ UPDATE FROM YOUR EXISTING VERSION
 2. Click the running app's terminal window and press q to stop it. Close
    its browser tab too.
 3. Download black_box_starter.zip. Choose Extract All and use a NEW folder,
-   such as Documents\BlackBox_v060. Keep your old source folder.
+   such as Documents\BlackBox_v070. Keep your old source folder.
 4. Open the extracted folder containing START_HERE.cmd and pubspec.yaml.
 5. Double-click START_HERE.cmd and keep its terminal window open. It downloads
-   the added Flutter packages and compiles the updated app; internet is needed.
+   the required Flutter packages and compiles the updated app; internet is needed.
 6. When the terminal says the app is being served, open your normal Chrome
    profile and go to this exact address:
 
    http://127.0.0.1:54321
 
 7. Confirm the app shows Black Box. Open Appearance > About Black Box & licenses
-   to check that it says Prototype 0.6.0. If the old screen is still visible,
+   to check that it says Prototype 0.7.0. If the old screen is still visible,
    press Ctrl+Shift+R to reload it. Do NOT clear site data.
 8. Check that any plan you saved in the first version is still there. Then
    open Group > Download backup and keep the downloaded JSON file.
@@ -194,6 +218,15 @@ coordinate edits between multiple tabs or devices.
 
 WHAT IS NEW
 -----------
+RUGGED VISUAL UPDATE
+- Static ripstop/grain backdrops, matte chamfered panels, double edges, and
+  small recessed fastener details across the main screens and guide library.
+- Larger condensed headings, stronger button borders/depth, and clearer
+  selected navigation. Text fields and controls keep solid readable fills.
+- Dark olive/sage/cream and Light sand/forest palettes, with amber accents.
+- Header branding simplifies at narrow widths or large text settings.
+- No new assets or dependencies. Appearance IDs and saved data are unchanged.
+
 SUGGESTIONS AND OWNERSHIP
 - Kit > Suggested and Home > Browse suggested items open the six-item catalog.
   Four links lead to product pages; two lead to searches. Shopping needs internet.
@@ -232,8 +265,8 @@ APPEARANCE AND NAVIGATION
 - Field Terminal opens in Dark mode by default. Use the top-right sun/moon
   button to switch directly to Light mode or back to Dark. Both options are
   also in Appearance, and the selected mode is stored locally.
-- Light uses a pale off-white background with forest-green text and controls;
-  Dark keeps the green-on-black terminal appearance.
+- Light uses sand/canvas surfaces with forest-green controls; Dark uses
+  olive-black panels, sage controls, and cream text. Both retain the texture.
 - Home shows the plan overview; Plan contains meeting places; Map displays
   those locations; Kit contains supplies; Group contains the local roster,
   backup/restore, and readable copies.
@@ -410,6 +443,7 @@ PROJECT FILES
 -------------
 lib/main.dart          Screens, local saving, backup preview, and recovery UI.
 lib/black_box_theme.dart Field Terminal appearance and color definitions.
+lib/field_surfaces.dart Static textures, chamfered panels, and field-style headings.
 lib/plan_models.dart   Data model, version migration, validation, readable export.
 lib/plan_dialogs.dart  Meeting-place and supply editors.
 lib/meeting_map.dart   Interactive online map and coordinate picker.
@@ -517,14 +551,20 @@ For v0.6.0+9, all 52 standalone personal-checklist model/store checks passed,
 covering the added ownership behavior and personal-list migration.
 All 182 standalone catalog/link-policy checks passed, including the default
 disabled configuration and shopping destination/platform validation. Source
-review and standalone Dart formatting also completed. Other test results
-above describe earlier releases; they are not new reruns for this version.
+review and standalone Dart formatting also completed. You subsequently
+reported a green ios-compile-check and that everything is working for v0.6.0+9.
+That report is the latest confirmed user baseline; it is not workspace-run
+browser or native-device QA, and it does not establish every offline scenario.
 
-These checks do not replace Flutter compilation or a runtime screen check.
-This suggested-items update has not been Flutter-compiled or tested in a
-browser or on a native device here. Device rendering, interaction, shopping
-handoff, and appearance persistence across real restarts remain unverified.
-Check it with the Windows browser launcher and a new ios-compile-check build.
+For v0.7.0+10, verification is limited to source review, standalone formatting,
+and numerical contrast review of the new palette. The 52 personal-list and
+182 catalog/link checks above are historical v0.6.0 results; they have not been
+rerun for this visual-only update. No new model or UI test suite was added.
+No Flutter compilation, browser QA, or native-device QA was performed here;
+the earlier automatic approval restriction on Flutter startup remains in place.
+These checks do not replace compilation or a runtime screen check. Check this
+release with the Windows launcher and a new ios-compile-check build, including
+both appearances, small widths, larger text, and the existing screen actions.
 Installation and behavior on the physical iPhone still need testing after
 Apple signing is configured.
 

@@ -1,6 +1,6 @@
 BLACK BOX - AMAZON SUGGESTIONS SETUP
 ==================================
-For version 0.6.0+9 | November 22, 2026
+For version 0.7.0+10 | November 22, 2026
 
 START HERE
 ----------
@@ -105,7 +105,7 @@ https://affiliate-program.amazon.com/help/operating/agreement
 
 EDIT THE FILE ON YOUR WINDOWS PC
 --------------------------------
-First install all files from the 0.6.0+9 update using the main README. Then:
+First install all files from the 0.7.0+10 update using the main README. Then:
 
 1. Open Visual Studio Code. Choose File > Open Folder and select the Black Box
    project folder containing pubspec.yaml, codemagic.yaml, and the lib folder.

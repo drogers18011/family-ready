@@ -9,14 +9,22 @@ Keep developing on Windows. Put the project in a private GitHub repository.
 Codemagic checks out the code and builds it on a hosted Mac. Later, Apple's
 TestFlight installs the signed beta on your iPhone.
 
-CURRENT STATUS: You reported a green unsigned iPhone compile check for v0.2.2.
-Your Apple Developer enrollment was last reported pending. Apple signing and TestFlight
-come next after membership activation.
+CURRENT STATUS: You reported a green ios-compile-check for v0.6.0+9 and said
+everything is working. This is the user-reported baseline, not runtime QA
+performed in this preparation workspace. Your Apple Developer enrollment was
+last reported pending. Apple signing and TestFlight follow activation.
 
-This package is version 0.6.0+9 and uses Field Terminal. Dark is the default,
-with green text and controls on black. Light uses a pale off-white background
-with forest-green text and controls. Switch directly with the top-right
-sun/moon button, or select Light or Dark in Appearance. The choice is remembered
+This package is version 0.7.0+10 and gives Field Terminal a rugged treatment.
+Static ripstop/grain backdrops surround matte, chamfered panels with double
+edges and fastener details. Buttons and navigation have stronger borders and
+depth. Barlow Condensed headings sit above IBM Plex Mono body text and labels.
+Dark is the default: olive-black surfaces, sage controls, cream text, and
+amber details. Light uses sand/canvas tones with forest-green controls.
+Texture is drawn by app code; there are no new image assets or dependencies.
+The header simplifies at narrow widths and enlarged text settings.
+
+Switch directly with the top-right sun/moon button, or select Light or Dark
+in Appearance. The choice is remembered
 on the same browser or device when its preference save succeeds. An older
 Flight Deck preference opens Field Terminal in Dark mode after this update.
 The five tabs are Home, Plan, Map, Kit, and Group. Map shows the
@@ -24,7 +32,7 @@ current local plan's primary and backup places by their saved names, with
 selectable markers, local details, and the existing edit/place-pin controls.
 Its map imagery requires internet. The app still holds one local plan.
 
-NEW: Kit has Shared kit, My pack, and Suggested. Home has a Browse suggested
+RETAINED: Kit has Shared kit, My pack, and Suggested. Home has a Browse suggested
 items shortcut. Six bundled suggestions have original preparation notes,
 four ordinary Amazon product links, and two clearly labeled search links.
 My pack tracks Owned separately from Packed: Packed sets Owned, and clearing
@@ -55,10 +63,11 @@ cloud storage. Guide files and personal pack items are not in group JSON
 backups; keep original files and use Copy list text for the personal list.
 
 The successful Material UI migration and Black Box rename remain included.
-This suggested-items update has not been Flutter-compiled or tested in a
+This rugged visual update has not been Flutter-compiled or tested in a
 browser or on a phone here. Upload this version and run a new ios-compile-check;
-the previous green result covers v0.2.2. Offline map downloads and two-marker
-offline routing remain future work. NEXT_FEATURES.txt records the planned account groups,
+the latest user-reported green result covers v0.6.0+9. Offline map downloads
+and two-marker offline routing remain future work. NEXT_FEATURES.txt records
+the planned account groups,
 multiple plans, sharing, forum, asynchronous inbox, and subscriptions. None of
 those online/account features is implemented in this local prototype.
 
@@ -68,8 +77,9 @@ Extract black_box_starter.zip and upload its contents to the existing
 family-ready repository, preserving assets, lib, scripts, test, and web as
 folders at the repository root beside pubspec.yaml and codemagic.yaml. Include
 ALL files in lib and test, the updated pubspec.yaml/scripts, and every file in
-assets/fonts, preserving their folder hierarchy. Include all guide platform
-files, the new suggested/catalog/affiliate-config/personal-repository files,
+assets/fonts, preserving their folder hierarchy. Include the new
+lib/field_surfaces.dart with the updated theme and screen files. Keep all guide
+platform files, the suggested/catalog/affiliate-config/personal-repository files,
 and test/suggested_catalog_check.dart alongside the existing checks. Keep
 NEXT_FEATURES.txt and AMAZON_AFFILIATE_SETUP.txt with the top-level documents.
 Do not upload only main.dart, the ZIP, or an extra
@@ -145,6 +155,7 @@ STEP 2 - UPLOAD THE CLEAN PROJECT TO A PRIVATE GITHUB REPOSITORY
      AMAZON_AFFILIATE_SETUP.txt
    Also confirm these paths are present, with the same folder hierarchy:
      lib/black_box_theme.dart
+     lib/field_surfaces.dart
      lib/plan_map.dart
      lib/guide_library.dart and all guide_*.dart files
      lib/personal_packlist.dart and lib/personal_packlist_models.dart
@@ -277,6 +288,10 @@ FIRST PHONE CHECK
 ------------------
 Check Home, Plan, Map, Kit, and Group. Use the top-right sun/moon button to try
 Field Terminal in Light and Dark, then check the same options in Appearance.
+Inspect the textured panels, selected navigation, and button/input contrast.
+Try a narrow screen and larger system text; the header should simplify while
+its controls remain usable. Texture should remain static, and controls should
+respond normally without any decorative layer intercepting taps.
 Edit sample details, choose a mode, close the app completely, reopen it, and
 check the saved plan and appearance.
 Give the primary and backup locations names and pins, then check their labels
@@ -356,9 +371,10 @@ fonts do not add offline maps.
 VERIFICATION AND NEXT DEVELOPMENT
 ---------------------------------
 The existing configuration/scripts have source review and local syntax/fixture
-checks. You reported a green ios-compile-check run for v0.2.2. That verifies
-the Material migration and Black Box rename through the configured analysis,
-data checks, and unsigned iPhone compilation.
+checks. Historically, you reported a green ios-compile-check for v0.2.2,
+covering the Material migration and Black Box rename. The latest user-reported
+green build is v0.6.0+9, accompanied by your report that everything is working.
+This does not replace dedicated signed-phone and offline restart checks.
 
 Version 0.3.0+5 passed standalone Dart formatting and source review during
 preparation. Its existing 62 model/migration/backup/validation checks and all
@@ -396,14 +412,19 @@ For v0.6.0+9, all 52 standalone personal-checklist model/store checks passed,
 including ownership behavior and personal-list migration.
 All 182 standalone catalog/link-policy checks passed, including the default
 disabled configuration and shopping destination/platform validation. Source
-review and standalone Dart formatting also completed. Other test results
-above remain historical results, not new reruns for this version.
+review and standalone Dart formatting also completed. You then reported the
+green compile check and working app for that version.
 
-This suggested-items update has not been Flutter-compiled or tested in a
+For v0.7.0+10, verification is limited to standalone formatting, source review,
+and numerical contrast review of selected base palette pairs. The previous
+52 personal-list and 182 catalog/link checks are historical results, not new
+runs for this visual-only update. No additional automated tests were added.
+
+This rugged visual update has not been Flutter-compiled or tested in a
 browser or on a native device here. Device rendering, interaction, shopping
 handoff, and appearance persistence across real restarts remain unverified.
 Run a new ios-compile-check for this version. No signed IPA, phone installation,
-or TestFlight upload has been completed yet.
+or TestFlight upload has been completed by this workspace.
 
 Earlier automatic approval review in the preparation environment rejected
 local Flutter startup after an unexpected cloud metadata connection. That
@@ -411,7 +432,7 @@ blocked path has not been retried. The supplied workflows are for the hosted
 Mac build process you separately requested and start from your own account.
 
 Native offline-routing integration will need tracked iOS host configuration;
-we will extend the project for that work after establishing the first build.
+we will extend the project after establishing a signed-device baseline.
 Generated build outputs are diagnostics, not replacements for the app source.
 
 PRIMARY REFERENCES

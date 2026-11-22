@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:material_ui/material_ui.dart';
 
+import 'field_surfaces.dart';
 import 'personal_packlist_repository.dart';
 
 int _personalIdCounter = 0;
@@ -249,13 +250,9 @@ class _PersonalPacklistPanelState extends State<PersonalPacklistPanel> {
   Widget _item(PersonalPackItem item) {
     final theme = Theme.of(context);
     final colors = theme.colorScheme;
-    return Container(
+    return FieldPanel(
       margin: const EdgeInsets.only(bottom: 10),
-      decoration: BoxDecoration(
-        color: colors.surfaceContainerLow,
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: colors.outlineVariant),
-      ),
+      padding: EdgeInsets.zero,
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
@@ -373,12 +370,12 @@ class _PersonalPacklistPanelState extends State<PersonalPacklistPanel> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Text('My packing list', style: theme.textTheme.headlineMedium),
-        const SizedBox(height: 8),
-        Text(
-          'Your own checklist, free to use. These items and check marks are '
-          'kept on $_location, separate from the group plan.',
-          style: theme.textTheme.bodyMedium,
+        FieldSectionHeading(
+          title: 'My packing list',
+          eyebrow: 'Personal equipment',
+          subtitle:
+              'Your own checklist, free to use. These items and check marks '
+              'are kept on $_location, separate from the group plan.',
         ),
         const SizedBox(height: 10),
         Text(

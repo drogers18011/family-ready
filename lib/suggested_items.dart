@@ -3,6 +3,7 @@ import 'package:material_ui/material_ui.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import 'amazon_affiliate_config.dart';
+import 'field_surfaces.dart';
 import 'personal_packlist_repository.dart';
 import 'suggested_catalog.dart';
 
@@ -285,8 +286,8 @@ class _SuggestedItemsPanelState extends State<SuggestedItemsPanel> {
         : existing.owned
         ? 'Owned · not packed'
         : 'In My pack · not marked owned';
-    return Card(
-      margin: EdgeInsets.zero,
+    return FieldPanel(
+      padding: EdgeInsets.zero,
       child: Padding(
         padding: const EdgeInsets.all(18),
         child: Column(
@@ -389,12 +390,12 @@ class _SuggestedItemsPanelState extends State<SuggestedItemsPanel> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Text('Suggested items', style: _type.headlineMedium),
-        const SizedBox(height: 8),
-        Text(
-          'Build your kit a little at a time. Save an item to My pack, '
-          'mark it owned when you have it, then mark it packed.',
-          style: _type.bodyMedium,
+        const FieldSectionHeading(
+          title: 'Suggested items',
+          eyebrow: 'Supply catalog',
+          subtitle:
+              'Build your kit a little at a time. Save an item to My pack, '
+              'mark it owned when you have it, then mark it packed.',
         ),
         const SizedBox(height: 10),
         Text(

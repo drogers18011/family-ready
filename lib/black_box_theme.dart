@@ -11,72 +11,73 @@ extension BlackBoxStyleInfo on BlackBoxStyle {
 
   String get subtitle => switch (this) {
     BlackBoxStyle.aviation => 'Charcoal, clear type, safety orange',
-    BlackBoxStyle.terminal => 'Pale green on deep forest',
-    BlackBoxStyle.terminalLight => 'Forest green on warm white',
+    BlackBoxStyle.terminal => 'Olive equipment panels with sage controls',
+    BlackBoxStyle.terminalLight => 'Canvas tones with forest-green controls',
   };
 }
 
-/// Fonts are bundled with the app so these styles need no font downloads.
+/// Bundled fonts and solid control surfaces keep the field treatment legible.
+/// Texture belongs to the surrounding panels, not to text fields or buttons.
 ThemeData buildBlackBoxTheme(BlackBoxStyle style) {
   final terminal = style != BlackBoxStyle.aviation;
   final light = style == BlackBoxStyle.terminalLight;
   final bodyFont = terminal ? 'IBM Plex Mono' : 'Barlow';
-  final headingFont = terminal ? 'IBM Plex Mono' : 'Barlow Condensed';
+  const headingFont = 'Barlow Condensed';
   final emphasis = terminal ? FontWeight.w500 : FontWeight.w600;
-  final radius = terminal ? 8.0 : 16.0;
+  final radius = terminal ? 6.0 : 16.0;
   final canvas = light
-      ? const Color(0xFFF5F6EF)
+      ? const Color(0xFFD9D4C5)
       : terminal
-      ? const Color(0xFF07120D)
+      ? const Color(0xFF10130E)
       : const Color(0xFF101416);
   final panel = light
-      ? const Color(0xFFFFFFFF)
+      ? const Color(0xFFF2EEDC)
       : terminal
-      ? const Color(0xFF0C1D13)
+      ? const Color(0xFF1C211A)
       : const Color(0xFF1B2225);
   final raised = light
-      ? const Color(0xFFE5EDE2)
+      ? const Color(0xFFE4DEC8)
       : terminal
-      ? const Color(0xFF13291C)
+      ? const Color(0xFF293024)
       : const Color(0xFF252F33);
   final accent = light
-      ? const Color(0xFF245B35)
+      ? const Color(0xFF304B27)
       : terminal
-      ? const Color(0xFF9BE8B2)
+      ? const Color(0xFFBCD985)
       : const Color(0xFFFF9E54);
   final text = light
-      ? const Color(0xFF163B26)
+      ? const Color(0xFF202A1D)
       : terminal
-      ? const Color(0xFFD3F3DB)
+      ? const Color(0xFFF0ECDD)
       : const Color(0xFFF3F2EC);
   final muted = light
-      ? const Color(0xFF42634D)
+      ? const Color(0xFF3D4935)
       : terminal
-      ? const Color(0xFF98B7A0)
+      ? const Color(0xFFBAC2A9)
       : const Color(0xFFBAC6C5);
   final line = light
-      ? const Color(0xFF657D67)
+      ? const Color(0xFF6C785F)
       : terminal
-      ? const Color(0xFF587862)
+      ? const Color(0xFF788167)
       : const Color(0xFF738783);
   final softLine = light
-      ? const Color(0xFFA8BCA7)
+      ? const Color(0xFFBBB9A4)
       : terminal
-      ? const Color(0xFF294534)
+      ? const Color(0xFF3E4736)
       : const Color(0xFF38464A);
   final colors = light
       ? ColorScheme.light(
           primary: accent,
           onPrimary: const Color(0xFFFFFFFF),
-          primaryContainer: const Color(0xFFD9EBCF),
-          onPrimaryContainer: const Color(0xFF12351F),
-          secondary: const Color(0xFF3C6343),
+          primaryContainer: const Color(0xFFD2DCC0),
+          onPrimaryContainer: const Color(0xFF263C1E),
+          secondary: const Color(0xFF5C6544),
           onSecondary: const Color(0xFFFFFFFF),
-          secondaryContainer: const Color(0xFFE0EBDC),
-          onSecondaryContainer: const Color(0xFF25442D),
-          tertiary: const Color(0xFF80551A),
+          secondaryContainer: const Color(0xFFE0DDC4),
+          onSecondaryContainer: const Color(0xFF343D27),
+          tertiary: const Color(0xFF80531E),
           onTertiary: const Color(0xFFFFFFFF),
-          tertiaryContainer: const Color(0xFFF7E7BF),
+          tertiaryContainer: const Color(0xFFF2DFB9),
           onTertiaryContainer: const Color(0xFF553A0C),
           error: const Color(0xFFA52922),
           onError: const Color(0xFFFFFFFF),
@@ -91,34 +92,34 @@ ThemeData buildBlackBoxTheme(BlackBoxStyle style) {
           scrim: Colors.black,
           inverseSurface: text,
           onInverseSurface: canvas,
-          inversePrimary: const Color(0xFF9BE8B2),
+          inversePrimary: const Color(0xFFBCD985),
           surfaceTint: accent,
-          surfaceDim: const Color(0xFFDCE7D8),
+          surfaceDim: const Color(0xFFCFC9B7),
           surfaceBright: panel,
           surfaceContainerLowest: canvas,
           surfaceContainerLow: panel,
           surfaceContainer: panel,
           surfaceContainerHigh: raised,
-          surfaceContainerHighest: const Color(0xFFDCE7D8),
+          surfaceContainerHighest: const Color(0xFFD7D1BC),
         )
       : ColorScheme.dark(
           primary: accent,
           onPrimary: terminal
-              ? const Color(0xFF082211)
+              ? const Color(0xFF182210)
               : const Color(0xFF291400),
           primaryContainer: terminal
-              ? const Color(0xFF173D24)
+              ? const Color(0xFF34452B)
               : const Color(0xFF49301D),
           onPrimaryContainer: terminal
-              ? const Color(0xFFB7F4C8)
+              ? const Color(0xFFE1EDCD)
               : const Color(0xFFFFD4B1),
           secondary: terminal
-              ? const Color(0xFFB4D6B6)
+              ? const Color(0xFFC5CBA9)
               : const Color(0xFFA9C9B2),
           onSecondary: const Color(0xFF10271A),
-          secondaryContainer: const Color(0xFF213A2C),
-          onSecondaryContainer: const Color(0xFFD0EAD7),
-          tertiary: const Color(0xFFECCB82),
+          secondaryContainer: const Color(0xFF3C442F),
+          onSecondaryContainer: const Color(0xFFE4E7CE),
+          tertiary: const Color(0xFFF5B95F),
           onTertiary: const Color(0xFF2E2307),
           tertiaryContainer: const Color(0xFF453719),
           onTertiaryContainer: const Color(0xFFFFE3A3),
@@ -136,7 +137,7 @@ ThemeData buildBlackBoxTheme(BlackBoxStyle style) {
           inverseSurface: text,
           onInverseSurface: canvas,
           inversePrimary: terminal
-              ? const Color(0xFF245B35)
+              ? const Color(0xFF36532C)
               : const Color(0xFF774015),
           surfaceTint: accent,
           surfaceDim: canvas,
@@ -146,23 +147,23 @@ ThemeData buildBlackBoxTheme(BlackBoxStyle style) {
           surfaceContainer: panel,
           surfaceContainerHigh: raised,
           surfaceContainerHighest: terminal
-              ? const Color(0xFF1C3826)
+              ? const Color(0xFF36402E)
               : const Color(0xFF303D42),
         );
 
   TextStyle heading(double size) => TextStyle(
     fontFamily: headingFont,
     fontSize: size,
-    fontWeight: emphasis,
-    height: 1.15,
-    letterSpacing: terminal ? -0.4 : 0.1,
+    fontWeight: FontWeight.w600,
+    height: 1.12,
+    letterSpacing: terminal ? 0.5 : 0.1,
     color: text,
   );
   TextStyle body(double size) => TextStyle(
     fontFamily: bodyFont,
     fontSize: size,
     fontWeight: FontWeight.w400,
-    height: 1.4,
+    height: 1.45,
     color: text,
   );
   TextStyle label(double size) => TextStyle(
@@ -170,18 +171,18 @@ ThemeData buildBlackBoxTheme(BlackBoxStyle style) {
     fontSize: size,
     fontWeight: emphasis,
     height: 1.25,
-    letterSpacing: terminal ? 0 : 0.2,
+    letterSpacing: 0.2,
     color: text,
   );
 
   final textTheme = TextTheme(
-    displayLarge: heading(terminal ? 36 : 48),
-    displayMedium: heading(terminal ? 32 : 40),
-    displaySmall: heading(terminal ? 28 : 34),
-    headlineLarge: heading(terminal ? 26 : 32),
-    headlineMedium: heading(terminal ? 23 : 28),
-    headlineSmall: heading(terminal ? 21 : 24),
-    titleLarge: heading(terminal ? 19 : 22),
+    displayLarge: heading(48),
+    displayMedium: heading(terminal ? 42 : 40),
+    displaySmall: heading(terminal ? 36 : 34),
+    headlineLarge: heading(terminal ? 34 : 32),
+    headlineMedium: heading(terminal ? 30 : 28),
+    headlineSmall: heading(terminal ? 26 : 24),
+    titleLarge: heading(terminal ? 24 : 22),
     titleMedium: label(terminal ? 16 : 18),
     titleSmall: label(terminal ? 15 : 16),
     bodyLarge: body(terminal ? 16 : 17),
@@ -191,12 +192,12 @@ ThemeData buildBlackBoxTheme(BlackBoxStyle style) {
     labelMedium: label(13),
     labelSmall: label(12).copyWith(color: muted),
   );
-  final shape = RoundedRectangleBorder(
-    borderRadius: BorderRadius.circular(radius),
-  );
+  final OutlinedBorder shape = terminal
+      ? BeveledRectangleBorder(borderRadius: BorderRadius.circular(radius))
+      : RoundedRectangleBorder(borderRadius: BorderRadius.circular(radius));
   final inputBorder = OutlineInputBorder(
-    borderRadius: BorderRadius.circular(terminal ? 6 : 12),
-    borderSide: BorderSide(color: line),
+    borderRadius: BorderRadius.circular(terminal ? 3 : 12),
+    borderSide: BorderSide(color: line, width: terminal ? 1.5 : 1),
   );
 
   return ThemeData(
@@ -220,7 +221,7 @@ ThemeData buildBlackBoxTheme(BlackBoxStyle style) {
     iconTheme: IconThemeData(color: muted, size: 22),
     primaryIconTheme: IconThemeData(color: accent, size: 22),
     appBarTheme: AppBarThemeData(
-      backgroundColor: canvas,
+      backgroundColor: terminal ? panel : canvas,
       foregroundColor: text,
       surfaceTintColor: Colors.transparent,
       elevation: 0,
@@ -228,17 +229,20 @@ ThemeData buildBlackBoxTheme(BlackBoxStyle style) {
       centerTitle: false,
       titleTextStyle: textTheme.titleLarge,
       iconTheme: IconThemeData(color: text, size: 24),
+      shape: Border(bottom: BorderSide(color: line)),
     ),
     cardTheme: CardThemeData(
       color: panel,
       surfaceTintColor: Colors.transparent,
-      elevation: 0,
+      elevation: terminal ? 2 : 0,
       margin: EdgeInsets.zero,
-      shape: shape.copyWith(side: BorderSide(color: softLine)),
+      shape: shape.copyWith(
+        side: BorderSide(color: softLine, width: terminal ? 1.5 : 1),
+      ),
     ),
     inputDecorationTheme: InputDecorationThemeData(
       filled: true,
-      fillColor: canvas,
+      fillColor: light ? const Color(0xFFFAF7EB) : canvas,
       contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
       labelStyle: textTheme.bodyMedium!.copyWith(color: muted),
       floatingLabelStyle: textTheme.labelLarge!.copyWith(color: accent),
@@ -269,7 +273,14 @@ ThemeData buildBlackBoxTheme(BlackBoxStyle style) {
         foregroundColor: colors.onPrimary,
         disabledBackgroundColor: raised,
         disabledForegroundColor: muted,
-        minimumSize: const Size(48, 52),
+        elevation: terminal ? 3 : 0,
+        shadowColor: Colors.black.withValues(alpha: light ? 0.28 : 0.65),
+        surfaceTintColor: Colors.transparent,
+        side: BorderSide(
+          color: light ? const Color(0xFF253D1D) : accent,
+          width: terminal ? 1.5 : 1,
+        ),
+        minimumSize: const Size(48, 54),
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
         textStyle: textTheme.labelLarge,
         shape: shape,
@@ -279,11 +290,16 @@ ThemeData buildBlackBoxTheme(BlackBoxStyle style) {
       style: ElevatedButton.styleFrom(
         backgroundColor: accent,
         foregroundColor: colors.onPrimary,
-        disabledBackgroundColor: light ? raised : null,
-        disabledForegroundColor: light ? muted : null,
+        disabledBackgroundColor: raised,
+        disabledForegroundColor: muted,
         surfaceTintColor: Colors.transparent,
-        elevation: 0,
-        minimumSize: const Size(48, 52),
+        elevation: terminal ? 3 : 0,
+        shadowColor: Colors.black.withValues(alpha: light ? 0.28 : 0.65),
+        side: BorderSide(
+          color: light ? const Color(0xFF253D1D) : accent,
+          width: terminal ? 1.5 : 1,
+        ),
+        minimumSize: const Size(48, 54),
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
         textStyle: textTheme.labelLarge,
         shape: shape,
@@ -292,10 +308,12 @@ ThemeData buildBlackBoxTheme(BlackBoxStyle style) {
     outlinedButtonTheme: OutlinedButtonThemeData(
       style: OutlinedButton.styleFrom(
         foregroundColor: text,
-        disabledForegroundColor: light ? muted : null,
-        minimumSize: const Size(48, 48),
+        backgroundColor: panel,
+        disabledForegroundColor: muted,
+        disabledBackgroundColor: raised,
+        minimumSize: const Size(48, 50),
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-        side: BorderSide(color: line),
+        side: BorderSide(color: line, width: terminal ? 1.5 : 1),
         textStyle: textTheme.labelLarge,
         shape: shape,
       ),
@@ -314,6 +332,9 @@ ThemeData buildBlackBoxTheme(BlackBoxStyle style) {
       style: IconButton.styleFrom(
         foregroundColor: text,
         disabledForegroundColor: light ? muted.withValues(alpha: 0.65) : null,
+        backgroundColor: terminal ? panel : null,
+        side: terminal ? BorderSide(color: softLine) : null,
+        shape: shape,
         minimumSize: const Size(48, 48),
         padding: const EdgeInsets.all(12),
       ),
@@ -323,7 +344,9 @@ ThemeData buildBlackBoxTheme(BlackBoxStyle style) {
         minimumSize: const WidgetStatePropertyAll(Size(48, 48)),
         textStyle: WidgetStatePropertyAll(textTheme.labelLarge),
         shape: WidgetStatePropertyAll(shape),
-        side: WidgetStatePropertyAll(BorderSide(color: line)),
+        side: WidgetStatePropertyAll(
+          BorderSide(color: line, width: terminal ? 1.5 : 1),
+        ),
         backgroundColor: WidgetStateProperty.resolveWith(
           (states) => light && states.contains(WidgetState.disabled)
               ? raised
@@ -341,14 +364,13 @@ ThemeData buildBlackBoxTheme(BlackBoxStyle style) {
       ),
     ),
     navigationBarTheme: NavigationBarThemeData(
-      backgroundColor: canvas,
+      backgroundColor: terminal ? panel : canvas,
       surfaceTintColor: Colors.transparent,
       elevation: 0,
-      height: 76,
-      indicatorColor: colors.primaryContainer,
-      indicatorShape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(terminal ? 6 : 12),
-        side: light ? BorderSide(color: line) : BorderSide.none,
+      height: 80,
+      indicatorColor: terminal ? accent : colors.primaryContainer,
+      indicatorShape: shape.copyWith(
+        side: BorderSide(color: terminal ? accent : line),
       ),
       labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
       labelTextStyle: WidgetStateProperty.resolveWith(
@@ -359,20 +381,24 @@ ThemeData buildBlackBoxTheme(BlackBoxStyle style) {
       iconTheme: WidgetStateProperty.resolveWith(
         (states) => IconThemeData(
           size: 23,
-          color: states.contains(WidgetState.selected) ? accent : muted,
+          color: states.contains(WidgetState.selected)
+              ? terminal
+                    ? colors.onPrimary
+                    : accent
+              : muted,
         ),
       ),
     ),
     navigationRailTheme: NavigationRailThemeData(
-      backgroundColor: canvas,
-      indicatorColor: colors.primaryContainer,
-      indicatorShape: light
-          ? RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(6),
-              side: BorderSide(color: line),
-            )
-          : null,
-      selectedIconTheme: IconThemeData(color: accent, size: 24),
+      backgroundColor: terminal ? panel : canvas,
+      indicatorColor: terminal ? accent : colors.primaryContainer,
+      indicatorShape: shape.copyWith(
+        side: BorderSide(color: terminal ? accent : line),
+      ),
+      selectedIconTheme: IconThemeData(
+        color: terminal ? colors.onPrimary : accent,
+        size: 24,
+      ),
       unselectedIconTheme: IconThemeData(color: muted, size: 24),
       selectedLabelTextStyle: textTheme.labelMedium!.copyWith(color: accent),
       unselectedLabelTextStyle: textTheme.labelMedium!.copyWith(color: muted),
@@ -385,7 +411,7 @@ ThemeData buildBlackBoxTheme(BlackBoxStyle style) {
       ),
       checkColor: WidgetStatePropertyAll(colors.onPrimary),
       side: BorderSide(color: line, width: 1.5),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(2)),
       materialTapTargetSize: MaterialTapTargetSize.padded,
       visualDensity: VisualDensity.standard,
     ),
@@ -399,10 +425,8 @@ ThemeData buildBlackBoxTheme(BlackBoxStyle style) {
         color: colors.onPrimaryContainer,
       ),
       checkmarkColor: accent,
-      side: BorderSide(color: line),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(terminal ? 6 : 10),
-      ),
+      side: BorderSide(color: line, width: terminal ? 1.5 : 1),
+      shape: shape,
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
     ),
     listTileTheme: ListTileThemeData(
@@ -418,9 +442,8 @@ ThemeData buildBlackBoxTheme(BlackBoxStyle style) {
     dialogTheme: DialogThemeData(
       backgroundColor: panel,
       surfaceTintColor: Colors.transparent,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(terminal ? 12 : 24),
-        side: BorderSide(color: softLine),
+      shape: shape.copyWith(
+        side: BorderSide(color: line, width: terminal ? 1.5 : 1),
       ),
       titleTextStyle: textTheme.headlineSmall,
       contentTextStyle: textTheme.bodyMedium,
@@ -431,11 +454,16 @@ ThemeData buildBlackBoxTheme(BlackBoxStyle style) {
       surfaceTintColor: Colors.transparent,
       showDragHandle: true,
       dragHandleColor: line,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(
-          top: Radius.circular(terminal ? 12 : 24),
-        ),
-      ),
+      shape: terminal
+          ? BeveledRectangleBorder(
+              borderRadius: const BorderRadius.vertical(
+                top: Radius.circular(10),
+              ),
+              side: BorderSide(color: line),
+            )
+          : const RoundedRectangleBorder(
+              borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+            ),
     ),
     popupMenuTheme: PopupMenuThemeData(
       color: raised,

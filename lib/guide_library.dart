@@ -1,5 +1,6 @@
 import 'package:material_ui/material_ui.dart';
 
+import 'field_surfaces.dart';
 import 'guide_files.dart';
 
 /// Personal PDFs and videos kept separately from the shared-plan prototype.
@@ -318,8 +319,9 @@ class _GuideLibraryPageState extends State<GuideLibraryPage> {
   Widget _guideCard(GuideEntry entry) {
     final guide = entry.record;
     final pdf = guide.kind == GuideKind.pdf;
-    return Card(
+    return FieldPanel(
       margin: const EdgeInsets.only(bottom: 14),
+      padding: EdgeInsets.zero,
       child: Padding(
         padding: const EdgeInsets.all(18),
         child: Column(
@@ -441,129 +443,131 @@ class _GuideLibraryPageState extends State<GuideLibraryPage> {
             const SizedBox(width: 8),
           ],
         ),
-        body: SafeArea(
-          top: false,
-          child: Align(
-            alignment: Alignment.topCenter,
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 940),
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.all(20),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    Text('Your field library', style: _type.headlineMedium),
-                    const SizedBox(height: 10),
-                    Text(
-                      'Import PDFs and videos so the file itself is kept on '
-                      '$_where. These personal guides are separate from the '
-                      'shared plan.',
-                      style: _type.bodyLarge,
-                    ),
-                    const SizedBox(height: 18),
-                    _notice(
-                      _repository.isBrowser
-                          ? 'Browser preview: saved files can be removed when '
-                                'browser data is cleared or storage is reclaimed. '
-                                'Keep the originals. The launcher must be running '
-                                'to reopen this preview.'
-                          : 'Files are copied into Black Box on this device. '
-                                'Keep your originals as a backup. Open each guide '
-                                'and test it in airplane mode before relying on it.',
-                    ),
-                    Wrap(
-                      spacing: 16,
-                      runSpacing: 12,
-                      crossAxisAlignment: WrapCrossAlignment.center,
-                      children: [
-                        FilledButton.icon(
-                          onPressed: _working || _loading || _library == null
-                              ? null
-                              : _import,
-                          style: FilledButton.styleFrom(
-                            minimumSize: const Size(48, 48),
-                          ),
-                          icon: const Icon(Icons.add),
-                          label: const Text('Import PDF or video'),
-                        ),
-                        Text('${saved.length} saved · ${_size(bytes)}'),
-                      ],
-                    ),
-                    const SizedBox(height: 12),
-                    Text(
-                      'PDF, MP4, MOV, or M4V · Up to '
-                      '${_size(_repository.maxImportBytes)} per file. '
-                      'Cloud files need to finish downloading before import.',
-                      style: _type.bodySmall,
-                    ),
-                    const SizedBox(height: 22),
-                    if (_loading) const LinearProgressIndicator(),
-                    if (_working && _activity != null) ...[
-                      Semantics(liveRegion: true, child: Text(_activity!)),
-                      const SizedBox(height: 8),
-                      LinearProgressIndicator(value: _progress),
-                      const SizedBox(height: 18),
-                    ],
-                    if (_error != null) _notice(_error!, error: true),
-                    for (final warning in _library?.warnings ?? <String>[])
-                      _notice(warning),
-                    if (!_loading) ...[
-                      TextField(
-                        controller: _search,
-                        onChanged: (_) => setState(() {}),
-                        decoration: const InputDecoration(
-                          labelText: 'Search guides',
-                          prefixIcon: Icon(Icons.search),
-                        ),
+        body: FieldBackdrop(
+          child: SafeArea(
+            top: false,
+            child: Align(
+              alignment: Alignment.topCenter,
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 940),
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.all(20),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      FieldSectionHeading(
+                        title: 'Your field library',
+                        eyebrow: 'Reference archive',
+                        subtitle:
+                            'Import PDFs and videos so the file itself is kept on '
+                            '$_where. These personal guides are separate from the '
+                            'shared plan.',
                       ),
-                      const SizedBox(height: 14),
+                      const SizedBox(height: 18),
+                      _notice(
+                        _repository.isBrowser
+                            ? 'Browser preview: saved files can be removed when '
+                                  'browser data is cleared or storage is reclaimed. '
+                                  'Keep the originals. The launcher must be running '
+                                  'to reopen this preview.'
+                            : 'Files are copied into Black Box on this device. '
+                                  'Keep your originals as a backup. Open each guide '
+                                  'and test it in airplane mode before relying on it.',
+                      ),
                       Wrap(
-                        spacing: 8,
-                        runSpacing: 8,
+                        spacing: 16,
+                        runSpacing: 12,
+                        crossAxisAlignment: WrapCrossAlignment.center,
                         children: [
-                          ChoiceChip(
-                            label: const Text('All'),
-                            selected: _filter == null,
-                            onSelected: (_) => setState(() => _filter = null),
+                          FilledButton.icon(
+                            onPressed: _working || _loading || _library == null
+                                ? null
+                                : _import,
+                            style: FilledButton.styleFrom(
+                              minimumSize: const Size(48, 48),
+                            ),
+                            icon: const Icon(Icons.add),
+                            label: const Text('Import PDF or video'),
                           ),
-                          ChoiceChip(
-                            label: const Text('PDFs'),
-                            selected: _filter == GuideKind.pdf,
-                            onSelected: (_) =>
-                                setState(() => _filter = GuideKind.pdf),
-                          ),
-                          ChoiceChip(
-                            label: const Text('Videos'),
-                            selected: _filter == GuideKind.video,
-                            onSelected: (_) =>
-                                setState(() => _filter = GuideKind.video),
-                          ),
+                          Text('${saved.length} saved · ${_size(bytes)}'),
                         ],
                       ),
-                      const SizedBox(height: 20),
-                      if (_library == null)
-                        _notice(
-                          'Saved guides could not be checked. Use Refresh to try again.',
-                        ),
-                      if (_library != null && visible.isEmpty)
-                        _notice(
-                          entries.isEmpty
-                              ? 'No guides saved yet. Import a PDF or video '
-                                    'to start your field library.'
-                              : 'No guides match this search or filter.',
-                        ),
-                      ...visible.map(_guideCard),
-                      const SizedBox(height: 10),
+                      const SizedBox(height: 12),
                       Text(
-                        'Opening a saved file uses the device or browser viewer. '
-                        'Video playback depends on its format. Guides are not '
-                        'included in the group-plan JSON backup and are not '
-                        'uploaded to a cloud account.',
+                        'PDF, MP4, MOV, or M4V · Up to '
+                        '${_size(_repository.maxImportBytes)} per file. '
+                        'Cloud files need to finish downloading before import.',
                         style: _type.bodySmall,
                       ),
+                      const SizedBox(height: 22),
+                      if (_loading) const LinearProgressIndicator(),
+                      if (_working && _activity != null) ...[
+                        Semantics(liveRegion: true, child: Text(_activity!)),
+                        const SizedBox(height: 8),
+                        LinearProgressIndicator(value: _progress),
+                        const SizedBox(height: 18),
+                      ],
+                      if (_error != null) _notice(_error!, error: true),
+                      for (final warning in _library?.warnings ?? <String>[])
+                        _notice(warning),
+                      if (!_loading) ...[
+                        TextField(
+                          controller: _search,
+                          onChanged: (_) => setState(() {}),
+                          decoration: const InputDecoration(
+                            labelText: 'Search guides',
+                            prefixIcon: Icon(Icons.search),
+                          ),
+                        ),
+                        const SizedBox(height: 14),
+                        Wrap(
+                          spacing: 8,
+                          runSpacing: 8,
+                          children: [
+                            ChoiceChip(
+                              label: const Text('All'),
+                              selected: _filter == null,
+                              onSelected: (_) => setState(() => _filter = null),
+                            ),
+                            ChoiceChip(
+                              label: const Text('PDFs'),
+                              selected: _filter == GuideKind.pdf,
+                              onSelected: (_) =>
+                                  setState(() => _filter = GuideKind.pdf),
+                            ),
+                            ChoiceChip(
+                              label: const Text('Videos'),
+                              selected: _filter == GuideKind.video,
+                              onSelected: (_) =>
+                                  setState(() => _filter = GuideKind.video),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 20),
+                        if (_library == null)
+                          _notice(
+                            'Saved guides could not be checked. Use Refresh to try again.',
+                          ),
+                        if (_library != null && visible.isEmpty)
+                          _notice(
+                            entries.isEmpty
+                                ? 'No guides saved yet. Import a PDF or video '
+                                      'to start your field library.'
+                                : 'No guides match this search or filter.',
+                          ),
+                        ...visible.map(_guideCard),
+                        const SizedBox(height: 10),
+                        Text(
+                          'Opening a saved file uses the device or browser viewer. '
+                          'Video playback depends on its format. Guides are not '
+                          'included in the group-plan JSON backup and are not '
+                          'uploaded to a cloud account.',
+                          style: _type.bodySmall,
+                        ),
+                      ],
+                      const SizedBox(height: 24),
                     ],
-                    const SizedBox(height: 24),
-                  ],
+                  ),
                 ),
               ),
             ),

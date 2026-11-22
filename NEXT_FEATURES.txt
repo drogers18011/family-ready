@@ -2,15 +2,22 @@ BLACK BOX - NEXT FEATURE SPECIFICATION
 ======================================
 Prepared for Dennis Rogers, November 20, 2026
 Updated with Dennis's decisions on November 22, 2026
-Baseline: v0.6.0+9 local Flutter prototype
+Current source: v0.7.0+10 local Flutter prototype
+Latest user-reported green and working baseline: v0.6.0+9
 
 STATUS
 ------
 This file records the requested product direction and proposed implementation
 rules. It is not a claim that the online service is running.
 
-IMPLEMENTED IN THE v0.6.0 SOURCE:
-- Field Terminal with remembered Light/Dark modes.
+IMPLEMENTED IN THE v0.7.0 SOURCE:
+- Rugged Field Terminal with remembered Light/Dark modes. Static code-drawn
+  ripstop/grain backdrops, matte chamfered panels, double edges, and fasteners
+  give the interface a field-equipment treatment. Controls retain solid fills.
+- Barlow Condensed headings with IBM Plex Mono body text/labels, stronger
+  button and navigation styling, and compact branding at narrow widths or
+  large text. Dark uses olive/sage/cream; Light uses sand/forest. Amber accents
+  are restrained. No texture assets, font downloads, or new dependencies.
 - Home / Plan / Map / Kit / Group navigation.
 - A separate Map tab for the CURRENT local plan's primary and backup places.
   Saved names appear on markers and in a selectable, wrapping location list.
@@ -37,13 +44,21 @@ IMPLEMENTED IN THE v0.6.0 SOURCE:
   rename their display titles, open them, or remove the app's saved copies.
   The original imported files are not deleted by removing an app copy.
 
-The new native and browser interfaces have not been runtime-tested here.
+The new rugged native and browser interfaces have not been runtime-tested here.
 For v0.6.0+9, all 52 standalone personal-list model/store checks and all 182
 catalog/link-policy checks passed. Source review and standalone Dart formatting
-also completed. No Flutter compilation, browser QA, or native-device QA has
-been performed for this update. The last user-reported
-green iPhone compile check still covers v0.2.2. Compilation and real-device
-offline reopening/playback checks remain required.
+also completed. Those are historical results, not reruns for the visual update.
+Dennis subsequently reported a green ios-compile-check for v0.6.0+9 and that
+everything is working. This is user-reported confirmation, not workspace-run
+browser or native-device QA.
+
+For v0.7.0+10, verification is limited to standalone formatting, source review,
+and numerical contrast review. No new automated tests were added for this
+visual-only change. Flutter startup remains blocked by the previous automatic
+approval restriction; no Flutter compilation, browser QA, or native-device QA
+has been performed here for this release. A fresh compile and screen checks
+in both modes are required. Real-device offline reopening/playback checks
+remain required before the relevant offline features can be relied on.
 An installable iPhone/TestFlight build still depends on Apple signing setup.
 
 NOT IMPLEMENTED YET:
@@ -87,6 +102,9 @@ are part of the local plan. Named pins are not downloaded map imagery.
     an additional potential revenue source. The requested purchase-to-owned
     automation is not claimed: the current implementation adds an unowned
     list entry and requires the user to confirm possession with I have this.
+18. Make the interface more rugged and textured while retaining easy operation
+    and both Light and Dark appearances. This is a visual direction, not a
+    claim of physical ruggedness or certified data protection.
 
 
 2. PROPOSED BUSINESS RULES - NOT ALL CONFIRMED
@@ -425,7 +443,7 @@ Live member tracking has not been requested and is not part of this scope.
 FUTURE NAVIGATION PROPOSAL
 Plans / Map / Groups / Community / Inbox.
 The Plans screen becomes the home/library. Kits and assignments live within
-each plan. Current v0.6.0 navigation remains Home / Plan / Map / Kit / Group;
+each plan. Current v0.7.0 navigation remains Home / Plan / Map / Kit / Group;
 Kit contains Shared kit, My pack, and Suggested, and Offline guides opens
 from Home or the top bar. Future navigation must keep personal guides easy
 to reach as the online and multi-plan screens are implemented.
@@ -493,9 +511,12 @@ reading an existing emergency copy should not be interrupted by a paywall.
 --------------------------
 Completed source increments: named-location Map tab in v0.4.0, then a free
 personal packing list and local PDF/video guide library in v0.5.0+8. Version
-0.6.0+9 adds suggested supplies, separate ownership/packing, catalog reuse,
-and disabled-by-default affiliate configuration. Compile, browser interaction,
-shopping handoff, and native offline reopening/playback checks remain required.
+0.6.0+9 added suggested supplies, separate ownership/packing, catalog reuse,
+and disabled-by-default affiliate configuration. Dennis reported that release's
+compile check green and the app working. Version 0.7.0+10 adds the rugged
+visual treatment with the existing storage and feature behavior retained.
+The new visual release needs compile and screen checks; dedicated native
+offline reopening/playback checks remain required for the go-bag goal.
 
 Next foundation:
 1. Durable local plan library with migration and multiple plan IDs.
