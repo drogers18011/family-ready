@@ -28,6 +28,19 @@ class RestoreFailure implements Exception {
       'previousUpdated: $previousUpdated, cause: $cause)';
 }
 
+/// The three independent records belonging to one local plan.
+class PlanStorageKeys {
+  const PlanStorageKeys({
+    required this.current,
+    required this.previous,
+    required this.recovery,
+  });
+
+  final String current;
+  final String previous;
+  final String recovery;
+}
+
 /// Coordinates restore writes without depending on Flutter or a storage plugin.
 ///
 /// Callers validate the input plan and serialize operations. Each successful
@@ -36,6 +49,11 @@ class PlanStore {
   PlanStore({
     required Future<void> Function(String key, String value) write,
     required Future<void> Function(String key) remove,
+    this.keys = const PlanStorageKeys(
+      current: currentKey,
+      previous: previousKey,
+      recovery: recoveryKey,
+    ),
   }) : _write = write,
        _remove = remove;
 
@@ -43,6 +61,7 @@ class PlanStore {
   static const previousKey = 'family_ready.prototype.previous';
   static const recoveryKey = 'family_ready.prototype.restore_recovery';
 
+  final PlanStorageKeys keys;
   final Future<void> Function(String key, String value) _write;
   final Future<void> Function(String key) _remove;
 
@@ -61,13 +80,13 @@ class PlanStore {
     var previousUpdated = false;
 
     try {
-      await _write(recoveryKey, incomingRaw);
+      await _write(keys.recovery, incomingRaw);
       recoveryAvailable = true;
 
-      await _write(previousKey, currentRaw);
+      await _write(keys.previous, currentRaw);
       previousUpdated = true;
 
-      await _write(currentKey, committedRaw);
+      await _write(keys.current, committedRaw);
     } catch (cause, stackTrace) {
       Error.throwWithStackTrace(
         RestoreFailure(
@@ -80,7 +99,7 @@ class PlanStore {
     }
 
     try {
-      await _remove(recoveryKey);
+      await _remove(keys.recovery);
       return const RestoreResult(recoveryRemains: false);
     } catch (_) {
       // Current and previous are already committed. Keep the journal and let

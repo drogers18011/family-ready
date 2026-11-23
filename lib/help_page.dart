@@ -505,6 +505,8 @@ IconData _destinationIcon(HelpDestination? destination) =>
     switch (destination) {
       HelpDestination.home => Icons.home_outlined,
       HelpDestination.plan => Icons.place_outlined,
+      HelpDestination.planLibrary => Icons.folder_outlined,
+      HelpDestination.familyInformation => Icons.contact_page_outlined,
       HelpDestination.map => Icons.map_outlined,
       HelpDestination.sharedKit => Icons.checklist_rounded,
       HelpDestination.personalPack => Icons.inventory_2_outlined,

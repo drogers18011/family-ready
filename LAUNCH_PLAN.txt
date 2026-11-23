@@ -1,0 +1,385 @@
+BLACK BOX — PRODUCT AND LAUNCH PLAN
+==================================
+Prepared for Dennis Rogers | November 22, 2026
+Companion to the v0.9.0+12 source update
+
+DECISION
+--------
+Build around a clear family job: agree on a plan, give the right people a
+complete copy, and keep that copy understandable when service is unavailable.
+The rugged field-terminal design supports that job. Dependable access,
+straightforward setup, and clear sharing should determine the product scope.
+
+This document separates implemented source changes, proposed product work,
+and requirements verified from primary sources. Competitor features are their
+published claims, reviewed on November 22, 2026; their apps were not installed,
+security-audited, or independently tested. These findings do not establish
+competitor revenue, demand, or Black Box's future profitability.
+
+The project targets below are proposed decision points. They are not promises
+of a launch date, an earnings forecast, or industry conversion benchmarks.
+
+
+1. WHAT WAS BUILT IN THIS UPDATE
+--------------------------------
+LOCAL PLAN LIBRARY
+- A selector below the main header identifies the selected local plan.
+- Create an independent blank plan with You as its first member.
+- Give household, extended-family, travel, and other plans separate people,
+  meeting places, instructions, family information, and shared packing lists.
+- Duplicate a plan without changing its source. Shared-kit Packed checks are
+  cleared in the duplicate so the new kit can be checked separately.
+- Import an existing backup as a new plan. Import preserves its packed values;
+  review them because the file may describe an older state of the supplies.
+- Archive a plan reversibly and restore it to the active list. The current
+  plan must be switched before it can be archived. This is not deletion.
+- Keep independent current, previous, and interrupted-restore records.
+
+FAMILY INFORMATION
+- An out-of-area contact's name and phone number.
+- Additional contacts with name, role, and phone number.
+- The household's communication instructions.
+- Care and pickup responsibilities for children, relatives, pets, or people
+  needing assistance, written by the user.
+- Departure instructions agreed on by the household.
+- A readable summary on Home and full information in Plan.
+- The selected plan's JSON backup and readable text copy include these fields.
+
+DATA AND INSTRUCTIONS
+- The original plan keeps its existing storage keys. Registering it in the
+  library does not rewrite its saved plan or recovery bytes.
+- A failed initial library-directory write can leave the original plan open
+  for reading, with a warning and retry path. An unreadable existing directory
+  is never silently reset.
+- Unsaved changes must save successfully before another plan can be selected.
+- New plan records are written before the directory selects them. Failure can
+  leave an unlisted new record, but does not delete existing plans.
+- Plan schema 3 reads older schema 1/2 plans, adding empty family information.
+  A previous raw copy is retained before the first schema-3 edit.
+- Old app versions cannot read the new format. Keep a pre-update backup and
+  use v0.9 or a compatible newer release for the updated data.
+- The six-part tour now explains multiple plans and family information;
+  searchable Help has twelve topics.
+- My pack and the personal guide library remain common across local plans.
+  They are not included in an individual group-plan JSON backup.
+
+This is source prepared for the next build. Pure-Dart data checks and source
+review do not establish Flutter compilation, successful iPhone installation,
+accessibility, or actual offline playback. Follow the included build and
+manual-check instructions. Cloud accounts, invitations, subscriptions, forum,
+inbox, licensed offline maps, and routing are not implemented in this package.
+
+
+2. WHAT THE COMPETITOR REVIEW CHANGES
+-------------------------------------
+PrepperApp: publishes household invitations, shared supplies/plans, offline
+guides and routes, named places, printable maps, and a free-posting forum.
+The overall combination is already present in the market. [C1, C2]
+
+Firefly: describes guided family planning, offline information, family
+contacts and documents, with continued access to saved information after a
+trial and a one-time payment for further editing. Free reading/paid editing
+is already offered elsewhere; recurring cloud collaboration must earn a
+subscription's ongoing value. [C3]
+
+ReadyPlan: describes scenario plans, alternate routes and communication
+plans, checklists, selective sharing, and saved offline plans. Its PDF wording
+is inconsistent between its description and release notes, so PDF availability
+was not independently resolved. [C4]
+
+Our Plan Is: describes people/pets, outside contacts, go-bags, offline household
+plans, later synchronization, and attributed public-safety information. These
+are useful comparisons for a product aimed at ordinary households. [C5]
+
+Warrior Gardeners: describes separate locations/inventories, expiration
+tracking, scenarios, practice records, and per-resource sharing choices.
+Plan maintenance and understandable audiences deserve explicit design. [C6]
+
+SHTF: Life Prep: describes planning, private groups, chat, a community guide
+library, expiration tracking, and offline saved plans/guides/inventory.
+Community adds an operational service to maintain, not just another screen. [C7]
+
+Blackout: Emergency Plan: describes offline household tools, a family card,
+expiration reminders, encrypted backups, and printable plans. Its nearby
+messaging is described as operating over tens of meters; that does not solve
+communication between relatives in different states. [C8]
+
+POSITIONING HYPOTHESIS TO TEST
+Black Box can be a clear, durable family-planning tool with rugged presentation
+and understandable access across several groups. A future public promise of
+family-wide offline access should follow successful cross-device testing.
+Do not claim that the feature combination is unique, that a downloaded plan
+proves safety, or that the aircraft-inspired name means certified protection.
+
+
+3. DEFINE A FIRST CUSTOMER AND A COMPLETE WORKFLOW
+-------------------------------------------------
+Start with one organizing adult in a household who wants relatives to know
+where to go, what to bring, who needs assistance, and what to do if they cannot
+communicate. Include a less technical relative in each pilot group. Designing
+only for the founder's own comfort with technology would miss the hard part.
+
+The first shared-plan workflow should be:
+1. The organizer creates a clear plan and adds permitted guide files.
+2. They invite a specific person and choose that person's access.
+3. The invitee accepts, reviews the audience, and downloads the complete plan.
+4. The app confirms the locally saved revision and the files actually present.
+5. The invitee turns off service, closes/reopens the app, and reads the plan
+   and supported guide files without paying for an editor subscription.
+6. An update is downloaded without destroying the previous complete copy.
+
+For relatives in another state, a meeting plan also needs user-written
+contingencies: when travel should wait, which alternate applies, and what to
+do when the primary place cannot be reached. The app should store the family's
+agreed instructions, not infer current road safety or invent evacuation orders.
+
+
+4. BUILD ORDER AND ACCEPTANCE CONDITIONS
+----------------------------------------
+STAGE A — LOCAL FAMILY PRODUCT (CURRENT SOURCE INCREMENT)
+Multiple local plans and family information are implemented in v0.9.
+Next: compile, check the screens, and exercise migration/switching with real
+copies of the user's existing data. Check Light/Dark, larger text, long names,
+empty plans, imported plans, and unsuccessful saves on actual devices.
+
+STAGE B — DURABLE OFFLINE COPIES AND PORTABILITY
+Before broad release, migrate primary plan data from prototype preferences
+to a transactional local store, retain recovery copies, and test interrupted
+migration. Design local protection and key recovery deliberately. The current
+prototype must not be advertised as an encrypted vault.
+
+Add native phone backup export/share, selected-plan and whole-library restore
+previews, and a printable concise family card plus full-plan copy. Explain
+whether a file includes contacts, guides, personal inventory, and map packages.
+Do not let an export button imply that every asset is present in its output.
+
+Add visible last-reviewed and last-practiced dates, notes, and optional review
+reminders. Record actual user actions. Add expiry/replacement dates and kit
+locations to inventory. Give people useful maintenance tasks without implying
+that a calculated percentage establishes their ability to survive an event.
+
+Red Cross guidance supports written contacts, an out-of-area contact, assigned
+responsibilities, meeting places, and practicing the plan. Use authoritative
+guidance to inform product fields and licensed content; clinical/survival
+instructions need appropriate sourcing and review. [P1]
+
+STAGE C — PRIVATE SHARING AND A FREE READER DOWNLOAD
+Implement accounts, accepted invitations, plan membership and permissions,
+server-enforced access, and versioned cloud copies. Test one organizer and one
+free reader on separate devices before expanding the feature surface.
+
+Each plan needs its own owner and access list. Membership in Group A does not
+grant access to Group B. Paying for Premium does not grant access to someone
+else's plan. Display the audience before any plan/file is shared.
+
+Use separate states for editing, saved locally, uploading, uploaded, downloading,
+and downloaded. Show the saved revision and time; an offline device cannot
+know that it has the newest server revision. Download into a temporary package,
+verify required files, and promote the complete package. An interrupted update
+must leave the previous complete copy readable.
+
+Resolve simultaneous edits deliberately. Preserve conflicting changes and
+explain who changed what. A last-write-wins policy can silently lose a changed
+meeting place, which is unacceptable for the product's central purpose.
+
+Keep an already downloaded emergency copy readable during connectivity loss,
+temporary authentication failure, and subscription expiry. Revoking access
+stops future server access; explain that already downloaded/exported copies
+cannot be guaranteed remotely erased.
+
+STAGE D — SUBSCRIPTIONS WITH MEASURABLE ONGOING VALUE
+Keep the agreed rules: free authorized readers/downloaders, free personal
+packing, and Premium for authorized shared-plan editing/contributing. Editing
+requires both the subscription entitlement and plan permission.
+
+Start with development entitlements and sandbox purchases, then verified store
+transactions, renewal/expiry/refund handling, purchase restoration, and a clear
+subscription-management path. The first iPhone implementation should use
+Apple's subscription tools; prices, periods and included service must be clear.
+Apple describes subscriptions as ongoing access with ongoing value. [A3, A4]
+
+STAGE E — INBOX, THEN A MANAGED COMMUNITY
+Build the requested subject-based Inbox/Sent/Drafts/Archive model. Offline
+composition is a draft or queue; it is not a delivered message. Downloaded
+messages may remain readable, but new remote delivery still needs a supported
+communication path. Long-distance communication without infrastructure is
+not a capability of this app.
+
+For the forum: free posting/replies remain the plan. Moderators need the
+assigned role and the agreed Premium eligibility; purchasing alone never
+grants moderation. Keep reporting, blocking and privacy controls available.
+Apple's user-content rules require filtering, reports with timely handling,
+blocking and published contact information. Assign a person to operations
+before exposing the service to the public. [A1]
+
+STAGE F — LICENSED OFFLINE MAPS AND ROUTING
+Choose a provider/package whose rights permit offline downloading. The standard
+OpenStreetMap tile endpoint prohibits bulk/offline prefetch. A different
+permitted service or self-hosted approach is required. [M1]
+
+Map imagery, route calculation, and live hazards are different capabilities.
+Test region boundaries, storage limits, updates, missing routing data, and
+travel mode. Let people place an origin manually as requested. Keep written
+destinations/instructions accessible even if the map or route is unavailable.
+Do not label a route safe merely because the routing engine can calculate it.
+
+
+5. REQUIRED LAUNCH OPERATIONS
+------------------------------
+DEVICE TESTING
+Use the spare iPhone for install, cold restart, airplane mode with Wi-Fi off,
+PDF opening, supported video playback, background/foreground transitions,
+low storage, interrupted import/download, and app-update checks. Add at least
+one smaller or older supported device before promising broad go-bag support.
+Verify the eventual minimum OS/device requirements against the actual build.
+
+TestFlight is a beta distribution method. Apple says builds become unavailable
+after 90 days. It is useful for pilot testing and unsuitable as the permanent
+go-bag installation. Use the external tester process for pilot households;
+they do not need developer-account access. [A5]
+
+PRIVACY AND SUPPORT
+Provide a real support address, an accurate policy, and a way to report a
+problem. Inventory what maps, storage services, purchases and any SDKs send
+off-device before completing App Store privacy answers. Apple requires the
+answers to account for integrated third parties and remain current. [A6]
+
+When accounts exist, add an in-app account-deletion path and explain data
+retention. Handle shared information and ownership transfer deliberately.
+Account deletion and Apple subscription cancellation are separate actions. [A7]
+
+For shared guide files: choose accepted types/size limits, validate content,
+restrict access, and establish deletion/retention and abuse handling. A user
+having a PDF/video does not automatically give Black Box rights to distribute
+it publicly. Personal imported files should not silently become community posts.
+
+Add a support/incident procedure, server recovery backups, access logging that
+does not expose private plan contents, and a way to roll back an unsuccessful
+release. Someone must be responsible for reports and outages.
+
+BRAND CHECK
+Keep Black Box as the working name. There is an existing Blackbox puzzle app
+and a preparedness app called Blackout. This is discoverability/confusion
+evidence, not a conclusion of infringement or legal clearance. [B1, C8]
+Before committing substantial branding spend, check names, stores, domains,
+and relevant trademark/common-law uses. USPTO describes a comprehensive
+clearance process that goes beyond its federal database. [B2]
+
+
+6. MONEY: WHAT TO VALIDATE BEFORE CHOOSING A PRICE
+-------------------------------------------------
+Ongoing private collaboration, storage, version history and shared downloads
+can support a recurring offer. A permanent charge to reopen an already saved
+emergency plan would conflict with the agreed reader-access promise.
+
+Measure the economics for the entire group supported by each payer:
+Monthly contribution = subscription receipts after store deductions/refunds
+minus storage, downloads, maps, messages, support, moderation and other costs.
+
+Video storage and repeat downloads need explicit allowances. Do not promise
+unlimited cloud videos or lifetime cloud service before knowing the cost.
+Affiliate revenue is an optional additional stream, not a substitute for a
+working paid-product model. Keep the existing approval/disclosure work separate.
+
+Illustration only: 500 paying users at a hypothetical $6/month would produce
+$3,000/month in gross billings before deductions and costs. This is arithmetic,
+not a forecast, recommended price, profit estimate, or expected customer count.
+Do not use subscriber counts alone to decide whether the business is healthy.
+
+Interviews can identify expectations, but willingness to pay should ultimately
+be checked against a real working offer. Track cancellations and reasons,
+support work per group, download/storage cost, and continued use after setup.
+Choose sustainable spending limits now; expand spending after evidence improves.
+
+
+7. A FAMILY-LED ORGANIC LAUNCH
+------------------------------
+The founder story is a parent building a clearer way for the family to prepare.
+Dennis and his family can show actual use and what they learn while building.
+The most persuasive demonstration is another household succeeding with the
+same workflow. The adults can carry the story; children's identities are not
+needed to demonstrate the product.
+
+Use a separate demonstration plan with fictional contact details and locations.
+Avoid exposing home/school addresses, pickup arrangements, private documents,
+or supply-storage locations in screenshots and videos. Say that the app is
+yours when that ownership is not otherwise clear. FTC guidance addresses
+material relationships and misleading endorsements. [G1]
+
+PROPOSED FIRST CONTENT SERIES
+1. Introduce the problem: does everyone in the household know the same plan?
+2. Build a simple demonstration plan and show the written meeting instructions.
+3. Show Owned versus Packed using ordinary household supplies.
+4. Explain who helps whom, using a fictional family-information card.
+5. Show importing a real permitted PDF/video and opening its saved copy.
+6. After device testing succeeds, show a genuine offline close/reopen exercise.
+7. Show something a pilot family found confusing and the improvement made.
+
+Use a clear stage-appropriate call to action: volunteer for a pilot, join a
+waitlist, or download the released app. Do not advertise unbuilt offline maps,
+automated family alerts, encrypted storage, or cross-device sharing as finished.
+
+Consider a simple landing page with accurate current capabilities, the founder
+story, sample screens, privacy/support information, and a consent-based pilot
+signup. No landing page, mailing list, tracking service, posts, or invitations
+were deployed or sent as part of this update.
+
+PROPOSED VALIDATION MILESTONES
+- Interview 10 households about their existing plans and real gaps. Ask what
+  they currently do before showing a long feature list.
+- Recruit 10–15 pilot households, including people who are less technical and
+  at least one group with relatives living elsewhere.
+- Observe setup without coaching. Record completed steps, errors and where
+  people need help. Improve the product before adding more acquisition volume.
+- Require every pilot's supported device to pass the offline retrieval exercise;
+  fix every critical data-loss/access failure before expanding.
+- Prove an invited free reader receives the correct plan while an unrelated
+  account cannot access it. Test the server rules, not just hidden UI buttons.
+- Revisit pilots after about 30 days: did they review or update the plan, invite
+  someone, and still understand what their device holds?
+- Test a real paid offer once its benefits work, then measure conversion,
+  continued subscriptions, support burden and per-group cost before buying ads.
+
+These sample sizes and times are internal project targets. They do not prove
+market demand statistically and are not established performance benchmarks.
+
+
+8. NEXT CONCRETE MILESTONE
+---------------------------
+Upload v0.9.0+12 and run a fresh ios-compile-check. In the working preview,
+create two differently named plans, add different family information and
+supplies, switch/reopen them, import a backup as a third plan, and test archive
+and restore. Verify that the personal pack and guide library remain available.
+
+When Apple enrollment becomes active, finish signing/TestFlight setup and
+perform the phone checks. Then complete native portability and the private
+organizer-to-free-reader download flow. A public launch date should follow
+those demonstrated outcomes, rather than determine whether they are skipped.
+
+No cloud service, billing product, moderation operation, trademark clearance,
+marketing account, or public deployment was created in this source update.
+Those steps need the actual owned accounts, configuration and operational
+choices. The current prototype remains a local development product.
+
+
+PRIMARY SOURCES — REVIEWED NOVEMBER 22, 2026
+--------------------------------------------
+C1 https://prepperapp.net/faq
+C2 https://prepperapp.net/forum
+C3 https://apps.apple.com/us/app/firefly-family-emergency-plan/id6829938732
+C4 https://apps.apple.com/us/app/readyplan-crisis-planner/id6741729714
+C5 https://apps.apple.com/us/app/our-plan-is/id6762509719
+C6 https://www.warriorgardeners.com/
+C7 https://theshtfapp.com/
+C8 https://apps.apple.com/us/app/blackout-emergency-plan/id6772589160
+P1 https://www.redcross.org/get-help/how-to-prepare-for-emergencies/make-a-plan.html
+A1 https://developer.apple.com/app-store/review/guidelines/
+A3 https://developer.apple.com/app-store/subscriptions/
+A4 https://developer.apple.com/design/human-interface-guidelines/apple-in-app-purchase
+A5 https://developer.apple.com/help/app-store-connect/test-a-beta-version/testflight-overview/
+A6 https://developer.apple.com/help/app-store-connect/manage-app-information/manage-app-privacy/
+A7 https://developer.apple.com/help/app-review/guideline-reference/5-1-1-account-deletion
+M1 https://operations.osmfoundation.org/policies/tiles/
+B1 https://apps.apple.com/us/app/blackbox/id962969578
+B2 https://www.uspto.gov/trademarks/search/comprehensive-clearance-search-similar-trademarks
+G1 https://www.ftc.gov/business-guidance/resources/ftcs-endorsement-guides-what-people-are-asking

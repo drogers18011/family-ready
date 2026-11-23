@@ -1,17 +1,59 @@
-BLACK BOX - VERSION 0.8.0+11
+BLACK BOX - VERSION 0.9.0+12
 ==========================
 Updated for Dennis Rogers, November 22, 2026
 
+LOCAL PLANS AND FAMILY INFORMATION
+-----------------------------------
+This release adds the local foundation for separate family, friends, and
+travel plans. The plan selector below the main header opens Your plans.
+Search by name, choose Active or Archived, and see which plan is current.
+The existing plan is retained when the library is first opened.
+
+If first-time plan-library setup cannot be saved, the original plan remains
+readable and a visible warning offers Plans to retry. An existing invalid
+library record is treated differently: the app shows a load warning and
+does not guess a selected plan or replace stored information.
+
+- New plan starts with You, empty meeting places, and an empty shared kit.
+- Open plan switches the selected plan after its current changes are saved.
+- Duplicate makes an independent copy with shared-kit Packed checks cleared;
+  the original remains unchanged. Give the copy its own name.
+- Import backup adds a reviewed JSON backup as a separate plan, preserving
+  the backup's Packed checks. Review those checks for the current situation.
+- Archive keeps a plan's data but moves it out of Active. Switch to another
+  plan first if you want to archive the current one. Restore to active plans
+  brings an archived entry back. No plan deletion is introduced.
+- An unreadable plan is shown as unavailable and retained. It cannot be
+  opened or duplicated; the library does not silently replace its contents.
+
+Each plan has its own people, places, shared supplies, saved record, previous
+copy, and restore-recovery copy. My pack and Offline guides remain personal
+and common across all plans. A group backup contains only the selected plan;
+it does not include the whole library, personal pack, or guide files.
+
+Plan > Family information stores optional out-of-area contact details,
+additional contacts with names/numbers/roles, communication notes, care or
+pickup responsibilities, and departure notes. Home and Group have shortcuts.
+The editor saves a draft to the selected plan only when Save family
+information is chosen. Cancel or Back offers to discard an edited draft.
+These details are included in that plan's JSON backup and readable text copy.
+Saving does not call, message, invite, or alert anyone. Exported copies are
+plain and unencrypted; keep entered contact details private.
+
+Local multiple plans do not create online groups or sharing permissions.
+Accounts, invitations, cloud sync, forum, inbox, and subscriptions remain
+future work. LAUNCH_PLAN.txt records the researched priorities and launch work.
+
 HELP AND QUICK TOUR
 --------------------
-This release adds instructions inside the app. Home offers a Get started with
+The optional introduction and bundled instructions remain in the app. Home offers a Get started with
 Black Box card with Start quick tour and Not now. You can keep using the app
 without taking the tour. The six short chapters explain the group plan,
 meeting places, packing lists, saved guides, offline practice, and plan copies.
 Use Back, Next, or Skip; the last chapter offers Done or Open Plan.
 
 The question-mark button in the header opens Help & tutorial whenever you
-need it. Search ten topics, expand one for numbered instructions, and use its
+need it. Search twelve topics, including Your plans and Family information, expand one for numbered instructions, and use its
 Open button to go to that part of the app. Choose Quick tour to replay the
 introduction. The header keeps three shortcuts: guides, Light/Dark, and Help.
 Appearance is now inside Help; About Black Box & licenses is inside Appearance.
@@ -37,10 +79,12 @@ by the app's code: no texture downloads, new image assets, or dependencies are
 needed. Controls and text-entry surfaces remain clear. The header simplifies
 at narrow widths or enlarged text settings to leave room for its controls.
 
-The existing Light/Dark preference, plan/checklist/guide storage, shopping
-behavior, and features are retained. You reported a green ios-compile-check
-and that v0.7.0+10 rendered great. That is the user-reported baseline;
-this new tutorial release still needs its own compile and screen checks.
+The existing Light/Dark preference, personal checklist and guide storage,
+and shopping behavior are retained. Plan storage now separates local plans,
+and schema 3 includes Family information while reading older schemas 1 and 2.
+You accepted v0.8.0+11 as perfect so far. The latest explicit user-reported
+green ios-compile-check remains v0.7.0+10, which also rendered well.
+This new release still needs its own compile and screen checks.
 
 SUGGESTED ITEMS AND PERSONAL INVENTORY
 --------------------------------------
@@ -114,9 +158,10 @@ The Map tab shows the current local plan's primary and backup meeting
 places using their saved names. Select a marker to review that place's local
 details. The existing edit and place-pin controls remain available.
 
-The five tabs are Home, Plan, Map, Kit, and Group. This version still manages
-one local plan. The Map tab uses online map imagery; it does not download
-offline maps or calculate directions.
+The five tabs are Home, Plan, Map, Kit, and Group. The selector below the main
+header changes the current local plan. Map shows that plan's locations only.
+It uses online map imagery; it does not download offline maps or calculate
+directions.
 
 FIELD TERMINAL - DARK AND LIGHT
 -------------------------------
@@ -139,21 +184,26 @@ font download while using the app.
 The app previously called Family Ready keeps the Black Box name introduced
 in v0.2.2. The new Map tab uses the existing plan format and saved locations.
 
-Existing shared plans and JSON backups use the same data format and storage
-keys. Continue using your normal Chrome profile at http://127.0.0.1:54321.
-Older Family Ready JSON backups remain supported.
+Existing plans and older Family Ready backups remain readable. New writes
+use plan schema 3 for Family information. The original plan keeps its storage
+keys; additional plans have separate records and recovery copies. Continue
+using your normal Chrome profile at http://127.0.0.1:54321.
 
 Upload the contents of the extracted black_box_starter.zip into the existing
 family-ready GitHub repository on the same build branch. Keep assets, lib,
 scripts, test, and web as folders beside pubspec.yaml and codemagic.yaml.
 Include ALL files in lib and test, the updated pubspec.yaml and scripts, and
 everything in assets/fonts, preserving their folder hierarchy. Include the
-new lib/help_content.dart and lib/help_page.dart with the updated main.dart.
+new lib/plan_library_store.dart, lib/plan_library_page.dart, and
+lib/family_brief_page.dart, plus test/plan_library_check.dart. Keep the updated
+plan_models.dart, plan_store.dart, help_content.dart, and help_page.dart with
+main.dart. Do not omit any other lib or test file.
 Keep lib/field_surfaces.dart with the existing theme and screen files. Keep the
 suggested-items, catalog, affiliate-config, and personal-repository files
 in lib, plus test/suggested_catalog_check.dart. Keep the existing guide
 platform files too, even when testing in Chrome. Keep NEXT_FEATURES.txt and
-AMAZON_AFFILIATE_SETUP.txt with the top-level documents. Upload the extracted
+AMAZON_AFFILIATE_SETUP.txt and LAUNCH_PLAN.txt with the top-level documents.
+Upload the extracted
 contents, not the ZIP or
 an extra enclosing folder. scripts/configure_ios.py still applies the Black Box
 iPhone display name during a build.
@@ -165,17 +215,18 @@ the visible Black Box name and keep the working setup consistent.
 
 CURRENT STATUS
 ---------------
-You reported that v0.7.0+10 passed ios-compile-check with a green result and
-that it rendered great. This is user-reported confirmation of the
-previous release, not runtime testing performed in this preparation workspace.
+You accepted the v0.8.0+11 tutorial update as perfect so far. Your latest
+explicit green ios-compile-check and rendering confirmation cover v0.7.0+10.
+These are user-reported results, not runtime tests in this workspace.
 Your Apple Developer enrollment was last reported pending. Apple signing and
 TestFlight follow after the membership becomes active.
 
-This v0.8.0+11 tutorial update has not been Flutter-compiled or tested
-in a browser or on a phone here. Run a new ios-compile-check after uploading
-it, and try the tour, Help search, Open buttons, and Appearance access in
-both modes. Preparation checks are limited to standalone Dart formatting,
-source review, and content/navigation review.
+This v0.9.0+12 update has not been Flutter-compiled or tested in a browser or
+on a phone here. Run a new ios-compile-check after uploading all source and
+test files. Check plan switching, new/copy/import/archive actions, Family
+information, backup/restore, Help and both appearances. Focused pure-Dart
+checks cover the model and plan-library persistence; they do not establish
+Flutter rendering, plugin behavior, or native offline access.
 
 The planned access model lets free readers view complete shared plans and
 download them for offline use, with subscriptions for contributing and editing.
@@ -196,17 +247,16 @@ IPHONE BUILD SETUP ADDED
 ------------------------
 For your iPhone 16 Pro Max and Windows-only development setup, start with
 START_IPHONE_CLOUD.txt. The included Codemagic workflows prepare the current
-v0.8.0+11 app for an unsigned iOS compile check and, after your Apple account setup,
+v0.9.0+12 app for an unsigned iOS compile check and, after your Apple account setup,
 an internal TestFlight build. Offline routing remains a future feature.
 If v0.2 is already working in Chrome, continue with that cloud guide; you do
 not need to repeat the browser installation steps below.
 
 
-This update builds on the v0.7.0+10 app you reported as rendering well with a
-green compile check. It adds in-app help while retaining the rugged design,
-suggested supplies, ownership/packing,
-the personal checklist, local guide-file storage, Map tab, and existing
-shared-plan backup/restore format.
+This update builds on the accepted v0.8.0+11 tutorial release. It adds local
+multiple plans and Family information while retaining the rugged design,
+suggested supplies, personal inventory, guides, and Map. Older plan backups
+remain supported; new backups include Family information with schema 3.
 
 UPDATE FROM YOUR EXISTING VERSION
 ---------------------------------
@@ -218,7 +268,10 @@ UPDATE FROM YOUR EXISTING VERSION
 2. Click the running app's terminal window and press q to stop it. Close
    its browser tab too.
 3. Download black_box_starter.zip. Choose Extract All and use a NEW folder,
-   such as Documents\BlackBox_v080. Keep your old source folder.
+   such as Documents\BlackBox_v090. Keep your old source folder.
+   Keeping old source is not a supported downgrade: schema-3 data and backups
+   require Black Box 0.9.0 or later. Keep the pre-update backup from step 1,
+   and use the current app version with updated data.
 4. Open the extracted folder containing START_HERE.cmd and pubspec.yaml.
 5. Double-click START_HERE.cmd and keep its terminal window open. It downloads
    the required Flutter packages and compiles the updated app; internet is needed.
@@ -229,7 +282,7 @@ UPDATE FROM YOUR EXISTING VERSION
 
 7. Confirm the app shows Black Box. Open the question-mark button, then
    Appearance > About Black Box & licenses to check that it says Prototype
-   0.8.0. If the old screen is still visible, press Ctrl+Shift+R to reload it.
+   0.9.0. If the old screen is still visible, press Ctrl+Shift+R to reload it.
    Do NOT clear site data.
 8. Check that any plan you saved in the first version is still there. Then
    open Group > Download backup and keep the downloaded JSON file.
@@ -244,20 +297,32 @@ coordinate edits between multiple tabs or devices.
 
 WHAT IS NEW
 -----------
+MULTIPLE PLANS AND FAMILY DETAILS
+- Plan selector below the header opens Your plans without adding another
+  main-header icon. Search Active/Archived plans and switch the current plan.
+- Create a blank plan, duplicate with Packed cleared, import as a separate
+  plan with existing checks preserved, and archive/restore older plans.
+- Each plan has separate data and recovery copies. Personal pack and guide
+  files remain common across plans. Group backups cover one selected plan.
+- Family information adds optional contacts, communication, care/pickup, and
+  departure notes to Plan, with Home/Group shortcuts and backup/text export.
+- Plan schema 3 reads legacy schemas 1 and 2; first upgrade saves the old raw
+  record as a previous copy. Old application versions cannot read schema 3.
+
 HELP AND TUTORIAL
 - Optional Home introduction with Start quick tour and Not now.
 - Six short tour chapters with Back, Next, Skip, Done, and a final Open Plan
   action. Replay it from Help whenever you want.
-- Ten searchable help topics with expandable steps and direct Open buttons.
+- Twelve searchable help topics with expandable steps and direct Open buttons.
 - Question-mark header button opens Help; Appearance moves into Help. The
   guide-book and sun/moon shortcuts remain in the main header.
 - Instructions explain actual local/offline behavior and the differences
   between the shared kit, personal pack, guide files, and backup copies.
 - Bundled text requires no network or media download to read after opening
   the app. Reading progress does not mark any real setup task complete.
-- A separate optional preference remembers introduction dismissal. Existing
-  models, storage, tests, build scripts, dependencies, fonts, and shopping
-  configuration are unchanged.
+- A separate optional preference remembers introduction dismissal. Reading
+  Help does not edit plan data. Dependencies, fonts, and shopping configuration
+  are unchanged in this release.
 
 RUGGED DESIGN RETAINED
 - Static ripstop/grain backdrops, matte chamfered panels, double edges, and
@@ -266,7 +331,7 @@ RUGGED DESIGN RETAINED
   selected navigation. Text fields and controls keep solid readable fills.
 - Dark olive/sage/cream and Light sand/forest palettes, with amber accents.
 - Header branding simplifies at narrow widths or large text settings.
-- No new assets or dependencies. Appearance IDs and saved data are unchanged.
+- No new assets or dependencies. Appearance IDs and display preferences are retained.
 
 SUGGESTIONS AND OWNERSHIP
 - Kit > Suggested and Home > Browse suggested items open the six-item catalog.
@@ -299,8 +364,8 @@ CURRENT PLAN MAP
 - Existing controls let you edit a place or choose/change its map pin.
 - Map imagery requires internet. Saved names, written details and coordinates
   are part of the existing local plan; map imagery is not in its JSON backup.
-- Multiple plans, account groups, cloud sharing, a forum, an inbox, and paid
-  subscriptions are planned features, not functions added by this update.
+- Local multiple plans are included. Account groups, cloud sharing, a forum,
+  an inbox, and paid subscriptions remain future features.
 
 APPEARANCE AND NAVIGATION
 - Field Terminal opens in Dark mode by default. Use the top-right sun/moon
@@ -308,8 +373,8 @@ APPEARANCE AND NAVIGATION
   also in Help > Appearance, and the selected mode is stored locally.
 - Light uses sand/canvas surfaces with forest-green controls; Dark uses
   olive-black panels, sage controls, and cream text. Both retain the texture.
-- Home shows the plan overview; Plan contains meeting places; Map displays
-  those locations; Kit contains supplies; Group contains the local roster,
+- Home shows the plan overview; Plan contains meeting places and Family
+  information; Map displays those locations; Kit contains supplies; Group contains the local roster,
   backup/restore, and readable copies.
 - Barlow, Barlow Condensed, and IBM Plex Mono are bundled font assets. Their
   open font license notices are included with the app.
@@ -341,11 +406,14 @@ SUPPLIES
 
 BACKUPS AND READABLE COPIES
 - In the browser and on supported desktop targets, Download backup creates
-  a JSON file containing your whole plan: members,
-  locations, coordinates, supplies, quantities, assignments, notes, and checks.
+  a JSON file containing the selected plan: members, locations, coordinates,
+  Family information, supplies, quantities, assignments, notes, and checks.
+  It is not a backup of every plan or the personal pack/guide files.
 - Restore backup validates the file and shows its group name and counts before
   you decide whether to replace the current plan. It does not merge two plans.
-- A previous local copy is retained during upgrade/restore. A separate recovery
+- Your plans > Import backup adds a previewed backup as a separate plan.
+  Group > Restore backup replaces only the selected plan after confirmation.
+- Each plan retains its own previous copy during upgrade/restore. A separate recovery
   copy protects the selected backup if a restore is interrupted or a write fails.
 - Group provides previews when those local copies are present. Download
   controls are available on the browser and supported desktop targets.
@@ -411,6 +479,22 @@ changing any plan information. The steps below let you check actual actions.
     try Done and then replay to try Open Plan. If the Home introduction is
     still visible, choose Not now and reopen to check that it stays dismissed.
     Help remains available from the question-mark button in either case.
+19. Use the plan selector below the header to create a new test plan. Confirm
+    it starts with You and empty places/shared kit. Add different details to
+    two plans, switch, and restart to check that their contents stay separate.
+20. Open Family information for one plan. Save contacts and responsibility
+    notes, reopen them, and check a readable plan copy. Edit again, cancel,
+    and discard the draft; confirm the saved details are unchanged.
+21. Duplicate a plan with a packed supply. Confirm the copy has Packed cleared
+    while the original stays checked. My pack and guides should remain the
+    same across both plans. Import a JSON backup through Your plans and check
+    that it adds a separate plan with the backup's original checks/details.
+22. Switch away from a test plan, archive it, then find it under Archived and
+    choose Restore to active plans. Confirm its information is retained.
+23. Check a schema-3 JSON backup includes Family information. Keep the backup
+    private. Group > Restore backup replaces only the selected plan; preview
+    the selected target carefully. Check each intended plan offline on the
+    installed phone separately from guide playback and online map imagery.
 
 WHAT WORKS OFFLINE, AND WHAT IS STILL BEING BUILT
 ------------------------------------------------
@@ -425,8 +509,9 @@ map downloading. This prototype requests only the area you actively view.
 The JSON backup stores pin coordinates, not map imagery.
 Bundled fonts and a saved appearance do not provide downloaded map data.
 
-There are no accounts, account-based groups/invitations, multiple-plan storage,
-cloud sharing, family synchronization, community forum, asynchronous inbox,
+Local multiple-plan storage and per-plan Family information are included.
+There are no accounts, account-based groups/invitations, cloud sharing,
+family synchronization, community forum, asynchronous inbox,
 subscriptions, live member locations, or bundled survival-guide content in
 this version. You can import your own local PDF/video guides. Adding a name
 only changes the local roster. A save time
@@ -478,11 +563,15 @@ flutter run -d web-server --web-hostname=127.0.0.1 --web-port=54321
 
 Then open http://127.0.0.1:54321 in your normal Chrome window.
 
-The same original group-plan browser storage key is retained. Version 1 plans remain
-readable; new writes use version 2. Before the first version-2 save, the exact
-old stored record is retained as the previous copy. Opening an old source
-version after upgrading is not a supported downgrade path: the old code cannot
-read version-2 plans. Keep the updated code with your downloaded backups.
+The original group plan keeps its existing current, previous, and recovery
+storage keys. The local library indexes that existing plan and gives each new
+plan separate current/previous/recovery records. Plans and backups using
+schemas 1 and 2 remain readable with empty Family information. New writes use
+schema 3. Before the first schema-3 save, the exact earlier raw stored record
+is retained as the previous copy. Schema-3 saved data and backups require
+Black Box 0.9.0 or later; older versions do not know the new Family information.
+Keep a pre-update backup, and use the current version with updated data.
+Keeping the older source folder alone does not provide a supported downgrade.
 
 The separate personal-list key is also retained. This update reads personal
 schema versions 1 and 2 and writes version 2 with ownership and catalog IDs.
@@ -511,7 +600,10 @@ lib/plan_dialogs.dart  Meeting-place and supply editors.
 lib/meeting_map.dart   Interactive online map and coordinate picker.
 lib/plan_map.dart      Map tab for the current local plan's named locations.
 lib/plan_files.dart    File import, browser download, and desktop save helpers.
-lib/plan_store.dart    Restore journal and ordered persistence writes.
+lib/plan_store.dart    Per-plan restore journal and ordered persistence writes.
+lib/plan_library_store.dart Local plan index, migration, switching, copying, and archive.
+lib/plan_library_page.dart Plan search, Active/Archived lists, and action requests.
+lib/family_brief_page.dart Optional per-plan contacts and responsibility editor.
 lib/personal_packlist.dart Personal checklist screen and saved-state controls.
 lib/personal_packlist_models.dart Ownership/packing model, migration, and queued store.
 lib/personal_packlist_repository.dart Shared personal-list access across Kit views.
@@ -528,6 +620,7 @@ lib/guide_platform_web.dart Browser IndexedDB storage and local Blob opening.
 lib/guide_platform_stub.dart Unsupported-platform fallback.
 test/                  Pure Dart model, restore, checklist, catalog/link, and guide checks.
 test/suggested_catalog_check.dart Catalog and shopping-link validation checks.
+test/plan_library_check.dart Local plan migration, isolation, and failure checks.
 assets/fonts/          Bundled font files and their open font license notices.
 pubspec.yaml           Version, pinned dependencies, font and asset declarations.
 web/index.html         Browser entry point.
@@ -535,6 +628,7 @@ START_HERE.cmd         Windows launcher.
 README.txt             Browser prototype guide.
 START_IPHONE_CLOUD.txt  Windows-to-iPhone build and TestFlight instructions.
 NEXT_FEATURES.txt       Planned product features, access model, and requirements.
+LAUNCH_PLAN.txt         Research-backed priorities, launch gaps, and validation plan.
 AMAZON_AFFILIATE_SETUP.txt Shopping behavior, approved-link setup, catalog, and sources.
 codemagic.yaml         Manual unsigned and signed iOS build workflows.
 scripts/               Isolated native-project preparation and build helpers.
@@ -595,9 +689,9 @@ A focused source review checked Map navigation, location selection, and reuse
 of the existing edit/save callbacks. Runtime layout, native builds, and device
 interaction remain unverified.
 
-The existing group model and storage files are unchanged, so the earlier 62-check and
-six-scenario results are carried forward; those checks have not been rerun
-for this update. No widget or native UI tests were run.
+For that v0.4.0 update, the group model and storage files were unchanged;
+the earlier 62-check and six-scenario results were historical, not reruns.
+No widget or native UI tests were run for that release.
 
 For v0.5.0+8, 27 new standalone checklist model/store checks and 38 native guide
 file-storage checks passed. Guide tests used real temporary files with an
@@ -623,11 +717,11 @@ formatting, and numerical contrast review of the palette. The 52 personal-list
 and 182 catalog/link checks above are historical v0.6.0 results; they have not been
 rerun for the visual update. No new model or UI test suite was added. You then
 reported that v0.7.0+10 rendered great and passed ios-compile-check. This is the
-latest user-reported baseline; no browser or native-device QA ran here.
+latest explicit user-reported green compile; no browser or native-device QA ran here.
 
-For v0.8.0+11, checks are limited to standalone Dart formatting, source review,
-and review of help content/navigation. The existing model/storage/test files,
-build scripts, dependencies, fonts, and shopping configuration are unchanged.
+For v0.8.0+11, checks were limited to standalone Dart formatting, source review,
+and review of help content/navigation. Model/storage/test files, build scripts,
+dependencies, fonts, and shopping configuration were unchanged in that release.
 No new automated tests were added; the earlier 52/182-check results have not
 been rerun. No Flutter compilation, browser QA, or native-device QA was
 performed here. The earlier automatic approval restriction on Flutter startup
@@ -637,17 +731,35 @@ small widths, larger text, and the existing screen actions.
 Installation and behavior on the physical iPhone still need testing after
 Apple signing is configured.
 
+You subsequently accepted v0.8.0+11 as perfect so far, with Apple still pending.
+That acceptance was not a new explicit ios-compile-check result.
+
+For v0.9.0+12, the source includes focused standalone model, restore, and
+plan-library checks for schema migration, plan isolation, ordered writes,
+copy/import/archive behavior, and interrupted or failed operations. These are
+data checks; Flutter compilation, rendering, browser plugins, signed-phone
+installation, and offline restart/playback still need validation. Run the
+updated Codemagic compile workflow and the manual walkthrough earlier in this file.
+
+TestFlight builds become unavailable after 90 days. Use TestFlight for testing,
+not as the permanent installation on a phone stored in a go bag. The go-bag
+release needs a production distribution path and periodic device checks.
+Apple: https://developer.apple.com/help/app-store-connect/test-a-beta-version/testflight-overview/
+
 Optional developer checks (after Dart is available in your terminal):
   dart test/plan_models_check.dart
   dart test/plan_store_check.dart
+  dart test/plan_library_check.dart
   dart test/personal_packlist_check.dart
   dart test/guide_store_check.dart
   dart test/suggested_catalog_check.dart
 
 NEXT DEVELOPMENT MILESTONE
 --------------------------
-See NEXT_FEATURES.txt for the agreed direction: account-based groups and
-invitations, multiple plans, user-controlled sharing, an online community
+The local plan library and Family information foundations are now included.
+See LAUNCH_PLAN.txt and NEXT_FEATURES.txt for the next work: durable protected
+storage, phone backup export, review/drill records, account-based groups and
+invitations, user-controlled cloud sharing, an online community
 forum, and an asynchronous inbox. The inbox is not real-time chat or SMS.
 Free readers should be able to view and download complete shared plans for
 offline access; subscribers should be able to contribute and edit. Online

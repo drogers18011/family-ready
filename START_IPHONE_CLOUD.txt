@@ -9,19 +9,38 @@ Keep developing on Windows. Put the project in a private GitHub repository.
 Codemagic checks out the code and builds it on a hosted Mac. Later, Apple's
 TestFlight installs the signed beta on your iPhone.
 
-CURRENT STATUS: You reported a green ios-compile-check for v0.7.0+10 and said
-it rendered great. This is the user-reported baseline, not runtime QA
-performed in this preparation workspace. Your Apple Developer enrollment was
-last reported pending. Apple signing and TestFlight follow activation.
+CURRENT STATUS: You accepted v0.8.0+11 as perfect so far. The latest explicit
+user-reported green ios-compile-check is v0.7.0+10, which rendered well.
+These are user reports, not runtime QA in this preparation workspace.
+Your Apple Developer enrollment is still pending. Apple signing and TestFlight
+follow activation.
 
-This package is version 0.8.0+11 and adds an optional quick tour and searchable
-in-app instructions. Home offers Get started with Black Box, with Start quick
+This package is version 0.9.0+12. It adds Your plans, opened by the selector
+below the main header. Create a blank plan, switch plans, duplicate with
+shared-kit Packed checks cleared, import a reviewed backup as a separate plan,
+or archive/restore older plans. Import preserves the backup's checks. Each
+plan has its own people, places, supplies, previous copy, and recovery copy.
+The original plan is retained; personal pack and guide files remain common.
+If first-time library setup cannot be saved, the original plan remains
+readable and the visible warning offers Plans to retry. An existing invalid
+library record instead shows a load warning; the app does not guess which
+plan to use or overwrite the record.
+
+Plan > Family information adds optional out-of-area contact details, other
+contacts, communication notes, care/pickup responsibilities, and departure
+notes. Home and Group have shortcuts. Saved details belong to the selected
+plan and appear in its JSON and readable text backups. Saving does not call,
+message, invite, or alert anyone. A backup covers one plan, not the library
+or the personal pack/guide files. Online sharing is not implemented.
+
+The optional quick tour and searchable in-app instructions are retained.
+Home offers Get started with Black Box, with Start quick
 tour and Not now. The six chapters have Back, Next, Skip, Done, and a final
 Open Plan action. Reading or finishing the tour does not change the plan or
 mark it ready. The introduction preference is saved separately; a failure
 does not block access to the app.
 
-The question-mark header button opens Help & tutorial. Search ten topics,
+The question-mark header button opens Help & tutorial. Search twelve topics,
 expand numbered instructions, and use their Open buttons to reach the related
 screen. Choose Quick tour to replay it. The main header keeps three shortcuts:
 guides, sun/moon, and Help. Appearance is now in Help, with About Black Box &
@@ -44,7 +63,7 @@ Flight Deck preference opens Field Terminal in Dark mode after this update.
 The five tabs are Home, Plan, Map, Kit, and Group. Map shows the
 current local plan's primary and backup places by their saved names, with
 selectable markers, local details, and the existing edit/place-pin controls.
-Its map imagery requires internet. The app still holds one local plan.
+Its map imagery requires internet. Switching plans changes the places shown.
 
 RETAINED: Kit has Shared kit, My pack, and Suggested. Home has a Browse suggested
 items shortcut. Six bundled suggestions have original preparation notes,
@@ -77,15 +96,16 @@ cloud storage. Guide files and personal pack items are not in group JSON
 backups; keep original files and use Copy list text for the personal list.
 
 The successful Material UI migration and Black Box rename remain included.
-This tutorial update has not been Flutter-compiled or tested in a
-browser or on a phone here. Upload this version and run a new ios-compile-check;
-the latest user-reported green result covers v0.7.0+10. Preparation checks for
-v0.8.0+11 are limited to standalone formatting, source review, and review of
-the help content/navigation. Offline map downloads
-and two-marker offline routing remain future work. NEXT_FEATURES.txt records
-the planned account groups,
-multiple plans, sharing, forum, asynchronous inbox, and subscriptions. None of
-those online/account features is implemented in this local prototype.
+This update has not been Flutter-compiled or tested in a browser or on a
+phone here. Upload all source/test files and run a new ios-compile-check.
+Focused standalone Dart checks cover model, restore, and plan-library data
+behavior. They do not establish Flutter rendering or native plugin behavior.
+The latest explicit user-reported green result remains v0.7.0+10.
+Offline map downloads and two-marker offline routing remain future work.
+NEXT_FEATURES.txt and LAUNCH_PLAN.txt record the next work: durable protected
+storage, phone export, plan reviews/drills, account groups, complete cloud
+plan downloads for free readers, sharing, forum, inbox, and subscriptions.
+None of those online/account services is implemented by the local library.
 
 UPDATING THE EXISTING CODEMAGIC PROJECT
 --------------------------------------
@@ -94,11 +114,14 @@ family-ready repository, preserving assets, lib, scripts, test, and web as
 folders at the repository root beside pubspec.yaml and codemagic.yaml. Include
 ALL files in lib and test, the updated pubspec.yaml/scripts, and every file in
 assets/fonts, preserving their folder hierarchy. Include the new
-lib/help_content.dart and lib/help_page.dart with the updated main.dart.
+lib/plan_library_store.dart, lib/plan_library_page.dart, and
+lib/family_brief_page.dart, plus test/plan_library_check.dart. Keep the updated
+plan_models.dart, plan_store.dart, help_content.dart, and help_page.dart with
+main.dart. All existing lib and test files are still required.
 Keep lib/field_surfaces.dart with the existing theme and screen files. Keep
 all guide platform files, the suggested/catalog/affiliate-config/personal-repository files,
 and test/suggested_catalog_check.dart alongside the existing checks. Keep
-NEXT_FEATURES.txt and AMAZON_AFFILIATE_SETUP.txt with the top-level documents.
+NEXT_FEATURES.txt, LAUNCH_PLAN.txt, and AMAZON_AFFILIATE_SETUP.txt with the top-level documents.
 Do not upload only main.dart, the ZIP, or an extra
 enclosing folder. Commit the replacements to the selected build branch.
 scripts/configure_ios.py still sets the iPhone display name to Black Box.
@@ -107,8 +130,16 @@ web/index.html and the lib files keep the browser and in-app name consistent.
 Keep the existing repository, package, workflow, and integration identifiers.
 They retain their original family_ready/family-ready names for continuity.
 The proposed bundle identifier is still com.dennisrogers.familyready; it has
-not been registered or reserved. The visible product name is Black Box. The
-shared-plan schema, existing storage keys, and browser origin are unchanged.
+not been registered or reserved. The visible product name is Black Box.
+The original plan retains its storage keys; additional plans use separate
+current/previous/recovery records. Schema 3 writes include Family information.
+Schemas 1 and 2 still read with an empty family brief. The first schema-3 edit
+retains the prior raw record as the previous copy. Schema-3 saved data and
+backups require Black Box 0.9.0 or later; older versions do not know the new
+Family information. Keep a pre-update backup and use the current app version
+with updated data. Keeping old source does not guarantee a working downgrade.
+The browser origin
+remains http://127.0.0.1:54321 with the same normal Chrome profile.
 The help prompt uses a separate optional preference,
 black_box.help_intro_dismissed.v1; it does not change plan data or readiness.
 The separate personal-list store reads schema 1 or 2 and now writes schema 2.
@@ -165,8 +196,9 @@ STEP 2 - UPLOAD THE CLEAN PROJECT TO A PRIVATE GITHUB REPOSITORY
 4. On the new GitHub repository page, choose upload existing files.
 5. Drag the CONTENTS of the extracted folder into the upload area, including
    assets, lib, scripts, test, web, and the top-level files. Keep assets/fonts
-   and ALL lib files, including help_content.dart and help_page.dart, in
-   their existing folders. Do not upload the ZIP or an extra enclosing folder.
+   and ALL lib/test files, including plan_library_store.dart,
+   plan_library_page.dart, family_brief_page.dart, help_content.dart,
+   help_page.dart, and test/plan_library_check.dart, in their existing folders. Do not upload the ZIP or an extra enclosing folder.
 6. Commit the upload. Confirm these appear at the repository's top level:
      pubspec.yaml
      codemagic.yaml
@@ -176,6 +208,9 @@ STEP 2 - UPLOAD THE CLEAN PROJECT TO A PRIVATE GITHUB REPOSITORY
      lib/main.dart
      lib/help_content.dart
      lib/help_page.dart
+     lib/plan_library_store.dart
+     lib/plan_library_page.dart
+     lib/family_brief_page.dart
      lib/black_box_theme.dart
      lib/field_surfaces.dart
      lib/plan_map.dart
@@ -188,6 +223,7 @@ STEP 2 - UPLOAD THE CLEAN PROJECT TO A PRIVATE GITHUB REPOSITORY
      test/personal_packlist_check.dart
      test/guide_store_check.dart
      test/suggested_catalog_check.dart
+     test/plan_library_check.dart
      assets/fonts/Barlow-Regular.ttf
      assets/fonts/Barlow-SemiBold.ttf
      assets/fonts/BarlowCondensed-SemiBold.ttf
@@ -304,13 +340,16 @@ STEP 6 - BUILD AND INSTALL THROUGH TESTFLIGHT
 
 The prepared export is for internal TestFlight testing. A later configuration
 and new build will be needed for external family testers or App Store release.
-TestFlight builds expire after 90 days; they are temporary development builds.
+TestFlight builds become unavailable after 90 days. They are temporary testing
+builds, not a permanent go-bag installation. Keep beta tests current; a go-bag
+release needs a production distribution path and periodic device checks.
+Apple: https://developer.apple.com/help/app-store-connect/test-a-beta-version/testflight-overview/
 
 FIRST PHONE CHECK
 ------------------
 Check Home, Plan, Map, Kit, and Group. Use the top-right sun/moon button to try
 Field Terminal in Light and Dark, then check the same options in Help >
-Appearance. Open About Black Box & licenses there to confirm Prototype 0.8.0.
+Appearance. Open About Black Box & licenses there to confirm Prototype 0.9.0.
 Inspect the textured panels, selected navigation, and button/input contrast.
 Try a narrow screen and larger system text; the header should simplify while
 its controls remain usable. Texture should remain static, and controls should
@@ -330,12 +369,32 @@ HELP AND QUICK TOUR CHECK
 3. If the Home introduction is still visible, try Not now. Close/reopen the
    app and check that the card stays dismissed. Help remains available.
 4. Search instructions for "offline", "packed", or "backup". Expand a topic
-   and try its Open button. Check the ten topics and Appearance shortcut.
+   and try its Open button. Check the twelve topics and Appearance shortcut.
 5. Check the tour, expanded instructions, and buttons in Light and Dark with
    larger system text. Keep access to scrolling, Back, and Skip visible.
 6. On the installed phone with Wi-Fi and cellular off, reopen Help and read
    a topic. This checks bundled instructions; it does not prove saved guide
    playback, plan persistence, or downloaded maps. Check those separately.
+
+MULTIPLE PLANS AND FAMILY INFORMATION CHECK
+1. Confirm the old plan is still selected and its members/places/supplies are
+   intact. Open the selector below the header and create a test plan.
+2. Confirm New plan starts with You and empty locations/shared kit. Enter
+   different details in two plans, switch between them, and restart the app.
+   Check that the selected plan and each plan's contents remain separate.
+3. Add Family information, save, reopen, and check all fields. Edit again,
+   then cancel/discard and confirm the saved version is unchanged.
+4. Duplicate a plan with a packed supply. Confirm the new plan starts with
+   Packed cleared and the original remains checked. Personal pack/guides
+   should stay the same across plans.
+5. Import a JSON backup through Your plans and review its preview. Confirm it
+   adds a separate plan with the backup's checks and Family information.
+   Group > Restore backup instead replaces only the currently selected plan.
+6. Switch away from a test plan, archive it, find it under Archived, and
+   choose Restore to active plans. Check its information is retained.
+7. Check Family information in Copy plan text and a browser JSON backup.
+   Reopen each intended plan offline on the phone and read its local details.
+   A saved contact must not send a call, message, or invitation by itself.
 
 PERSONAL PACK CHECK
 1. Open Kit > My pack. Add an item, quantity, and note; mark it packed.
@@ -395,9 +454,10 @@ Premium plus explicit administrator assignment is required for moderators;
 a subscription alone grants no moderator powers. Operator administration is
 separate. Free inbox sending remains an unconfirmed recommendation.
 
-The Group tab remains a local roster. Accounts, invited users, multiple groups
-and plans, cloud sharing, an online forum, an asynchronous inbox, and paid
-subscriptions are future requirements documented in NEXT_FEATURES.txt. The
+The Group tab is the selected plan's local roster. Local multiple plans are
+included, but accounts, invited users, online groups, cloud sharing, a forum,
+an asynchronous inbox, and paid subscriptions remain future requirements
+in NEXT_FEATURES.txt and LAUNCH_PLAN.txt. The
 planned inbox is not real-time chat or SMS. There is no active payment feature.
 
 The Black Box name is a flight-recorder metaphor, not a certification of
@@ -431,9 +491,9 @@ A focused source review checked Map navigation, location selection, and reuse
 of the existing edit/save callbacks. Runtime layout, native builds, and device
 interaction remain unverified.
 
-The existing group model and storage files are unchanged, so the earlier 62-check and
-six-scenario results are carried forward; those checks have not been rerun
-for this update. No widget or native UI tests were run.
+For that v0.4.0 update, the group model and storage files were unchanged;
+the earlier 62-check and six-scenario results were historical, not reruns.
+No widget or native UI tests were run for that release.
 
 For v0.5.0+8, 27 standalone checklist model/store checks and 38 native guide
 file-storage checks passed. Guide tests use real temporary files and injected
@@ -460,15 +520,19 @@ runs for that visual-only update. No additional automated tests were added.
 Dennis then reported that v0.7.0+10 rendered great and passed ios-compile-check.
 This is user-reported confirmation, not browser or device QA in this workspace.
 
-For v0.8.0+11, verification is limited to standalone Dart formatting, source
-review, and help content/navigation review. Existing model/storage/test files,
-build scripts, dependencies, fonts, and shopping configuration are unchanged.
+For v0.8.0+11, verification was limited to standalone Dart formatting, source
+review, and help content/navigation review. Model/storage/test files, build
+scripts, dependencies, fonts, and shopping configuration were unchanged in
+that release. Dennis subsequently accepted the tutorial update as perfect so
+far; this was not a new explicit green compile result.
 The earlier 52/182-check results have not been rerun. No new automated tests
 were added for the tutorial feature.
 
-This tutorial update has not been Flutter-compiled or tested in a browser or
-on a native device here. Tour navigation, layout with larger text, help search,
-and preference persistence need runtime checks in this new version.
+For v0.9.0+12, focused pure-Dart model, restore, and library checks cover data
+migration, plan isolation, copy/import/archive behavior, and failed operations.
+This release has not been Flutter-compiled or tested in a browser or on a
+native device here. Plan switching, family editing, backup preview, Help,
+large text, and both appearances need runtime checks in this new version.
 Run a new ios-compile-check for this version. No signed IPA, phone installation,
 or TestFlight upload has been completed by this workspace.
 
@@ -498,5 +562,6 @@ Upload: https://docs.codemagic.io/yaml-publishing/app-store-connect/
 Apple membership: https://developer.apple.com/help/account/membership/program-enrollment/
 Phone setup: https://support.apple.com/en-us/105132
 Internal testers: https://developer.apple.com/help/app-store-connect/test-a-beta-version/add-internal-testers
+TestFlight expiry: https://developer.apple.com/help/app-store-connect/test-a-beta-version/testflight-overview/
 macOS license: https://www.apple.com/legal/sla/docs/macOSTahoe.pdf
 

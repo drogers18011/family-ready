@@ -16,6 +16,133 @@ class FamilyMember {
   Map<String, Object?> toJson() => {'id': id, 'name': name};
 }
 
+/// A contact copied into this plan, independent of the device address book.
+class PlanContact {
+  factory PlanContact({
+    String name = '',
+    String phone = '',
+    String role = '',
+  }) => PlanContact._(
+    _briefText(name, 'contact name', 120),
+    _briefText(phone, 'contact phone', 80),
+    _briefText(role, 'contact role', 160),
+  );
+
+  const PlanContact._(this.name, this.phone, this.role);
+
+  final String name;
+  final String phone;
+  final String role;
+
+  Map<String, Object?> toJson() => {'name': name, 'phone': phone, 'role': role};
+
+  factory PlanContact.fromJson(Object? value) {
+    final map = readMap(value);
+    return PlanContact(
+      name: readString(map, 'name', allowEmpty: true),
+      phone: readString(map, 'phone', allowEmpty: true),
+      role: readString(map, 'role', allowEmpty: true),
+    );
+  }
+}
+
+/// Optional written information belonging to one plan. The contact list is
+/// copied on construction so editing a form cannot mutate the saved value.
+class FamilyBrief {
+  factory FamilyBrief({
+    String outOfAreaName = '',
+    String outOfAreaPhone = '',
+    String communicationNotes = '',
+    String careNotes = '',
+    String departureNotes = '',
+    List<PlanContact> contacts = const [],
+  }) {
+    if (contacts.length > maxContacts) {
+      throw const FormatException('A family brief has too many contacts.');
+    }
+    return FamilyBrief._(
+      _briefText(outOfAreaName, 'out-of-area contact name', 120),
+      _briefText(outOfAreaPhone, 'out-of-area contact phone', 80),
+      _briefText(communicationNotes, 'communication notes', maxNoteLength),
+      _briefText(careNotes, 'care and pickup notes', maxNoteLength),
+      _briefText(departureNotes, 'departure notes', maxNoteLength),
+      List<PlanContact>.unmodifiable(contacts),
+    );
+  }
+
+  const FamilyBrief._(
+    this.outOfAreaName,
+    this.outOfAreaPhone,
+    this.communicationNotes,
+    this.careNotes,
+    this.departureNotes,
+    this.contacts,
+  );
+
+  const FamilyBrief.empty()
+    : outOfAreaName = '',
+      outOfAreaPhone = '',
+      communicationNotes = '',
+      careNotes = '',
+      departureNotes = '',
+      contacts = const [];
+
+  static const maxContacts = 30;
+  static const maxNoteLength = 3000;
+
+  final String outOfAreaName;
+  final String outOfAreaPhone;
+  final String communicationNotes;
+  final String careNotes;
+  final String departureNotes;
+  final List<PlanContact> contacts;
+
+  bool get isEmpty =>
+      outOfAreaName.isEmpty &&
+      outOfAreaPhone.isEmpty &&
+      communicationNotes.isEmpty &&
+      careNotes.isEmpty &&
+      departureNotes.isEmpty &&
+      contacts.isEmpty;
+
+  Map<String, Object?> toJson() => {
+    'outOfAreaName': outOfAreaName,
+    'outOfAreaPhone': outOfAreaPhone,
+    'communicationNotes': communicationNotes,
+    'careNotes': careNotes,
+    'departureNotes': departureNotes,
+    'contacts': contacts.map((contact) => contact.toJson()).toList(),
+  };
+
+  factory FamilyBrief.fromJson(Object? value) {
+    final map = readMap(value);
+    final contacts = map['contacts'];
+    if (contacts is! List || contacts.length > maxContacts) {
+      throw const FormatException('The saved family contact list is invalid.');
+    }
+    return FamilyBrief(
+      outOfAreaName: readString(map, 'outOfAreaName', allowEmpty: true),
+      outOfAreaPhone: readString(map, 'outOfAreaPhone', allowEmpty: true),
+      communicationNotes: readString(
+        map,
+        'communicationNotes',
+        allowEmpty: true,
+      ),
+      careNotes: readString(map, 'careNotes', allowEmpty: true),
+      departureNotes: readString(map, 'departureNotes', allowEmpty: true),
+      contacts: contacts.map(PlanContact.fromJson).toList(),
+    );
+  }
+}
+
+String _briefText(String value, String name, int limit) {
+  final text = value.trim();
+  if (text.length > limit) {
+    throw FormatException('The saved $name exceeds $limit characters.');
+  }
+  return text;
+}
+
 class MeetingPlace {
   const MeetingPlace({
     this.name = '',
@@ -138,6 +265,7 @@ class GroupPlan {
     required this.supplies,
     this.primary = const MeetingPlace(),
     this.backup = const MeetingPlace(),
+    this.familyBrief = const FamilyBrief.empty(),
     this.savedAt,
   });
 
@@ -146,6 +274,7 @@ class GroupPlan {
   final List<Supply> supplies;
   MeetingPlace primary;
   MeetingPlace backup;
+  FamilyBrief familyBrief;
   DateTime? savedAt;
 
   factory GroupPlan.sample() => GroupPlan(
@@ -168,11 +297,12 @@ class GroupPlan {
   );
 
   Map<String, Object?> toJson(DateTime savedAt) => {
-    'version': 2,
+    'version': 3,
     'groupName': groupName,
     'members': members.map((member) => member.toJson()).toList(),
     'primary': primary.toJson(),
     'backup': backup.toJson(),
+    'familyBrief': familyBrief.toJson(),
     'supplies': supplies.map((item) => item.toJson()).toList(),
     'savedAt': savedAt.toUtc().toIso8601String(),
   };
@@ -180,7 +310,7 @@ class GroupPlan {
   factory GroupPlan.fromJson(Object? value) {
     final map = readMap(value);
     final version = map['version'];
-    if (version is! int || (version != 1 && version != 2)) {
+    if (version is! int || (version != 1 && version != 2 && version != 3)) {
       throw const FormatException(
         'This saved plan uses an unsupported version.',
       );
@@ -252,6 +382,9 @@ class GroupPlan {
       supplies: supplies,
       primary: MeetingPlace.fromJson(map['primary']),
       backup: MeetingPlace.fromJson(map['backup']),
+      familyBrief: version == 3
+          ? FamilyBrief.fromJson(map['familyBrief'])
+          : const FamilyBrief.empty(),
       savedAt: savedAt,
     );
   }
@@ -286,6 +419,33 @@ String readablePlanText(GroupPlan plan, {required String saveStatus}) {
 
   place('PRIMARY MEETING PLACE', plan.primary);
   place('BACKUP MEETING PLACE', plan.backup);
+  final brief = plan.familyBrief;
+  output.writeln('\nFAMILY INFORMATION');
+  if (brief.isEmpty) {
+    output.writeln('No family information added yet.');
+  } else {
+    if (brief.outOfAreaName.isNotEmpty || brief.outOfAreaPhone.isNotEmpty) {
+      output.writeln('Out-of-area contact: ${brief.outOfAreaName}');
+      if (brief.outOfAreaPhone.isNotEmpty) {
+        output.writeln('Phone: ${brief.outOfAreaPhone}');
+      }
+    }
+    for (var i = 0; i < brief.contacts.length; i++) {
+      final contact = brief.contacts[i];
+      output.writeln('Contact ${i + 1}: ${contact.name}');
+      if (contact.phone.isNotEmpty) output.writeln('Phone: ${contact.phone}');
+      if (contact.role.isNotEmpty) output.writeln('Role: ${contact.role}');
+    }
+    if (brief.communicationNotes.isNotEmpty) {
+      output.writeln('Communication notes: ${brief.communicationNotes}');
+    }
+    if (brief.careNotes.isNotEmpty) {
+      output.writeln('Care and pickup responsibilities: ${brief.careNotes}');
+    }
+    if (brief.departureNotes.isNotEmpty) {
+      output.writeln('Departure notes: ${brief.departureNotes}');
+    }
+  }
   output.writeln('\nSUPPLIES');
   if (plan.supplies.isEmpty) output.writeln('No supplies added yet.');
   final names = {for (final member in plan.members) member.id: member.name};

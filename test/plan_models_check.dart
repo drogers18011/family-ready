@@ -47,6 +47,12 @@ Map<String, dynamic> legacyFixture() => jsonDecode('''
 }
 ''') as Map<String, dynamic>;
 
+Map<String, dynamic> currentFixture() => jsonDecode(
+  jsonEncode(
+    GroupPlan.fromJson(legacyFixture()).toJson(DateTime.utc(2026, 11, 22)),
+  ),
+) as Map<String, dynamic>;
+
 void main() {
   final legacy = legacyFixture();
   final before = jsonEncode(legacy);
@@ -108,6 +114,19 @@ void main() {
     jsonEncode(legacy) == before,
     'migration does not mutate imported data',
   );
+  check(
+    migrated.familyBrief.isEmpty,
+    'schema 1 starts with an empty family brief',
+  );
+  final oldV2 = legacyFixture()..['version'] = 2;
+  check(
+    GroupPlan.fromJson(oldV2).familyBrief.isEmpty,
+    'schema 2 starts with an empty family brief',
+  );
+  check(
+    GroupPlan.sample().familyBrief.isEmpty,
+    'sample family details are not invented',
+  );
 
   migrated.primary = const MeetingPlace(
     name: 'North gate',
@@ -125,12 +144,12 @@ void main() {
   final encoded = jsonEncode(migrated.toJson(timestamp));
   final roundtrip = GroupPlan.fromJson(jsonDecode(encoded));
   check(
-    jsonDecode(encoded)['version'] == 2,
-    'new backups declare schema version 2',
+    jsonDecode(encoded)['version'] == 3,
+    'new backups declare schema version 3',
   );
   check(
     jsonEncode(roundtrip.toJson(timestamp)) == encoded,
-    'all v2 fields round-trip exactly',
+    'all existing fields round-trip exactly in schema 3',
   );
   check(roundtrip.primary.hasCoordinates, 'coordinates survive a round-trip');
   check(
@@ -140,6 +159,77 @@ void main() {
   check(
     roundtrip.savedAt == timestamp,
     'updated save time survives a round-trip',
+  );
+
+  final originalContacts = <PlanContact>[
+    PlanContact(
+      name: ' School office ',
+      phone: ' +1 (555) 010-0200 ext 2 ',
+      role: ' Pickup contact ',
+    ),
+    PlanContact(name: 'Neighbor', phone: '', role: 'Pet pickup backup'),
+  ];
+  roundtrip.familyBrief = FamilyBrief(
+    outOfAreaName: ' Aunt Morgan ',
+    outOfAreaPhone: ' +1 555 010 0300 ',
+    communicationNotes:
+        ' Check with our agreed contact.\nUse the written backup plan. ',
+    careNotes: ' Chris handles pickup. Pat is the backup. ',
+    departureNotes: ' Sam brings the carriers. ',
+    contacts: originalContacts,
+  );
+  final brief = roundtrip.familyBrief;
+  originalContacts.clear();
+  check(
+    brief.contacts.length == 2,
+    'family brief copies the caller contact list',
+  );
+  var cannotMutate = false;
+  try {
+    brief.contacts.clear();
+  } on UnsupportedError {
+    cannotMutate = true;
+  }
+  check(
+    cannotMutate,
+    'family brief contacts cannot be mutated through the getter',
+  );
+  check(brief.outOfAreaName == 'Aunt Morgan', 'family input is trimmed');
+  check(
+    brief.contacts.first.name == 'School office',
+    'contact input is trimmed',
+  );
+  check(
+    brief.contacts.first.phone == '+1 (555) 010-0200 ext 2',
+    'phone formatting and extensions survive',
+  );
+  check(
+    brief.communicationNotes.contains('\n'),
+    'multiline family notes survive',
+  );
+  check(!brief.isEmpty, 'a filled family brief reports present information');
+  final familyEncoded = jsonEncode(roundtrip.toJson(timestamp));
+  final familyRestored = GroupPlan.fromJson(jsonDecode(familyEncoded));
+  check(
+    jsonEncode(familyRestored.toJson(timestamp)) == familyEncoded,
+    'schema 3 restores every family field and contact without loss',
+  );
+  check(
+    familyRestored.familyBrief.contacts[1].phone.isEmpty,
+    'optional contact fields remain empty',
+  );
+  check(
+    !identical(familyRestored.familyBrief.contacts, brief.contacts),
+    'JSON copy creates an independent contact list',
+  );
+  check(
+    FamilyBrief.fromJson(const FamilyBrief.empty().toJson()).isEmpty,
+    'empty family information is valid',
+  );
+  final blankContact = FamilyBrief(contacts: [PlanContact()]);
+  check(
+    FamilyBrief.fromJson(blankContact.toJson()).contacts.length == 1,
+    'an all-optional contact is preserved rather than silently dropped',
   );
 
   final text = readablePlanText(roundtrip, saveStatus: 'Saved locally');
@@ -160,6 +250,22 @@ void main() {
     !text.contains('Sample information'),
     'text copy does not mislabel user data as samples',
   );
+  for (final detail in [
+    'Aunt Morgan',
+    '+1 555 010 0300',
+    'School office',
+    '+1 (555) 010-0200 ext 2',
+    'Pickup contact',
+    'Pet pickup backup',
+    'Check with our agreed contact.',
+    'Chris handles pickup. Pat is the backup.',
+    'Sam brings the carriers.',
+  ]) {
+    check(
+      text.contains(detail),
+      'readable plan includes family detail: $detail',
+    );
+  }
 
   final dangling = legacyFixture();
   dangling['supplies'][0]['assignedTo'] = 'removed-member';
@@ -168,7 +274,7 @@ void main() {
     'missing member references become unassigned without deleting the item',
   );
 
-  for (final version in <Object?>[0, 3, '2', 2.0, null]) {
+  for (final version in <Object?>[0, 4, '2', 2.0, 3.0, null]) {
     final value = legacyFixture()..['version'] = version;
     rejects(value, 'unsupported version $version is rejected');
   }
@@ -252,6 +358,73 @@ void main() {
   check(
     GroupPlan.fromJson(noSupplies).supplies.isEmpty,
     'an empty supply list is valid',
+  );
+
+  rejects(
+    currentFixture()..remove('familyBrief'),
+    'schema 3 requires its family brief',
+  );
+  for (final invalid in <Object?>[null, [], 'notes']) {
+    rejects(
+      currentFixture()..['familyBrief'] = invalid,
+      'malformed family brief $invalid is rejected',
+    );
+  }
+  for (final field in [
+    'outOfAreaName',
+    'outOfAreaPhone',
+    'communicationNotes',
+    'careNotes',
+    'departureNotes',
+  ]) {
+    final absent = currentFixture();
+    absent['familyBrief'].remove(field);
+    rejects(absent, 'missing family field $field is rejected');
+    final invalid = currentFixture();
+    invalid['familyBrief'][field] = 17;
+    rejects(invalid, 'non-string family field $field is rejected');
+  }
+  for (final invalid in <Object?>[
+    null,
+    'contacts',
+    [null],
+    [17],
+    [<String, dynamic>{}],
+  ]) {
+    final value = currentFixture();
+    value['familyBrief']['contacts'] = invalid;
+    rejects(value, 'malformed contact list $invalid is rejected');
+  }
+  for (final field in ['name', 'phone', 'role']) {
+    final value = currentFixture();
+    value['familyBrief']['contacts'] = [PlanContact(name: 'Valid').toJson()];
+    value['familyBrief']['contacts'][0][field] = null;
+    rejects(
+      value,
+      'invalid contact $field is rejected without dropping the contact',
+    );
+  }
+  final tooMany = currentFixture();
+  tooMany['familyBrief']['contacts'] = List.generate(
+    FamilyBrief.maxContacts + 1,
+    (_) => PlanContact(name: 'Person').toJson(),
+  );
+  rejects(tooMany, 'oversized contact list is rejected');
+  final tooLong = currentFixture();
+  tooLong['familyBrief']['careNotes'] = 'x' * (FamilyBrief.maxNoteLength + 1);
+  rejects(tooLong, 'oversized family notes are rejected');
+  final longContact = currentFixture();
+  longContact['familyBrief']['contacts'] = [
+    {'name': 'x' * 121, 'phone': '', 'role': ''},
+  ];
+  rejects(longContact, 'oversized contact fields are rejected');
+  final missingContacts = currentFixture();
+  missingContacts['familyBrief'].remove('contacts');
+  rejects(missingContacts, 'missing schema 3 contact list is rejected');
+  final completeEmpty = GroupPlan.fromJson(currentFixture());
+  check(
+    completeEmpty.familyBrief.isEmpty,
+    'explicit empty schema 3 brief is accepted',
   );
   print('Passed $_checks model, migration, backup, and validation checks.');
 }

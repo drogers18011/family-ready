@@ -3,6 +3,8 @@
 enum HelpDestination {
   home,
   plan,
+  planLibrary,
+  familyInformation,
   map,
   sharedKit,
   personalPack,
@@ -35,28 +37,29 @@ class HelpTopic {
 const quickTour = <HelpTopic>[
   HelpTopic(
     id: 'tour_welcome',
-    title: 'Your plan, close at hand',
+    title: 'Your plans, close at hand',
     summary:
-        'Keep meeting instructions, packing lists, and reference files '
-        'together in Black Box.',
+        'Keep separate local plans for family, friends, or travel, '
+        'with your reference files close at hand.',
     steps: [
-      'Home gives you a quick view of the meeting plan and shared kit.',
-      'Start in Group: replace the example names and add the people in your plan.',
+      'Use the plan selector below the header to open Your plans, create a plan, or switch plans.',
+      'Home shows the selected plan. In Group, add the people who belong to that plan.',
     ],
     note:
-        'This version keeps one local plan. Adding a person does not send '
+        'These plans stay on this device. Adding a person does not send '
         'an invitation or update their phone.',
-    destination: HelpDestination.group,
-    actionLabel: 'Open Group',
+    destination: HelpDestination.planLibrary,
+    actionLabel: 'Open Your plans',
   ),
   HelpTopic(
     id: 'tour_places',
-    title: 'Choose where to meet',
-    summary: 'Use Plan for a primary meeting place and a backup place.',
+    title: 'Places and family details',
+    summary:
+        'Use Plan for meeting places, contacts, and agreed responsibilities.',
     steps: [
       'Give each place a name, a written address or landmark, and clear instructions.',
-      'Choose a map pin separately, then check that it matches the written location.',
-      'Use Map to review your saved locations by name.',
+      'Choose each map pin separately and check it against the written location. Use Map to review the names.',
+      'Open Family information to add contacts, care or pickup arrangements, and communication or departure notes.',
     ],
     note:
         'Map imagery needs internet. Written details and coordinates are '
@@ -117,7 +120,7 @@ const quickTour = <HelpTopic>[
     title: 'Keep a copy and keep learning',
     summary: 'Use Group for plan copies and the question-mark button for help.',
     steps: [
-      'Group has Backup & restore and Copy plan text.',
+      'Group has Backup & restore and Copy plan text for the selected plan, including its family information.',
       'My pack has its own Copy list text; keep original PDFs and videos separately.',
       'Reopen Help anytime to search instructions or replay this tour.',
     ],
@@ -133,22 +136,62 @@ const helpTopics = <HelpTopic>[
   HelpTopic(
     id: 'getting_started',
     title: 'Start your group plan',
-    summary: 'Replace the example names and supplies with information for your people.',
+    summary: 'Choose a plan, then add information for the people it covers.',
     steps: [
-      'Open Group. Use the pencil beside the group name to rename your plan.',
+      'Check the selected plan below the header. Open Group and use the pencil beside the group name to rename it.',
       'Tap a member name to edit it, or choose Add member. Member actions lets '
           'you edit or remove a name.',
       'Open Plan to enter your primary and backup meeting places.',
-      'Open Kit > Shared kit to review the example supplies and add your own.',
+      'Open Kit > Shared kit to add supplies. A new plan starts empty; review any example items retained from an older version.',
       'After editing, check the shared-plan save message at the bottom of the '
           'main screen. If saving fails, use Retry save or Copy plan.',
     ],
     note:
         'Group is a local roster, not an account or invitation system. '
-        'Shared kit does not sync to other phones. Multiple plans, online '
-        'groups, forum posts, and inbox messaging are still in development.',
+        'Shared kit does not sync to other phones. Online groups, forum '
+        'posts, and inbox messaging are still in development.',
     destination: HelpDestination.group,
     actionLabel: 'Open Group',
+  ),
+  HelpTopic(
+    id: 'plan_library',
+    title: 'Create and organize multiple plans',
+    summary: 'Keep separate plans for different people or situations on this device.',
+    steps: [
+      'Tap the plan selector below the main header to open Your plans. Search by name or choose Active or Archived.',
+      'Choose New plan, enter a name, and Create plan. It starts with You, empty meeting places, and an empty shared kit.',
+      'Choose Open plan to switch. Finish saving any changes to your current plan first.',
+      'Duplicate makes an independent copy. Give it a name and choose Create copy. Shared-kit Packed checks start clear; the original stays unchanged.',
+      'Import backup adds a JSON backup as a separate plan after a preview. It preserves the backup\'s Packed checks; review them for your current situation.',
+      'Archive keeps an older plan out of Active without deleting it. Switch away from the current plan first. In Archived, choose Restore to active plans to bring it back.',
+    ],
+    note:
+        'Every plan keeps its own people, locations, family information, '
+        'and shared kit. My pack and Offline guides are common across plans. '
+        'A group backup contains one plan, not the entire library. '
+        'There are no online invitations or cloud sync yet.',
+    destination: HelpDestination.planLibrary,
+    actionLabel: 'Open Your plans',
+  ),
+  HelpTopic(
+    id: 'family_information',
+    title: 'Keep family contacts and responsibilities',
+    summary:
+        'Save the contact details and arrangements that belong to this plan.',
+    steps: [
+      'Check the selected plan, then open Plan > Family information. Home and Group also have shortcuts.',
+      'Under Out-of-area contact, enter the agreed contact name and phone number.',
+      'Use Add contact for other people or places. Each entry can have a Name, Phone number, and Role or reason to contact.',
+      'Add your Communication notes, Care and pickup responsibilities, and Departure notes. Every field is optional.',
+      'Choose Save family information, then check the shared-plan save message. Cancel or Back lets you discard an unsaved draft.',
+    ],
+    note:
+        'This information is separate for each plan and is included in its '
+        'JSON backup and readable text copy. Saving does not call, message, '
+        'or alert anyone. A stored phone number cannot supply service when '
+        'networks are unavailable. Keep exported contact details private.',
+    destination: HelpDestination.familyInformation,
+    actionLabel: 'Open Family information',
   ),
   HelpTopic(
     id: 'meeting_plan',
@@ -225,7 +268,8 @@ const helpTopics = <HelpTopic>[
     ],
     note:
         'The main screen footer reports the shared plan, not this personal '
-        'list. Older unchecked items are unconfirmed, so review what you '
+        'list. My pack stays the same when you switch plans. '
+        'Older unchecked items are unconfirmed, so review what you '
         'already own. Group backups do not include My pack.',
     destination: HelpDestination.personalPack,
     actionLabel: 'Open My pack',
@@ -269,7 +313,8 @@ const helpTopics = <HelpTopic>[
         'The import limit is 1 GiB per file on a device and 100 MiB in the '
         'browser preview. Playback depends on the file format. On the phone, '
         'test the saved files in airplane mode with Wi-Fi off. Guides are '
-        'personal files and are not included in group backups or cloud sharing.',
+        'personal files available across your plans; they are not included '
+        'in group backups or cloud sharing.',
     destination: HelpDestination.guides,
     actionLabel: 'Open guides',
   ),
@@ -278,20 +323,22 @@ const helpTopics = <HelpTopic>[
     title: 'Keep and restore plan copies',
     summary: 'Use a backup file for restoring and a text copy for reading or printing.',
     steps: [
-      'Open Group > Backup & restore. In the browser or desktop app, choose '
-          'Download backup and keep the JSON file somewhere you can find again.',
+      'Select the plan you want to copy, then open Group > Backup & restore. '
+          'In the browser or desktop app, choose Download backup and keep the JSON file.',
       'On a phone, use Copy plan text for a readable copy. The phone build '
           'can restore a JSON file, but does not yet create or share backup files.',
       'To restore, choose Restore backup and select a Black Box JSON file. '
           'Review its preview before choosing Replace current plan.',
+      'To keep an imported plan alongside your current plans, open Your plans > Import backup instead.',
       'Copy plan text and Download text plan make readable copies. They '
           'cannot be used with Restore backup.',
       'Keep My pack separately with Copy list text, and keep your original '
           'PDFs and videos. Group JSON does not include these or map images.',
     ],
     note:
-        'Restoring replaces the current local group plan and does not update '
-        'another device. Backup files contain your entered details without '
+        'Group > Restore backup replaces only the selected local plan. '
+        'It does not update another device. Backups include that plan\'s '
+        'family contacts and notes, without '
         'encryption, so keep them private. Keep a separate copy before replacing a plan.',
     destination: HelpDestination.group,
     actionLabel: 'Open Group',

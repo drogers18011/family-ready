@@ -7,6 +7,7 @@ import 'package:material_ui/material_ui.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'black_box_theme.dart';
+import 'family_brief_page.dart';
 import 'field_surfaces.dart';
 import 'guide_library.dart';
 import 'help_content.dart';
@@ -14,6 +15,8 @@ import 'help_page.dart';
 import 'personal_packlist.dart';
 import 'plan_dialogs.dart';
 import 'plan_files.dart';
+import 'plan_library_page.dart';
+import 'plan_library_store.dart';
 import 'plan_models.dart';
 import 'plan_map.dart';
 import 'plan_store.dart';
@@ -114,15 +117,26 @@ class PlanHome extends StatefulWidget {
 }
 
 class _PlanHomeState extends State<PlanHome> {
-  // Keep the original key and origin so existing plans survive the update.
-  static const _storageKey = PlanStore.currentKey;
-  static const _previousKey = PlanStore.previousKey;
-  static const _recoveryKey = PlanStore.recoveryKey;
+  // The original plan retains its exact storage keys. Each additional plan
+  // has its own current, previous, and interrupted-restore records.
   static const _helpPromptKey = 'black_box.help_intro_dismissed.v1';
   final _storage = SharedPreferencesAsync();
-  late final _store = PlanStore(
+  late final _libraryStore = PlanLibraryStore(
+    read: _storage.getString,
+    write: _storage.setString,
+  );
+  PlanLibraryManifest? _library;
+  String? _librarySetupWarning;
+  String get _activePlanId =>
+      _library?.activeId ?? PlanLibraryStore.originalPlanId;
+  PlanStorageKeys get _planKeys => PlanLibraryStore.keysFor(_activePlanId);
+  String get _storageKey => _planKeys.current;
+  String get _previousKey => _planKeys.previous;
+  String get _recoveryKey => _planKeys.recovery;
+  PlanStore get _store => PlanStore(
     write: _storage.setString,
     remove: _storage.remove,
+    keys: _planKeys,
   );
   GroupPlan _plan = GroupPlan.sample();
   bool _loading = true;
@@ -133,6 +147,9 @@ class _PlanHomeState extends State<PlanHome> {
   bool _appearanceBusy = false;
   bool _guidesOpen = false;
   bool _helpOpen = false;
+  bool _libraryOpen = false;
+  bool _libraryBusy = false;
+  bool _familyBriefOpen = false;
   bool _showHelpPrompt = false;
   int _helpPromptRevision = 0;
   int _kitSection = 0;
@@ -141,7 +158,7 @@ class _PlanHomeState extends State<PlanHome> {
   String _supplyFilter = 'All';
   String _categoryFilter = '';
   String _memberFilter = '';
-  bool get _busy => _saving || _fileBusy;
+  bool get _busy => _saving || _fileBusy || _libraryBusy;
   bool _dirty = false;
   String? _loadError;
   String? _writeError;
@@ -192,8 +209,27 @@ class _PlanHomeState extends State<PlanHome> {
       _loading = true;
       _loadError = null;
       _rawSavedData = null;
+      _library = null;
+      _librarySetupWarning = null;
+      _hasPrevious = false;
+      _hasRecovery = false;
+      _migrationSnapshot = null;
     });
     try {
+      PlanLibraryManifest library;
+      try {
+        library = await _libraryStore.load();
+      } on PlanLibraryInitializationFailure catch (error) {
+        // A new directory write may fail when storage is full. Keep the
+        // original plan readable; never use this fallback for an existing
+        // unreadable directory, whose selected plan is not known.
+        library = error.manifest;
+        _librarySetupWarning =
+            'Your original plan can still be opened. '
+            'Plan-library setup could not be saved. Open Plans to retry.';
+      }
+      if (!mounted) return;
+      _library = library;
       final previous = await _storage.getString(_previousKey);
       final recovery = await _storage.getString(_recoveryKey);
       if (!mounted) return;
@@ -203,11 +239,15 @@ class _PlanHomeState extends State<PlanHome> {
       });
       final raw = await _storage.getString(_storageKey);
       _rawSavedData = raw;
+      if (raw == null && _activePlanId != PlanLibraryStore.originalPlanId) {
+        throw const FormatException('This plan record is missing.');
+      }
       final decoded = raw == null ? null : jsonDecode(raw);
       final plan = raw == null
           ? GroupPlan.sample()
           : GroupPlan.fromJson(decoded);
-      _migrationSnapshot = decoded is Map && decoded['version'] == 1
+      _migrationSnapshot =
+          decoded is Map && (decoded['version'] == 1 || decoded['version'] == 2)
           ? raw
           : null;
       if (!mounted) return;
@@ -220,10 +260,13 @@ class _PlanHomeState extends State<PlanHome> {
     } catch (_) {
       if (!mounted) return;
       setState(() {
-        _loadError =
-            'Black Box could not read the plan saved on $_storageLocation. '
-            'Nothing has been overwritten. You can retry, or copy the stored '
-            'data if it is available.';
+        _loadError = _library == null
+            ? 'Black Box could not read the plan library on $_storageLocation. '
+                  'No existing plan has been replaced. Retry loading before '
+                  'creating or switching plans.'
+            : 'Black Box could not read the selected plan on $_storageLocation. '
+                  'Nothing has been overwritten. Retry, copy the stored data '
+                  'if available, or use Plans to open another saved plan.';
       });
     } finally {
       if (mounted) setState(() => _loading = false);
@@ -247,7 +290,7 @@ class _PlanHomeState extends State<PlanHome> {
     });
     final savedAt = DateTime.now().toUtc();
     try {
-      // Preserve the exact old record before the first version-2 write.
+      // Preserve the exact older record before the first version-3 write.
       if (_migrationSnapshot != null) {
         await _storage.setString(_previousKey, _migrationSnapshot!);
         _migrationSnapshot = null;
@@ -275,6 +318,176 @@ class _PlanHomeState extends State<PlanHome> {
     }
   }
 
+  Future<void> _openPlanLibrary() async {
+    if (!mounted || _loading || _busy || _libraryOpen || _library == null)
+      return;
+    // A failed autosave must not disappear when another plan is selected.
+    if (_dirty) {
+      await _save();
+      if (!mounted) return;
+      if (_dirty) {
+        _message(
+          'Retry saving before switching plans. Copy your plan as a backup; '
+          'the open draft has been kept.',
+        );
+        return;
+      }
+    }
+    setState(() {
+      _libraryOpen = true;
+      _libraryBusy = true;
+    });
+    try {
+      final library = await _libraryStore.load();
+      final items = await _libraryStore.summaries(library);
+      if (!mounted) return;
+      setState(() {
+        _libraryBusy = false;
+        _librarySetupWarning = null;
+      });
+      final action = await Navigator.of(context).push<PlanLibraryAction>(
+        MaterialPageRoute<PlanLibraryAction>(
+          builder: (_) =>
+              PlanLibraryPage(items: items, activeId: library.activeId),
+        ),
+      );
+      if (!mounted || action == null) return;
+      await _applyLibraryAction(action);
+    } on PlanLibraryException catch (error) {
+      _message(error.message);
+    } on FormatException catch (_) {
+      _message(
+        'The plan library could not be read. Existing stored data '
+        'has been kept; retry before changing plans.',
+      );
+    } catch (_) {
+      _message(
+        'The plan library could not complete that action. '
+        'Your existing saved plans have been kept. Please try again.',
+      );
+    } finally {
+      if (mounted) {
+        setState(() {
+          _libraryOpen = false;
+          _libraryBusy = false;
+        });
+      }
+    }
+  }
+
+  Future<void> _applyLibraryAction(PlanLibraryAction action) async {
+    if (!mounted || _busy || _dirty || _loading) return;
+    setState(() => _libraryBusy = true);
+    var notice = 'Plan library updated.';
+    try {
+      PlanLibraryManifest updated;
+      switch (action.kind) {
+        case PlanLibraryActionKind.create:
+          updated = await _libraryStore.create(action.name!);
+          notice =
+              'New plan created. Add its people, meeting places, and supplies.';
+        case PlanLibraryActionKind.duplicate:
+          updated = await _libraryStore.create(
+            action.name!,
+            copyFromId: action.planId!,
+          );
+          notice =
+              'Independent plan copy created. Shared-kit Packed checks '
+              'were cleared so you can review this kit.';
+        case PlanLibraryActionKind.select:
+          updated = await _libraryStore.select(action.planId!);
+          notice = 'Selected plan opened.';
+        case PlanLibraryActionKind.archive:
+          updated = await _libraryStore.setArchived(action.planId!, true);
+          notice =
+              'Plan archived. Find it under Plans > Archived to bring it back.';
+        case PlanLibraryActionKind.unarchive:
+          updated = await _libraryStore.setArchived(action.planId!, false);
+          notice = 'Plan returned to the active list. Select it when you want to open it.';
+        case PlanLibraryActionKind.importBackup:
+          final selected = await pickPlanBackup();
+          if (selected == null || !mounted) return;
+          final incoming = GroupPlan.fromJson(jsonDecode(selected.contents));
+          final canonical = jsonEncode(incoming.toJson(DateTime.now().toUtc()));
+          if (utf8.encode(canonical).length > maxPlanBackupBytes) {
+            throw const PlanFileException(
+              'This plan exceeds the 2 MB backup '
+              'limit after conversion. Choose a smaller backup.',
+            );
+          }
+          final originalName = incoming.groupName;
+          final name = await _nameDialog(
+            'Import as a new plan',
+            'plan name',
+            originalName.length > 80
+                ? originalName.substring(0, 80)
+                : originalName,
+            description:
+                '${incoming.members.length} members and '
+                '${incoming.supplies.length} supplies from ${selected.name}. '
+                'This adds a separate plan and keeps its saved packing checks. '
+                'Your existing plans are not replaced.',
+          );
+          if (name == null || !mounted) return;
+          updated = await _libraryStore.create(name, importedPlan: incoming);
+          notice =
+              'Backup imported as a separate plan. Review its details '
+              'and packing checks before using it.';
+      }
+      if (!mounted) return;
+      setState(() {
+        _library = updated;
+        _libraryBusy = false;
+        _tab = _homeTab;
+        _kitSection = 0;
+        _supplyFilter = 'All';
+        _categoryFilter = '';
+        _memberFilter = '';
+        _search.clear();
+      });
+      await _load();
+      if (mounted && _loadError == null) _message(notice);
+    } on PlanFileException catch (error) {
+      _message(error.message);
+    } on FormatException catch (error) {
+      _message(
+        'That file or saved record could not be opened: ${error.message} '
+        'Existing plans have been kept.',
+      );
+    } finally {
+      if (mounted) setState(() => _libraryBusy = false);
+    }
+  }
+
+  Future<void> _openFamilyBrief() async {
+    if (!mounted || _busy || _loading || _loadError != null || _familyBriefOpen)
+      return;
+    final planId = _activePlanId;
+    setState(() => _familyBriefOpen = true);
+    FamilyBrief? brief;
+    try {
+      brief = await Navigator.of(context).push<FamilyBrief>(
+        MaterialPageRoute<FamilyBrief>(
+          builder: (_) => FamilyBriefPage(
+            initial: _plan.familyBrief,
+            planName: _plan.groupName,
+          ),
+        ),
+      );
+    } finally {
+      if (mounted) setState(() => _familyBriefOpen = false);
+    }
+    if (!mounted || brief == null) return;
+    if (planId != _activePlanId) {
+      _message(
+        'The selected plan changed. Reopen Family information before saving.',
+      );
+      return;
+    }
+    final updated = brief;
+    await _change(() => _plan.familyBrief = updated);
+  }
+
   String _newId(String prefix) =>
       '${prefix}_${DateTime.now().microsecondsSinceEpoch}_${_idCounter++}';
 
@@ -293,6 +506,7 @@ class _PlanHomeState extends State<PlanHome> {
   }
 
   String get _saveStatus {
+    if (_libraryBusy) return 'Working with your plan library…';
     if (_fileBusy) return 'Working with a file…';
     if (_saving) return 'Saving on $_storageLocation…';
     if (_dirty) return 'Changes not saved';
@@ -353,6 +567,10 @@ class _PlanHomeState extends State<PlanHome> {
 
   Future<void> _openHelpDestination(HelpDestination destination) async {
     if (!mounted) return;
+    if (destination == HelpDestination.planLibrary) {
+      await _openPlanLibrary();
+      return;
+    }
     if (destination == HelpDestination.appearance) {
       if (!_appearanceBusy) await _showAppearance();
       return;
@@ -366,6 +584,10 @@ class _PlanHomeState extends State<PlanHome> {
         'The plan is not available yet. Finish loading or saving, '
         'or resolve its load warning before opening this section.',
       );
+      return;
+    }
+    if (destination == HelpDestination.familyInformation) {
+      await _openFamilyBrief();
       return;
     }
     setState(() {
@@ -389,6 +611,8 @@ class _PlanHomeState extends State<PlanHome> {
           _tab = _groupTab;
         case HelpDestination.guides:
         case HelpDestination.appearance:
+        case HelpDestination.planLibrary:
+        case HelpDestination.familyInformation:
           break;
       }
     });
@@ -445,7 +669,7 @@ class _PlanHomeState extends State<PlanHome> {
                     showAboutDialog(
                       context: context,
                       applicationName: 'Black Box',
-                      applicationVersion: 'Prototype 0.8.0',
+                      applicationVersion: 'Prototype 0.9.0',
                       children: const [
                         Text(
                           'A local preparedness plan for your people, meeting '
@@ -680,8 +904,10 @@ class _PlanHomeState extends State<PlanHome> {
                 Text('File: $filename'),
                 const SizedBox(height: 20),
                 Text(
-                  'This replaces the plan on $_storageLocation. A copy of the current '
-                  'stored plan will be kept here so you can go back.',
+                  'This replaces only the selected plan on $_storageLocation. '
+                  'Its current stored copy will be kept so you can go back. '
+                  'Other plans are not replaced. To keep both as separate plans, '
+                  'cancel and use Plans > Import backup.',
                 ),
                 const SizedBox(height: 10),
                 Text(
@@ -793,6 +1019,7 @@ class _PlanHomeState extends State<PlanHome> {
     String label,
     String initial, {
     String? Function(String)? extraValidation,
+    String? description,
   }) {
     final key = GlobalKey<FormState>();
     var draft = initial;
@@ -800,21 +1027,32 @@ class _PlanHomeState extends State<PlanHome> {
       context: context,
       builder: (dialogContext) => AlertDialog(
         title: Text(title),
+        scrollable: true,
         content: SizedBox(
           width: 400,
           child: Form(
             key: key,
-            child: TextFormField(
-              initialValue: initial,
-              autofocus: true,
-              maxLength: 80,
-              decoration: InputDecoration(labelText: label),
-              onChanged: (value) => draft = value,
-              validator: (value) {
-                final text = (value ?? '').trim();
-                if (text.isEmpty) return 'Please enter a $label.';
-                return extraValidation?.call(text);
-              },
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                if (description != null) ...[
+                  Text(description),
+                  const SizedBox(height: 16),
+                ],
+                TextFormField(
+                  initialValue: initial,
+                  autofocus: true,
+                  maxLength: 80,
+                  decoration: InputDecoration(labelText: label),
+                  onChanged: (value) => draft = value,
+                  validator: (value) {
+                    final text = (value ?? '').trim();
+                    if (text.isEmpty) return 'Please enter a $label.';
+                    return extraValidation?.call(text);
+                  },
+                ),
+              ],
             ),
           ),
         ),
@@ -1035,6 +1273,97 @@ class _PlanHomeState extends State<PlanHome> {
     ),
   );
 
+  Widget _familyInformationPanel({bool detailed = false}) {
+    final brief = _plan.familyBrief;
+    final outsideContact = [
+      brief.outOfAreaName,
+      brief.outOfAreaPhone,
+    ].where((value) => value.trim().isNotEmpty).join('\n');
+    return _panel(
+      Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text('Family information', style: _type.titleLarge),
+          const SizedBox(height: 10),
+          Text(
+            'Contacts and agreed responsibilities for this plan.',
+            style: _type.bodyMedium,
+          ),
+          const SizedBox(height: 16),
+          Text('OUT-OF-AREA CONTACT', style: _type.labelMedium),
+          const SizedBox(height: 6),
+          SelectableText(
+            outsideContact.isEmpty ? 'Not added yet' : outsideContact,
+            style: _type.bodyLarge,
+          ),
+          if (detailed) ...[
+            for (final contact in brief.contacts) ...[
+              const Divider(height: 24),
+              SelectableText(
+                [
+                  contact.name,
+                  contact.role,
+                  contact.phone,
+                ].where((value) => value.trim().isNotEmpty).join('\n'),
+                style: _type.bodyLarge,
+              ),
+            ],
+            for (final section in [
+              ('COMMUNICATION PLAN', brief.communicationNotes),
+              ('CARE & PICKUP RESPONSIBILITIES', brief.careNotes),
+              ('DEPARTURE INSTRUCTIONS', brief.departureNotes),
+            ])
+              if (section.$2.isNotEmpty) ...[
+                const Divider(height: 24),
+                Text(section.$1, style: _type.labelMedium),
+                const SizedBox(height: 8),
+                SelectableText(section.$2, style: _type.bodyLarge),
+              ],
+          ] else ...[
+            const SizedBox(height: 10),
+            Text(
+              brief.isEmpty
+                  ? 'Add important numbers and who helps children, relatives, '
+                        'pets, or anyone needing assistance.'
+                  : '${brief.contacts.length} additional contacts. Open Plan '
+                        'for the complete family information.',
+              style: _type.bodyMedium,
+            ),
+          ],
+          const SizedBox(height: 18),
+          Wrap(
+            spacing: 10,
+            runSpacing: 10,
+            children: [
+              FilledButton.icon(
+                onPressed: _busy || _familyBriefOpen ? null : _openFamilyBrief,
+                icon: const Icon(Icons.contact_page_outlined),
+                label: Text(
+                  brief.isEmpty
+                      ? 'Add family information'
+                      : 'Edit family information',
+                ),
+              ),
+              if (!detailed)
+                OutlinedButton(
+                  onPressed: () => setState(() => _tab = _planTab),
+                  child: const Text('Read in Plan'),
+                ),
+            ],
+          ),
+          if (detailed) ...[
+            const SizedBox(height: 12),
+            Text(
+              'These details are included in this plan’s text copy and JSON '
+              'backup. Adding a phone number does not contact anyone.',
+              style: _type.bodySmall,
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+
   Widget _overview() {
     final packed = _plan.supplies.where((item) => item.packed).length;
     final unassigned = _plan.supplies
@@ -1130,6 +1459,7 @@ class _PlanHomeState extends State<PlanHome> {
             ],
           ),
         ),
+        _familyInformationPanel(),
         _panel(
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -1342,6 +1672,7 @@ class _PlanHomeState extends State<PlanHome> {
       ),
       _placeCard('Primary meeting place', _plan.primary, true),
       _placeCard('Backup meeting place', _plan.backup, false),
+      _familyInformationPanel(detailed: true),
       Padding(
         padding: const EdgeInsets.only(bottom: 12),
         child: Text(
@@ -1669,6 +2000,14 @@ class _PlanHomeState extends State<PlanHome> {
     crossAxisAlignment: CrossAxisAlignment.start,
     children: [
       _heading('Your group', 'People and assignments in this local plan.'),
+      Padding(
+        padding: const EdgeInsets.only(bottom: 16),
+        child: OutlinedButton.icon(
+          onPressed: _busy || _familyBriefOpen ? null : _openFamilyBrief,
+          icon: const Icon(Icons.contact_page_outlined),
+          label: const Text('Family information'),
+        ),
+      ),
       _panel(
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -1763,11 +2102,12 @@ class _PlanHomeState extends State<PlanHome> {
         const SizedBox(height: 10),
         Text(
           _canExportFiles
-              ? 'A backup file keeps your people, meeting places, map pins, '
-                    'supplies, and packed status. Save it somewhere you can find again.'
+              ? 'A backup file keeps this selected plan’s people, family '
+                    'information, meeting places, map pins, supplies, and packed '
+                    'status. Export each plan separately.'
               : 'Restore a JSON backup from Files. Creating or sharing backup '
-                    'files on a phone is still in development; export them from '
-                    'the browser or desktop app for now.',
+                    'files on a phone is still in development; export each plan '
+                    'from the browser or desktop app for now.',
         ),
         const SizedBox(height: 18),
         Wrap(
@@ -1884,6 +2224,18 @@ class _PlanHomeState extends State<PlanHome> {
     return Column(
       children: [
         if (_busy) const LinearProgressIndicator(minHeight: 3),
+        if (_librarySetupWarning != null)
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(16),
+            color: _colors.tertiaryContainer,
+            child: Text(
+              _librarySetupWarning!,
+              style: _type.bodyMedium?.copyWith(
+                color: _colors.onTertiaryContainer,
+              ),
+            ),
+          ),
         if (_writeError != null)
           Container(
             width: double.infinity,
@@ -2054,6 +2406,87 @@ class _PlanHomeState extends State<PlanHome> {
     ),
   );
 
+  Widget _planSelectorBar() => Container(
+    width: double.infinity,
+    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+    decoration: BoxDecoration(
+      color: _colors.surface,
+      border: Border(bottom: BorderSide(color: _colors.outlineVariant)),
+    ),
+    child: Tooltip(
+      message: 'Open Plans to create, switch, copy, or archive a plan',
+      child: TextButton(
+        onPressed: _loading || _busy || _libraryOpen || _library == null
+            ? null
+            : _openPlanLibrary,
+        style: TextButton.styleFrom(
+          foregroundColor: _colors.onSurface,
+          alignment: Alignment.centerLeft,
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        ),
+        child: Row(
+          children: [
+            const Icon(Icons.folder_copy_outlined),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text('PLANS · LOCAL COPIES', style: _type.labelSmall),
+                  const SizedBox(height: 2),
+                  Text(
+                    _loading
+                        ? 'Loading plans…'
+                        : _loadError != null
+                        ? 'Choose a plan'
+                        : _plan.groupName,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: _type.titleMedium,
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(width: 8),
+            const Icon(Icons.unfold_more),
+          ],
+        ),
+      ),
+    ),
+  );
+
+  Widget _mainBody(bool wide) {
+    if (_loading) return const Center(child: CircularProgressIndicator());
+    if (_loadError != null) return _loadFailure();
+    return Row(
+      children: [
+        if (wide)
+          DecoratedBox(
+            position: DecorationPosition.foreground,
+            decoration: BoxDecoration(
+              border: Border(
+                right: BorderSide(color: _colors.outline, width: 1.5),
+              ),
+            ),
+            child: NavigationRail(
+              extended: true,
+              selectedIndex: _tab,
+              onDestinationSelected: (index) => setState(() => _tab = index),
+              destinations: List.generate(
+                _labels.length,
+                (index) => NavigationRailDestination(
+                  icon: Icon(_icons[index]),
+                  label: Text(_labels[index]),
+                ),
+              ),
+            ),
+          ),
+        Expanded(child: _content()),
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context) => LayoutBuilder(
     builder: (context, constraints) {
@@ -2157,40 +2590,12 @@ class _PlanHomeState extends State<PlanHome> {
           child: SafeArea(
             top: false,
             bottom: wide || !available,
-            child: _loading
-                ? const Center(child: CircularProgressIndicator())
-                : _loadError != null
-                ? _loadFailure()
-                : Row(
-                    children: [
-                      if (wide)
-                        DecoratedBox(
-                          position: DecorationPosition.foreground,
-                          decoration: BoxDecoration(
-                            border: Border(
-                              right: BorderSide(
-                                color: _colors.outline,
-                                width: 1.5,
-                              ),
-                            ),
-                          ),
-                          child: NavigationRail(
-                            extended: true,
-                            selectedIndex: _tab,
-                            onDestinationSelected: (index) =>
-                                setState(() => _tab = index),
-                            destinations: List.generate(
-                              _labels.length,
-                              (index) => NavigationRailDestination(
-                                icon: Icon(_icons[index]),
-                                label: Text(_labels[index]),
-                              ),
-                            ),
-                          ),
-                        ),
-                      Expanded(child: _content()),
-                    ],
-                  ),
+            child: Column(
+              children: [
+                _planSelectorBar(),
+                Expanded(child: _mainBody(wide)),
+              ],
+            ),
           ),
         ),
         bottomNavigationBar: !wide && available

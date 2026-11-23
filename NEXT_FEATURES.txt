@@ -2,19 +2,40 @@ BLACK BOX - NEXT FEATURE SPECIFICATION
 ======================================
 Prepared for Dennis Rogers, November 20, 2026
 Updated with Dennis's decisions on November 22, 2026
-Current source: v0.8.0+11 local Flutter prototype
-Latest user-reported baseline: v0.7.0+10 rendered well; ios-compile-check green
+Current source: v0.9.0+12 local Flutter prototype
+Latest user acceptance: v0.8.0+11 described as perfect so far
+Latest explicit green compile: v0.7.0+10 rendered well; ios-compile-check green
 
 STATUS
 ------
 This file records the requested product direction and proposed implementation
 rules. It is not a claim that the online service is running.
 
-IMPLEMENTED IN THE v0.8.0 SOURCE:
+IMPLEMENTED IN THE v0.9.0 SOURCE:
+- Your plans opens from the selector below the main header. Search plans,
+  choose Active/Archived, and see the current plan and saved timestamps.
+- New plan starts blank with You. Duplicate makes an independent plan and
+  clears its shared-kit Packed checks; the original remains unchanged.
+  Import backup adds a previewed JSON as a separate plan and preserves its
+  checks. Open plan switches after current edits have finished saving.
+- Archive retains data and removes a noncurrent plan from Active. Restore to
+  active plans brings it back. Unreadable entries remain visible/unavailable
+  and cannot be opened or duplicated. No plan deletion is introduced.
+- The original plan retains its current/previous/recovery keys. Additional
+  plans have independent records and restore journals. My pack and saved
+  guide files remain common across local plans and outside group backups.
+- Family information belongs to the selected plan: optional out-of-area
+  name/phone, additional contacts with roles, communication notes, care/pickup
+  responsibilities, and departure notes. Plan, Home, and Group provide access.
+  Saving does not call, message, invite, or alert anyone. Entered details are
+  included in the selected plan's JSON backup and readable text copy.
+- New group-plan writes use schema 3. Schemas 1 and 2 remain readable with
+  empty Family information. The first upgrade saves the previous raw record
+  as a local previous copy. Older app versions cannot read schema 3.
 - Optional Home introduction with Start quick tour and Not now. Six short
   tour chapters have Back, Next, Skip, Done, and a final Open Plan action.
   Reading progress does not change plan data or mark real setup tasks ready.
-- Help & tutorial opens from the question-mark header button. Ten searchable,
+- Help & tutorial opens from the question-mark header button. Twelve searchable,
   expandable topics give numbered instructions and direct Open buttons.
   Quick tour can be replayed from Help. Appearance moves into Help; the
   guide-book and sun/moon shortcuts remain in the three-action main header.
@@ -65,11 +86,13 @@ browser or native-device QA.
 For v0.7.0+10, preparation checks were limited to standalone formatting, source
 review, and numerical contrast review. No new automated tests were added.
 Dennis then reported that v0.7.0+10 rendered great and passed ios-compile-check.
-That is the latest user-reported baseline; it is not runtime QA in this workspace.
+That is the latest explicit user-reported green compile; it is not runtime QA here.
 
-For v0.8.0+11, verification is limited to standalone Dart formatting, source
-review, and help content/navigation review. Existing model/storage/test files,
-build scripts, dependencies, fonts, and shopping configuration are unchanged.
+For v0.8.0+11, verification was limited to standalone Dart formatting, source
+review, and help content/navigation review. Model/storage/test files, build
+scripts, dependencies, fonts, and shopping configuration were unchanged in
+that release. Dennis accepted that tutorial update as perfect so far; this
+was not an explicit new compile result.
 The earlier 52/182-check results have not been rerun, and no new automated
 tests were added. Flutter startup remains blocked by the previous automatic
 approval restriction; no Flutter compilation, browser QA, or native-device QA
@@ -80,8 +103,15 @@ relevant offline features can be relied on. Apple Developer enrollment was
 last reported pending; a signed iPhone/TestFlight build still needs activation
 and signing setup.
 
+For v0.9.0+12, focused pure-Dart model, restore, and library checks cover
+schema migration, per-plan isolation, copying/importing/archiving, ordered
+writes, and failed or interrupted operations. No Flutter, browser, or native
+phone test has been run here for this release. New source and test files
+must be uploaded together for a fresh Codemagic compile check. Screen and
+phone checks are described in README.txt and START_IPHONE_CLOUD.txt.
+
 NOT IMPLEMENTED YET:
-Accounts, real membership invitations, multiple stored plans/groups, cloud
+Accounts, real membership invitations, authenticated groups, cloud
 sharing/sync, community forum or moderator accounts, online inbox,
 subscriptions, verified complete shared-plan offline packages, encrypted plan
 storage, cloud guide uploads/group sharing, downloaded maps, offline routing,
@@ -127,6 +157,10 @@ are part of the local plan. Named pins are not downloaded map imagery.
 19. Add in-app instructions or a tutorial so people can understand the app.
     The current implementation offers a skippable quick tour and searchable
     task instructions, with accurate limits for the local prototype.
+20. Research comparable apps and build missing product foundations with a
+    practical path to launch. Local multiple plans and family contacts are
+    the next implemented increment; market success is not established by
+    feature comparisons. LAUNCH_PLAN.txt records the current researched plan.
 
 
 2. PROPOSED BUSINESS RULES - NOT ALL CONFIRMED
@@ -465,11 +499,12 @@ Live member tracking has not been requested and is not part of this scope.
 FUTURE NAVIGATION PROPOSAL
 Plans / Map / Groups / Community / Inbox.
 The Plans screen becomes the home/library. Kits and assignments live within
-each plan. Current v0.8.0 navigation remains Home / Plan / Map / Kit / Group;
+each plan. Current v0.9.0 navigation remains Home / Plan / Map / Kit / Group;
 Kit contains Shared kit, My pack, and Suggested, and Offline guides opens
 from Home or the top bar. The question-mark header button opens Help, with
-Appearance inside Help. Future navigation must keep personal guides and
-instructions easy to reach as the online and multi-plan screens are implemented.
+Appearance inside Help. The selector below the main header opens the local
+plan library. Future online navigation must keep personal guides, instructions,
+and the selected plan easy to identify.
 
 
 7. TECHNICAL FOUNDATION AND BILLING
@@ -539,13 +574,17 @@ and disabled-by-default affiliate configuration. Dennis reported that release's
 compile check green and the app working. Version 0.7.0+10 added the rugged
 visual treatment with the existing storage and feature behavior retained.
 Dennis reported that it rendered great and passed ios-compile-check.
-Version 0.8.0+11 adds the optional tour and searchable bundled instructions.
-This tutorial release still needs its own compile and screen checks;
-dedicated native offline reopening/playback checks remain required for the
-go-bag goal. Reading the tutorial does not establish plan readiness.
+Version 0.8.0+11 added the optional tour and searchable bundled instructions.
+Dennis accepted it as perfect so far. Version 0.9.0+12 adds independent local
+plans and Family information. This provides the local organization foundation;
+it does not complete a production database, cloud permissions, or downloads.
+The new release needs its own compile/screen checks and dedicated phone offline
+reopening/playback checks. Reading a tutorial does not establish plan readiness.
 
 Next foundation:
-1. Durable local plan library with migration and multiple plan IDs.
+1. A durable protected local database, migration/recovery, and native phone
+   export/restore. Keep old records until migration is verified. Add practical
+   review/drill history and maintenance reminders without a false safety score.
 2. Accounts, invitation acceptance, private groups, and per-plan permissions.
 3. One complete end-to-end flow: owner shares a plan; a free invited reader
    downloads it including its supported guides; the reader cold-starts the
@@ -557,6 +596,11 @@ Next foundation:
 7. Licensed offline maps/routing, then online area information. Plan-data,
    map, and routing download milestones must be tracked separately.
 
+TestFlight builds become unavailable after 90 days. Treat them as test builds,
+not a permanent app installation for a phone stored in a go bag. Production
+distribution and periodic device/offline checks are part of the launch work.
+See A4 and the researched launch priorities in LAUNCH_PLAN.txt.
+
 The public community can follow private group sharing. Its moderation and
 discovery requirements should not delay proving that a free family member can
 receive and retain a complete shared plan.
@@ -564,6 +608,19 @@ receive and retain a complete shared plan.
 
 10. RELEASE ACCEPTANCE CHECKS
 -------------------------------
+- The original plan survives library initialization without changing its
+  storage keys. Unreadable records are retained, not replaced with defaults.
+- Each plan's current, previous, and recovery records remain separate through
+  switching, reload, failed writes, restore attempts, and archived state.
+- Blank creation has You and no example supplies. Duplication clears only
+  the copied shared Packed checks; import preserves the imported checks.
+- Archive is reversible and cannot archive the current plan until switching.
+- Family information saves only to the selected plan, survives reopen, and
+  appears in that plan's JSON/text copies. Cancel discards the draft only.
+- Legacy schemas 1/2 load with empty Family information; first schema-3 save
+  preserves the old raw record as a previous copy. Do not silently downgrade.
+- Personal pack and guide files stay common across plans and remain outside
+  individual group backups. Switching does not change their content.
 - The optional introduction can be started or dismissed without blocking the
   existing app; a failed help preference read/write does not alter plan data.
 - Quick-tour Back, Next, Skip, Done, replay, and final Open Plan work in both
@@ -629,8 +686,10 @@ receive and retain a complete shared plan.
 
 11. COMPETITOR RESEARCH
 -------------------------
-Primary product websites and developer-authored listings were reviewed on
-November 20, 2026 local time. These are published claims, not independent tests.
+The earlier comparison below used primary product websites and developer-
+authored listings reviewed on November 20, 2026 local time. The expanded
+November 22 review and resulting launch priorities are in LAUNCH_PLAN.txt.
+These are published claims, not independent tests or proof of market demand.
 
 PrepperApp: shared household emergency planning, invitations, offline data,
 mapped places, and an in-app/web community forum. Its forum allows posting
@@ -672,6 +731,7 @@ C7 https://apps.apple.com/us/app/our-plan-is/id6762509719
 A1 https://developer.apple.com/app-store/review/guidelines/
 A2 https://developer.apple.com/help/app-review/guideline-reference/5-1-1-account-deletion
 A3 https://developer.apple.com/app-store/subscriptions/
+A4 https://developer.apple.com/help/app-store-connect/test-a-beta-version/testflight-overview/
 S1 https://supabase.com/docs/guides/database/postgres/row-level-security
 
 Map implementation API references:
